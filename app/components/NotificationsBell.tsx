@@ -1,0 +1,1381 @@
+"use client";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
+
+const SOUND_STORAGE_KEY =
+  "fixflow_sound_enabled";
+
+type Notification = {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  request_id: string | null;
+  read: boolean;
+  created_at: string;
+};
+
+type Props = {
+  modo?: "cliente" | "profesional";
+};
+
+type WindowConAudio = Window & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
+export default function NotificationsBell({
+  modo = "cliente",
+}: Props) {
+  const [userId, setUserId] =
+    useState<string | null>(null);
+
+  const [
+    notificaciones,
+    setNotificaciones,
+  ] = useState<Notification[]>([]);
+
+  const [abierto, setAbierto] =
+    useState(false);
+
+  const [cargando, setCargando] =
+    useState(true);
+
+  const [
+    sonidoActivo,
+    setSonidoActivo,
+  ] = useState(false);
+
+  const [
+    activandoSonido,
+    setActivandoSonido,
+  ] = useState(false);
+
+  /*
+    INDICA QUE EL USUARIO
+    YA DIJO QUE QUIERE SONIDO
+  */
+
+  const sonidoDeseadoRef =
+    useRef(false);
+
+  /*
+    AUDIO CONTEXT
+  */
+
+  const audioContextRef =
+    useRef<AudioContext | null>(
+      null
+    );
+
+  /*
+    CARGAR USUARIO
+  */
+
+  useEffect(() => {
+    iniciar();
+  }, []);
+
+  async function iniciar() {
+    const {
+      data: { user },
+      error,
+    } =
+      await supabase.auth.getUser();
+
+    if (
+      error ||
+      !user
+    ) {
+      setCargando(false);
+      return;
+    }
+
+    setUserId(user.id);
+
+    await cargarNotificaciones(
+      user.id
+    );
+
+    setCargando(false);
+  }
+
+  /*
+    RECORDAR PREFERENCIA
+    DE SONIDO DURANTE
+    LA SESIÓN
+  */
+
+  useEffect(() => {
+    try {
+      const guardado =
+        sessionStorage.getItem(
+          SOUND_STORAGE_KEY
+        );
+
+      sonidoDeseadoRef.current =
+        guardado === "true";
+
+      /*
+        SI YA LO HABÍA ACTIVADO,
+        INTENTAMOS REACTIVARLO.
+      */
+
+      if (
+        sonidoDeseadoRef.current
+      ) {
+        intentarReactivarAudio();
+      }
+    } catch (error) {
+      console.error(
+        "No se pudo leer preferencia de sonido:",
+        error
+      );
+    }
+  }, []);
+
+  /*
+    REACTIVAR AUDIO AUTOMÁTICAMENTE
+
+    Si el navegador suspende el
+    AudioContext, FixFlow intenta
+    recuperarlo cuando:
+
+    - vuelves a la pestaña
+    - haces clic
+    - presionas una tecla
+    - la ventana recupera foco
+  */
+
+  useEffect(() => {
+    async function reactivar() {
+      if (
+        !sonidoDeseadoRef.current
+      ) {
+        return;
+      }
+
+      await intentarReactivarAudio();
+    }
+
+    function cambioVisibilidad() {
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+        reactivar();
+      }
+    }
+
+    window.addEventListener(
+      "pointerdown",
+      reactivar
+    );
+
+    window.addEventListener(
+      "keydown",
+      reactivar
+    );
+
+    window.addEventListener(
+      "focus",
+      reactivar
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      cambioVisibilidad
+    );
+
+    return () => {
+      window.removeEventListener(
+        "pointerdown",
+        reactivar
+      );
+
+      window.removeEventListener(
+        "keydown",
+        reactivar
+      );
+
+      window.removeEventListener(
+        "focus",
+        reactivar
+      );
+
+      document.removeEventListener(
+        "visibilitychange",
+        cambioVisibilidad
+      );
+    };
+  }, []);
+
+  /*
+    OBTENER AUDIO CONTEXT
+  */
+
+  async function obtenerContextoAudio() {
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (
+          window as WindowConAudio
+        ).webkitAudioContext;
+
+      if (
+        !AudioContextClass
+      ) {
+        console.error(
+          "Este navegador no soporta AudioContext."
+        );
+
+        return null;
+      }
+
+      if (
+        !audioContextRef.current ||
+        audioContextRef.current.state ===
+          "closed"
+      ) {
+        audioContextRef.current =
+          new AudioContextClass();
+
+        /*
+          ESCUCHAR CAMBIOS
+          DEL AUDIO CONTEXT
+        */
+
+        audioContextRef.current.onstatechange =
+          () => {
+            const context =
+              audioContextRef.current;
+
+            if (!context) {
+              setSonidoActivo(false);
+              return;
+            }
+
+            const activo =
+              context.state ===
+              "running";
+
+            setSonidoActivo(
+              activo
+            );
+
+            console.log(
+              "Estado audio FixFlow:",
+              context.state
+            );
+          };
+      }
+
+      const context =
+        audioContextRef.current;
+
+      if (
+        context.state ===
+        "suspended"
+      ) {
+        try {
+          await context.resume();
+        } catch (error) {
+          console.warn(
+            "El navegador todavía mantiene el audio suspendido:",
+            error
+          );
+        }
+      }
+
+      if (
+        context.state ===
+        "running"
+      ) {
+        setSonidoActivo(true);
+      } else {
+        setSonidoActivo(false);
+      }
+
+      return context;
+    } catch (error) {
+      console.error(
+        "Error creando AudioContext:",
+        error
+      );
+
+      setSonidoActivo(false);
+
+      return null;
+    }
+  }
+
+  /*
+    INTENTAR REACTIVAR
+  */
+
+  async function intentarReactivarAudio() {
+    if (
+      !sonidoDeseadoRef.current
+    ) {
+      return;
+    }
+
+    const context =
+      await obtenerContextoAudio();
+
+    if (
+      context &&
+      context.state ===
+        "running"
+    ) {
+      setSonidoActivo(true);
+    }
+  }
+
+  /*
+    CREAR TONO
+  */
+
+  function crearTono(
+    context: AudioContext,
+    frecuencia: number,
+    inicio: number,
+    duracion: number,
+    volumen: number,
+    tipo: OscillatorType =
+      "sine"
+  ) {
+    const oscillator =
+      context.createOscillator();
+
+    const gain =
+      context.createGain();
+
+    oscillator.type =
+      tipo;
+
+    oscillator.connect(
+      gain
+    );
+
+    gain.connect(
+      context.destination
+    );
+
+    oscillator.frequency.setValueAtTime(
+      frecuencia,
+      inicio
+    );
+
+    gain.gain.setValueAtTime(
+      0.001,
+      inicio
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      volumen,
+      inicio + 0.02
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.001,
+      inicio + duracion
+    );
+
+    oscillator.start(
+      inicio
+    );
+
+    oscillator.stop(
+      inicio +
+        duracion +
+        0.05
+    );
+  }
+
+  /*
+    ACTIVAR / PROBAR SONIDO
+  */
+
+  async function activarSonido() {
+    setActivandoSonido(true);
+
+    /*
+      GUARDAMOS QUE EL USUARIO
+      QUIERE SONIDO
+    */
+
+    sonidoDeseadoRef.current =
+      true;
+
+    try {
+      sessionStorage.setItem(
+        SOUND_STORAGE_KEY,
+        "true"
+      );
+    } catch {
+      // No hacemos nada.
+    }
+
+    try {
+      const context =
+        await obtenerContextoAudio();
+
+      if (
+        !context ||
+        context.state !==
+          "running"
+      ) {
+        setSonidoActivo(false);
+
+        alert(
+          "El navegador no permitió activar el sonido. Revisa que la pestaña y Windows no estén silenciados."
+        );
+
+        return;
+      }
+
+      /*
+        SONIDO DE PRUEBA
+      */
+
+      const ahora =
+        context.currentTime;
+
+      crearTono(
+        context,
+        700,
+        ahora,
+        0.20,
+        0.35
+      );
+
+      crearTono(
+        context,
+        950,
+        ahora + 0.24,
+        0.25,
+        0.38
+      );
+
+      crearTono(
+        context,
+        1200,
+        ahora + 0.52,
+        0.45,
+        0.42
+      );
+
+      setSonidoActivo(true);
+
+      console.log(
+        "🔊 Sonido FixFlow activado"
+      );
+    } catch (error) {
+      console.error(
+        "No se pudo activar sonido:",
+        error
+      );
+
+      setSonidoActivo(false);
+    } finally {
+      setActivandoSonido(false);
+    }
+  }
+
+  /*
+    PREPARAR AUDIO PARA
+    UNA NOTIFICACIÓN
+  */
+
+  async function prepararAudio() {
+    if (
+      !sonidoDeseadoRef.current
+    ) {
+      console.warn(
+        "🔇 Sonido no activado por el usuario."
+      );
+
+      return null;
+    }
+
+    const context =
+      await obtenerContextoAudio();
+
+    if (
+      !context ||
+      context.state !==
+        "running"
+    ) {
+      console.warn(
+        "🔇 Audio suspendido. FixFlow intentará reactivarlo cuando vuelvas a interactuar."
+      );
+
+      setSonidoActivo(false);
+
+      return null;
+    }
+
+    return context;
+  }
+
+  /*
+    NUEVA ORDEN
+  */
+
+  async function sonidoNuevaOrden() {
+    const context =
+      await prepararAudio();
+
+    if (!context) {
+      return;
+    }
+
+    const ahora =
+      context.currentTime;
+
+    /*
+      PRIMER AVISO
+    */
+
+    crearTono(
+      context,
+      740,
+      ahora,
+      0.25,
+      0.38
+    );
+
+    crearTono(
+      context,
+      980,
+      ahora + 0.30,
+      0.25,
+      0.40
+    );
+
+    crearTono(
+      context,
+      1250,
+      ahora + 0.60,
+      0.50,
+      0.45
+    );
+
+    /*
+      SEGUNDO AVISO
+    */
+
+    crearTono(
+      context,
+      740,
+      ahora + 1.25,
+      0.25,
+      0.38
+    );
+
+    crearTono(
+      context,
+      980,
+      ahora + 1.55,
+      0.25,
+      0.40
+    );
+
+    crearTono(
+      context,
+      1250,
+      ahora + 1.85,
+      0.50,
+      0.45
+    );
+  }
+
+  /*
+    SONIDO POSITIVO
+  */
+
+  async function sonidoPositivo() {
+    const context =
+      await prepararAudio();
+
+    if (!context) {
+      return;
+    }
+
+    const ahora =
+      context.currentTime;
+
+    crearTono(
+      context,
+      650,
+      ahora,
+      0.18,
+      0.28
+    );
+
+    crearTono(
+      context,
+      900,
+      ahora + 0.22,
+      0.20,
+      0.30
+    );
+
+    crearTono(
+      context,
+      1150,
+      ahora + 0.46,
+      0.35,
+      0.34
+    );
+  }
+
+  /*
+    SONIDO AVISO
+  */
+
+  async function sonidoAviso() {
+    const context =
+      await prepararAudio();
+
+    if (!context) {
+      return;
+    }
+
+    const ahora =
+      context.currentTime;
+
+    crearTono(
+      context,
+      800,
+      ahora,
+      0.18,
+      0.26
+    );
+
+    crearTono(
+      context,
+      1000,
+      ahora + 0.22,
+      0.28,
+      0.28
+    );
+  }
+
+  /*
+    SONIDO ALERTA
+  */
+
+  async function sonidoAlerta() {
+    const context =
+      await prepararAudio();
+
+    if (!context) {
+      return;
+    }
+
+    const ahora =
+      context.currentTime;
+
+    crearTono(
+      context,
+      500,
+      ahora,
+      0.30,
+      0.30,
+      "triangle"
+    );
+
+    crearTono(
+      context,
+      350,
+      ahora + 0.35,
+      0.45,
+      0.32,
+      "triangle"
+    );
+  }
+
+  /*
+    REALTIME
+  */
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+
+    const channel =
+      supabase
+        .channel(
+          `notifications-${userId}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event:
+              "INSERT",
+
+            schema:
+              "public",
+
+            table:
+              "notifications",
+
+            filter:
+              `user_id=eq.${userId}`,
+          },
+          async (
+            payload
+          ) => {
+            const nueva =
+              payload.new as Notification;
+
+            console.log(
+              "🔔 NUEVA NOTIFICACIÓN:",
+              nueva
+            );
+
+            setNotificaciones(
+              (
+                actuales
+              ) => [
+                nueva,
+
+                ...actuales.filter(
+                  (
+                    item
+                  ) =>
+                    item.id !==
+                    nueva.id
+                ),
+              ]
+            );
+
+            /*
+              PROFESIONAL
+            */
+
+            if (
+              modo ===
+              "profesional"
+            ) {
+              if (
+                nueva.type ===
+                "new_job_available"
+              ) {
+                await sonidoNuevaOrden();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                "offer_accepted"
+              ) {
+                await sonidoPositivo();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                "job_cancelled_by_customer"
+              ) {
+                await sonidoAlerta();
+                return;
+              }
+
+              await sonidoAviso();
+
+              return;
+            }
+
+            /*
+              CLIENTE
+            */
+
+            if (
+              modo ===
+              "cliente"
+            ) {
+              if (
+                nueva.type ===
+                "new_offer_received"
+              ) {
+                await sonidoPositivo();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                  "provider_on_the_way" ||
+                nueva.type ===
+                  "provider_arrived" ||
+                nueva.type ===
+                  "job_started"
+              ) {
+                await sonidoAviso();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                "job_completed"
+              ) {
+                await sonidoPositivo();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                "provider_released_job"
+              ) {
+                await sonidoAlerta();
+                return;
+              }
+
+              await sonidoAviso();
+            }
+          }
+        )
+        .subscribe(
+          (
+            status
+          ) => {
+            console.log(
+              "Realtime notificaciones:",
+              status
+            );
+          }
+        );
+
+    return () => {
+      supabase.removeChannel(
+        channel
+      );
+    };
+  }, [
+    userId,
+    modo,
+  ]);
+
+  /*
+    CARGAR NOTIFICACIONES
+  */
+
+  async function cargarNotificaciones(
+    uid: string
+  ) {
+    const {
+      data,
+      error,
+    } =
+      await supabase
+        .from(
+          "notifications"
+        )
+        .select(`
+          id,
+          user_id,
+          type,
+          title,
+          message,
+          request_id,
+          read,
+          created_at
+        `)
+        .eq(
+          "user_id",
+          uid
+        )
+        .order(
+          "created_at",
+          {
+            ascending:
+              false,
+          }
+        )
+        .limit(30);
+
+    if (error) {
+      console.error(
+        "Error cargando notificaciones:",
+        error
+      );
+
+      return;
+    }
+
+    setNotificaciones(
+      (data ||
+        []) as Notification[]
+    );
+  }
+
+  /*
+    MARCAR UNA LEÍDA
+  */
+
+  async function marcarLeida(
+    id: string
+  ) {
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          "notifications"
+        )
+        .update({
+          read: true,
+        })
+        .eq(
+          "id",
+          id
+        );
+
+    if (error) {
+      console.error(
+        "Error marcando notificación:",
+        error
+      );
+
+      return;
+    }
+
+    setNotificaciones(
+      (
+        actuales
+      ) =>
+        actuales.map(
+          (
+            item
+          ) =>
+            item.id === id
+              ? {
+                  ...item,
+                  read: true,
+                }
+              : item
+        )
+    );
+  }
+
+  /*
+    MARCAR TODAS LEÍDAS
+  */
+
+  async function marcarTodasLeidas() {
+    if (!userId) {
+      return;
+    }
+
+    const {
+      error,
+    } =
+      await supabase
+        .from(
+          "notifications"
+        )
+        .update({
+          read: true,
+        })
+        .eq(
+          "user_id",
+          userId
+        )
+        .eq(
+          "read",
+          false
+        );
+
+    if (error) {
+      console.error(
+        "Error marcando todas:",
+        error
+      );
+
+      return;
+    }
+
+    setNotificaciones(
+      (
+        actuales
+      ) =>
+        actuales.map(
+          (
+            item
+          ) => ({
+            ...item,
+            read: true,
+          })
+        )
+    );
+  }
+
+  /*
+    ABRIR NOTIFICACIÓN
+  */
+
+  async function abrirNotificacion(
+    notificacion: Notification
+  ) {
+    if (
+      !notificacion.read
+    ) {
+      await marcarLeida(
+        notificacion.id
+      );
+    }
+
+    if (
+      !notificacion.request_id
+    ) {
+      setAbierto(false);
+      return;
+    }
+
+    if (
+      modo ===
+      "profesional"
+    ) {
+      window.location.href =
+        `/trabajos/${notificacion.request_id}`;
+
+      return;
+    }
+
+    window.location.href =
+      `/mis-solicitudes/${notificacion.request_id}`;
+  }
+
+  /*
+    ICONOS
+  */
+
+  function icono(
+    tipo: string
+  ) {
+    switch (tipo) {
+      case "new_job_available":
+        return "🆕";
+
+      case "new_offer_received":
+        return "💰";
+
+      case "offer_accepted":
+        return "✅";
+
+      case "provider_on_the_way":
+        return "🚗";
+
+      case "provider_arrived":
+        return "📍";
+
+      case "job_started":
+        return "🛠️";
+
+      case "job_completed":
+        return "🎉";
+
+      case "provider_released_job":
+        return "🔄";
+
+      case "job_cancelled_by_customer":
+        return "🚫";
+
+      default:
+        return "🔔";
+    }
+  }
+
+  /*
+    FECHA
+  */
+
+  function fecha(
+    valor: string
+  ) {
+    return new Intl.DateTimeFormat(
+      "es-US",
+      {
+        month:
+          "short",
+
+        day:
+          "numeric",
+
+        hour:
+          "numeric",
+
+        minute:
+          "2-digit",
+      }
+    ).format(
+      new Date(valor)
+    );
+  }
+
+  const noLeidas =
+    notificaciones.filter(
+      (item) =>
+        !item.read
+    ).length;
+
+  if (
+    cargando ||
+    !userId
+  ) {
+    return null;
+  }
+
+  return (
+    <div className="relative">
+
+      {/* CAMPANA */}
+
+      <button
+        type="button"
+        onClick={() =>
+          setAbierto(
+            (actual) =>
+              !actual
+          )
+        }
+        className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-xl text-white transition hover:bg-white/20"
+        aria-label="Notificaciones"
+      >
+        🔔
+
+        {noLeidas > 0 && (
+          <span className="absolute -right-2 -top-2 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-black text-white shadow">
+
+            {noLeidas > 99
+              ? "99+"
+              : noLeidas}
+
+          </span>
+        )}
+
+      </button>
+
+      {/* PANEL */}
+
+      {abierto && (
+        <div className="absolute right-0 z-50 mt-3 w-[340px] max-w-[90vw] overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-2xl sm:w-[390px]">
+
+          {/* HEADER */}
+
+          <div className="border-b border-slate-200 px-5 py-4">
+
+            <div className="flex items-center justify-between gap-3">
+
+              <div>
+
+                <p className="font-black text-slate-900">
+                  Notificaciones
+                </p>
+
+                <p className="text-xs text-slate-500">
+                  {noLeidas} sin leer
+                </p>
+
+              </div>
+
+              {noLeidas > 0 && (
+                <button
+                  type="button"
+                  onClick={
+                    marcarTodasLeidas
+                  }
+                  className="text-xs font-bold text-blue-700 hover:text-blue-900"
+                >
+                  Marcar todas leídas
+                </button>
+              )}
+
+            </div>
+
+            {/* SONIDO */}
+
+            <div
+              className={`mt-4 rounded-xl border p-4 ${
+                sonidoActivo
+                  ? "border-green-200 bg-green-50"
+                  : "border-amber-200 bg-amber-50"
+              }`}
+            >
+
+              <div className="flex items-center justify-between gap-3">
+
+                <div>
+
+                  <p
+                    className={`text-sm font-black ${
+                      sonidoActivo
+                        ? "text-green-800"
+                        : "text-amber-800"
+                    }`}
+                  >
+                    {sonidoActivo
+                      ? "🔊 Sonido activado"
+                      : sonidoDeseadoRef.current
+                      ? "🔄 Reactivando sonido"
+                      : "🔇 Activa el sonido"}
+                  </p>
+
+                  <p
+                    className={`mt-1 text-xs ${
+                      sonidoActivo
+                        ? "text-green-700"
+                        : "text-amber-700"
+                    }`}
+                  >
+                    {sonidoActivo
+                      ? modo ===
+                        "profesional"
+                        ? "FixFlow te avisará cuando llegue una orden o cambie un trabajo."
+                        : "FixFlow te avisará cuando recibas presupuestos o cambie el estado de tu trabajo."
+                      : sonidoDeseadoRef.current
+                      ? "FixFlow intentará reactivar el audio automáticamente."
+                      : "Pulsa Activar sonido para escuchar las notificaciones."}
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  disabled={
+                    activandoSonido
+                  }
+                  onClick={
+                    activarSonido
+                  }
+                  className={`shrink-0 rounded-lg px-4 py-2 text-xs font-black ${
+                    sonidoActivo
+                      ? "border border-green-300 bg-white text-green-700 hover:bg-green-100"
+                      : "bg-blue-700 text-white hover:bg-blue-800"
+                  } disabled:opacity-50`}
+                >
+                  {activandoSonido
+                    ? "Activando..."
+                    : sonidoActivo
+                    ? "Probar"
+                    : "Activar sonido"}
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* LISTA */}
+
+          {notificaciones.length ===
+          0 ? (
+            <div className="p-8 text-center">
+
+              <div className="text-4xl">
+                🔔
+              </div>
+
+              <p className="mt-3 font-bold text-slate-700">
+                No tienes notificaciones
+              </p>
+
+            </div>
+          ) : (
+            <div className="max-h-[430px] overflow-y-auto">
+
+              {notificaciones.map(
+                (
+                  notificacion
+                ) => (
+                  <button
+                    type="button"
+                    key={
+                      notificacion.id
+                    }
+                    onClick={() =>
+                      abrirNotificacion(
+                        notificacion
+                      )
+                    }
+                    className={`block w-full border-b border-slate-100 px-5 py-4 text-left transition hover:bg-slate-50 ${
+                      !notificacion.read
+                        ? "bg-blue-50/60"
+                        : "bg-white"
+                    }`}
+                  >
+
+                    <div className="flex items-start gap-3">
+
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl">
+                        {icono(
+                          notificacion.type
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+
+                        <div className="flex items-start justify-between gap-3">
+
+                          <p
+                            className={`text-sm text-slate-900 ${
+                              !notificacion.read
+                                ? "font-black"
+                                : "font-bold"
+                            }`}
+                          >
+                            {
+                              notificacion.title
+                            }
+                          </p>
+
+                          {!notificacion.read && (
+                            <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
+                          )}
+
+                        </div>
+
+                        <p className="mt-1 text-sm leading-5 text-slate-600">
+                          {
+                            notificacion.message
+                          }
+                        </p>
+
+                        <p className="mt-2 text-xs font-medium text-slate-400">
+                          {fecha(
+                            notificacion.created_at
+                          )}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </button>
+                )
+              )}
+
+            </div>
+          )}
+
+        </div>
+      )}
+
+    </div>
+  );
+}
