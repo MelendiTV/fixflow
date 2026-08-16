@@ -2823,6 +2823,32 @@ export default function AdminPage() {
                 Abrir gestión de usuarios
               </p>
             </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/admin/alertas"
+                )
+              }
+              className="rounded-3xl border border-amber-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-2xl">
+                  🔔
+                </div>
+                <span className="text-xl font-black text-amber-700">→</span>
+              </div>
+              <h3 className="mt-5 text-xl font-black text-slate-950">
+                Centro de alertas
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Revisa reclamos activos, profesionales pendientes y situaciones que requieren atención.
+              </p>
+              <p className="mt-5 text-sm font-black text-amber-700">
+                {totalReclamosActivos + providers.length} alerta{totalReclamosActivos + providers.length === 1 ? "" : "s"} pendiente{totalReclamosActivos + providers.length === 1 ? "" : "s"}
+              </p>
+            </button>
           </div>
         </section>
 
