@@ -67,6 +67,27 @@ export default function NotificationsBell({
     setActivandoSonido,
   ] = useState(false);
 
+
+  const [
+    pushDisponible,
+    setPushDisponible,
+  ] = useState(false);
+
+  const [
+    pushActivo,
+    setPushActivo,
+  ] = useState(false);
+
+  const [
+    activandoPush,
+    setActivandoPush,
+  ] = useState(false);
+
+  const [
+    pushError,
+    setPushError,
+  ] = useState("");
+
   /*
     INDICA QUE EL USUARIO
     YA DIJO QUE QUIERE SONIDO
@@ -114,6 +135,221 @@ export default function NotificationsBell({
     );
 
     setCargando(false);
+  }
+
+  /*
+    NOTIFICACIONES PUSH DEL DISPOSITIVO
+  */
+
+  useEffect(() => {
+    const disponible =
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window &&
+      "Notification" in window;
+
+    setPushDisponible(
+      disponible
+    );
+
+    if (
+      disponible &&
+      userId
+    ) {
+      comprobarSuscripcionPush();
+    }
+  }, [userId]);
+
+  async function comprobarSuscripcionPush() {
+    if (!userId) {
+      return;
+    }
+
+    try {
+      const registration =
+        await navigator.serviceWorker.register(
+          "/sw.js"
+        );
+
+      await navigator.serviceWorker.ready;
+
+      const subscription =
+        await registration.pushManager.getSubscription();
+
+      setPushActivo(
+        Boolean(subscription)
+      );
+    } catch (error) {
+      console.error(
+        "Error comprobando Push:",
+        error
+      );
+    }
+  }
+
+  function urlBase64AUint8Array(
+    base64String: string
+  ) {
+    const padding =
+      "=".repeat(
+        (4 -
+          (base64String.length %
+            4)) %
+          4
+      );
+
+    const base64 =
+      (
+        base64String +
+        padding
+      )
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
+    const rawData =
+      window.atob(base64);
+
+    const outputArray =
+      new Uint8Array(
+        rawData.length
+      );
+
+    for (
+      let i = 0;
+      i < rawData.length;
+      ++i
+    ) {
+      outputArray[i] =
+        rawData.charCodeAt(i);
+    }
+
+    return outputArray;
+  }
+
+  async function activarPush() {
+    if (
+      !userId ||
+      !pushDisponible
+    ) {
+      return;
+    }
+
+    setActivandoPush(true);
+    setPushError("");
+
+    try {
+      const publicKey =
+        process.env
+          .NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+      if (!publicKey) {
+        throw new Error(
+          "Falta NEXT_PUBLIC_VAPID_PUBLIC_KEY."
+        );
+      }
+
+      const permission =
+        await Notification.requestPermission();
+
+      if (
+        permission !== "granted"
+      ) {
+        throw new Error(
+          "No se concedió permiso para las notificaciones del dispositivo."
+        );
+      }
+
+      const registration =
+        await navigator.serviceWorker.register(
+          "/sw.js"
+        );
+
+      await navigator.serviceWorker.ready;
+
+      let subscription =
+        await registration.pushManager.getSubscription();
+
+      if (!subscription) {
+        subscription =
+          await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey:
+              urlBase64AUint8Array(
+                publicKey
+              ),
+          });
+      }
+
+      const json =
+        subscription.toJSON();
+
+      const endpoint =
+        subscription.endpoint;
+
+      const p256dh =
+        json.keys?.p256dh;
+
+      const auth =
+        json.keys?.auth;
+
+      if (
+        !endpoint ||
+        !p256dh ||
+        !auth
+      ) {
+        throw new Error(
+          "La suscripción Push no devolvió las claves necesarias."
+        );
+      }
+
+      const {
+        error:
+          guardarError,
+      } = await supabase
+        .from(
+          "push_subscriptions"
+        )
+        .upsert(
+          {
+            user_id:
+              userId,
+            endpoint,
+            p256dh,
+            auth,
+            user_agent:
+              navigator.userAgent,
+            updated_at:
+              new Date().toISOString(),
+          },
+          {
+            onConflict:
+              "endpoint",
+          }
+        );
+
+      if (guardarError) {
+        throw new Error(
+          `No se pudo guardar el dispositivo: ${guardarError.message}`
+        );
+      }
+
+      setPushActivo(true);
+    } catch (error) {
+      console.error(
+        "Error activando Push:",
+        error
+      );
+
+      setPushError(
+        error instanceof Error
+          ? error.message
+          : "No se pudieron activar las notificaciones del dispositivo."
+      );
+
+      setPushActivo(false);
+    } finally {
+      setActivandoPush(false);
+    }
   }
 
   /*
@@ -1216,6 +1452,75 @@ export default function NotificationsBell({
                 </button>
               )}
 
+            </div>
+
+            {/* PUSH DEL DISPOSITIVO */}
+
+            <div
+              className={`mt-4 rounded-xl border p-4 ${
+                pushActivo
+                  ? "border-emerald-200 bg-emerald-50"
+                  : "border-blue-200 bg-blue-50"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p
+                    className={`text-sm font-black ${
+                      pushActivo
+                        ? "text-emerald-800"
+                        : "text-blue-800"
+                    }`}
+                  >
+                    {pushActivo
+                      ? "📲 Notificaciones del dispositivo activadas"
+                      : "📲 Activa las notificaciones Push"}
+                  </p>
+
+                  <p
+                    className={`mt-1 text-xs ${
+                      pushActivo
+                        ? "text-emerald-700"
+                        : "text-blue-700"
+                    }`}
+                  >
+                    {pushActivo
+                      ? "FixFlow puede avisarte en la pantalla del teléfono o laptop aunque la web esté en segundo plano."
+                      : "Permite que FixFlow muestre avisos en la pantalla de este dispositivo."}
+                  </p>
+
+                  {pushError && (
+                    <p className="mt-2 text-xs font-bold text-red-700">
+                      {pushError}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={
+                    activandoPush ||
+                    !pushDisponible ||
+                    pushActivo
+                  }
+                  onClick={
+                    activarPush
+                  }
+                  className={`shrink-0 rounded-lg px-4 py-2 text-xs font-black ${
+                    pushActivo
+                      ? "border border-emerald-300 bg-white text-emerald-700"
+                      : "bg-blue-700 text-white hover:bg-blue-800"
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {activandoPush
+                    ? "Activando..."
+                    : pushActivo
+                    ? "Activadas"
+                    : pushDisponible
+                    ? "Activar Push"
+                    : "No disponible"}
+                </button>
+              </div>
             </div>
 
             {/* SONIDO */}
