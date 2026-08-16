@@ -3340,14 +3340,23 @@ export default function AdminPage() {
                         "provider"
                     );
 
+                  const profesionalRespondio =
+                    Boolean(
+                      reclamo.provider_response ||
+                      reclamo.provider_responded_at ||
+                      evidenciasProfesional.length > 0
+                    );
+
                   const estadoPlazoProfesional =
                     calcularEstadoPlazoProfesional(
                       reclamo.provider_response_deadline,
-                      reclamo.provider_response
+                      profesionalRespondio
+                        ? reclamo.provider_response || "respuesta_enviada"
+                        : null
                     );
 
                   const profesionalDentroDelPlazo =
-                    !reclamo.provider_response &&
+                    !profesionalRespondio &&
                     !estadoPlazoProfesional.vencido;
 
                   void relojReclamos;
@@ -3510,11 +3519,12 @@ export default function AdminPage() {
                             Respuesta del profesional
                           </h4>
 
-                          {reclamo.provider_response ? (
+                          {profesionalRespondio ? (
                             <>
                               <div className="mt-4 rounded-xl border border-emerald-100 bg-white p-4">
                                 <p className="whitespace-pre-wrap leading-7 text-slate-700">
-                                  {reclamo.provider_response}
+                                  {reclamo.provider_response ||
+                                    "El profesional envió evidencia para responder al reclamo."}
                                 </p>
                               </div>
 
@@ -3774,13 +3784,38 @@ export default function AdminPage() {
                             </p>
                           </div>
 
-                          {profesionalDentroDelPlazo && (
+                          {profesionalRespondio ? (
+                            <div className="mt-4 rounded-2xl border border-emerald-300 bg-emerald-50 p-5">
+                              <p className="font-black text-emerald-950">
+                                ✅ El profesional ya respondió
+                              </p>
+                              <p className="mt-1 text-sm leading-6 text-emerald-900">
+                                La respuesta y las evidencias del profesional ya fueron recibidas. El reclamo está listo para revisión y decisión del administrador.
+                              </p>
+                              {reclamo.provider_responded_at && (
+                                <p className="mt-2 text-xs font-bold text-emerald-700">
+                                  Respuesta recibida {formatearFecha(
+                                    reclamo.provider_responded_at
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                          ) : profesionalDentroDelPlazo ? (
                             <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-5">
                               <p className="font-black text-amber-950">
                                 ⏳ El profesional todavía está dentro de su plazo
                               </p>
                               <p className="mt-1 text-sm leading-6 text-amber-900">
                                 Le quedan {estadoPlazoProfesional.texto}. Puedes esperar su respuesta o resolver el reclamo antes como administrador. Si decides resolver ahora, FixFlow te pedirá una confirmación adicional.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="mt-4 rounded-2xl border border-slate-300 bg-slate-50 p-5">
+                              <p className="font-black text-slate-950">
+                                ⏰ El plazo del profesional terminó
+                              </p>
+                              <p className="mt-1 text-sm leading-6 text-slate-700">
+                                El administrador ya puede resolver el reclamo con la evidencia disponible.
                               </p>
                             </div>
                           )}
