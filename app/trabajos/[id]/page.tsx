@@ -1453,6 +1453,76 @@ export default function TrabajoDetallePage() {
         nuevaOferta as Oferta
       );
 
+      /*
+        PUSH AL CLIENTE:
+        NUEVO PRESUPUESTO RECIBIDO
+
+        Si el Push falla, el presupuesto
+        sigue guardado correctamente.
+      */
+
+      try {
+        const {
+          data: {
+            session,
+          },
+        } =
+          await supabase.auth.getSession();
+
+        const accessToken =
+          session?.access_token;
+
+        if (accessToken) {
+          const pushResponse =
+            await fetch(
+              "/api/push/new-offer",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  Authorization:
+                    `Bearer ${accessToken}`,
+                },
+
+                body:
+                  JSON.stringify({
+                    offerId:
+                      nuevaOferta.id,
+                  }),
+              }
+            );
+
+          const pushResult =
+            await pushResponse
+              .json()
+              .catch(() => null);
+
+          if (!pushResponse.ok) {
+            console.warn(
+              "El presupuesto se guardó, pero el Push al cliente no pudo enviarse:",
+              pushResult
+            );
+          } else {
+            console.log(
+              "Push nuevo presupuesto:",
+              pushResult
+            );
+          }
+        } else {
+          console.warn(
+            "El presupuesto se guardó, pero no encontramos access token para enviar Push."
+          );
+        }
+      } catch (pushError) {
+        console.warn(
+          "El presupuesto se guardó, pero ocurrió un error enviando Push al cliente:",
+          pushError
+        );
+      }
+
       form.reset();
 
       setMensaje(
