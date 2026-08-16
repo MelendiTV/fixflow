@@ -137,6 +137,17 @@ type ChangeOrder = {
   updated_at: string;
 };
 
+type CompletionEvidence = {
+  id: string;
+  request_id: string;
+  provider_id: string;
+  file_type: "image" | "video";
+  file_path: string;
+  file_url: string | null;
+  created_at: string;
+  signed_url: string | null;
+};
+
 function nombreOficio(
   trade: string | null
 ) {
@@ -575,6 +586,11 @@ export default function MisSolicitudDetallePage() {
     explicacionEvidenciaCliente,
     setExplicacionEvidenciaCliente,
   ] = useState("");
+
+  const [
+    evidenciasFinales,
+    setEvidenciasFinales,
+  ] = useState<CompletionEvidence[]>([]);
 
   /*
     CARGA INICIAL
@@ -1061,6 +1077,83 @@ export default function MisSolicitudDetallePage() {
       }
 
       setPayment(paymentData ? paymentData as PaymentCalculation : null);
+
+      /*
+        EVIDENCIA FINAL DEL PROFESIONAL
+      */
+
+      const {
+        data: completionEvidenceData,
+        error: completionEvidenceError,
+      } = await supabase
+        .from("job_completion_evidence")
+        .select(`
+          id,
+          request_id,
+          provider_id,
+          file_type,
+          file_path,
+          file_url,
+          created_at
+        `)
+        .eq("request_id", id)
+        .order("created_at", {
+          ascending: true,
+        });
+
+      if (completionEvidenceError) {
+        console.error(
+          "Error cargando evidencia final del profesional:",
+          completionEvidenceError
+        );
+        setEvidenciasFinales([]);
+      } else {
+        const evidenciaBase =
+          (completionEvidenceData || []) as Omit<
+            CompletionEvidence,
+            "signed_url"
+          >[];
+
+        const evidenciaConUrls =
+          await Promise.all(
+            evidenciaBase.map(
+              async (item) => {
+                const {
+                  data: signedData,
+                  error: signedError,
+                } = await supabase.storage
+                  .from("job-completion-evidence")
+                  .createSignedUrl(
+                    item.file_path,
+                    60 * 60
+                  );
+
+                if (signedError) {
+                  console.error(
+                    "Error creando URL segura para evidencia final:",
+                    signedError
+                  );
+
+                  return {
+                    ...item,
+                    signed_url: null,
+                  };
+                }
+
+                return {
+                  ...item,
+                  signed_url:
+                    signedData?.signedUrl ||
+                    null,
+                };
+              }
+            )
+          );
+
+        setEvidenciasFinales(
+          evidenciaConUrls
+        );
+      }
 
       const {
         data: changeOrdersData,
@@ -3716,6 +3809,105 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
           </section>
         )}
+
+        {/* EVIDENCIA FINAL DEL PROFESIONAL */}
+
+        {solicitud.status === "completed" &&
+          evidenciasFinales.length > 0 && (
+            <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wide text-blue-700">
+                    📸 Evidencia del trabajo terminado
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-black text-slate-950">
+                    Fotos y videos registrados por el profesional
+                  </h2>
+
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                    Esta evidencia fue registrada por el profesional al finalizar el servicio y queda asociada a este trabajo para tu protección y la del profesional.
+                  </p>
+                </div>
+
+                <div className="w-fit rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-black text-blue-700">
+                  {
+                    evidenciasFinales.filter(
+                      (item) =>
+                        item.file_type === "image"
+                    ).length
+                  }{" "}
+                  foto(s) ·{" "}
+                  {
+                    evidenciasFinales.filter(
+                      (item) =>
+                        item.file_type === "video"
+                    ).length
+                  }{" "}
+                  video(s)
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {evidenciasFinales.map(
+                  (item) => (
+                    <article
+                      key={item.id}
+                      className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                    >
+                      {item.signed_url ? (
+                        item.file_type ===
+                        "video" ? (
+                          <video
+                            src={item.signed_url}
+                            controls
+                            preload="metadata"
+                            className="aspect-video w-full bg-black object-contain"
+                          />
+                        ) : (
+                          <a
+                            href={item.signed_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block"
+                          >
+                            <img
+                              src={item.signed_url}
+                              alt="Evidencia del trabajo terminado"
+                              className="aspect-video w-full bg-slate-100 object-cover transition hover:opacity-95"
+                            />
+                          </a>
+                        )
+                      ) : (
+                        <div className="flex aspect-video items-center justify-center bg-slate-100 px-5 text-center text-sm font-bold text-slate-500">
+                          No pudimos abrir este archivo de evidencia.
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between gap-3 bg-white px-4 py-3">
+                        <span className="text-sm font-black text-slate-800">
+                          {item.file_type ===
+                          "video"
+                            ? "🎥 Video"
+                            : "📷 Foto"}
+                        </span>
+
+                        <span className="text-xs font-semibold text-slate-500">
+                          Registrado
+                        </span>
+                      </div>
+                    </article>
+                  )
+                )}
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
+                <p className="text-sm font-bold leading-6 text-blue-900">
+                  🔒 Esta evidencia forma parte del registro del trabajo y no puede ser modificada desde esta pantalla.
+                </p>
+              </div>
+            </section>
+          )}
 
         {/* RESEÑA */}
 
