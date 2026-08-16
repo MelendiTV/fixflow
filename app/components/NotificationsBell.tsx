@@ -58,6 +58,11 @@ export default function NotificationsBell({
   ] = useState(false);
 
   const [
+    sonidoDeseado,
+    setSonidoDeseado,
+  ] = useState(false);
+
+  const [
     activandoSonido,
     setActivandoSonido,
   ] = useState(false);
@@ -113,19 +118,23 @@ export default function NotificationsBell({
 
   /*
     RECORDAR PREFERENCIA
-    DE SONIDO DURANTE
-    LA SESIÓN
+    DE SONIDO EN ESTE
+    DISPOSITIVO
   */
 
   useEffect(() => {
     try {
       const guardado =
-        sessionStorage.getItem(
+        localStorage.getItem(
           SOUND_STORAGE_KEY
         );
 
       sonidoDeseadoRef.current =
         guardado === "true";
+
+      setSonidoDeseado(
+        guardado === "true"
+      );
 
       /*
         SI YA LO HABÍA ACTIVADO,
@@ -419,8 +428,10 @@ export default function NotificationsBell({
     sonidoDeseadoRef.current =
       true;
 
+    setSonidoDeseado(true);
+
     try {
-      sessionStorage.setItem(
+      localStorage.setItem(
         SOUND_STORAGE_KEY,
         "true"
       );
