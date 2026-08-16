@@ -808,6 +808,76 @@ function SolicitarTrabajoContenido() {
         fotos
       );
 
+      /*
+        AVISAR A PROFESIONALES POR PUSH
+
+        La solicitud ya quedó creada.
+        Si el Push falla, NO cancelamos
+        ni dañamos la orden del cliente.
+      */
+
+      try {
+        const {
+          data: {
+            session,
+          },
+        } =
+          await supabase.auth.getSession();
+
+        const accessToken =
+          session?.access_token;
+
+        if (accessToken) {
+          const pushResponse =
+            await fetch(
+              "/api/push/new-job",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  Authorization:
+                    `Bearer ${accessToken}`,
+                },
+
+                body:
+                  JSON.stringify({
+                    requestId:
+                      nuevaSolicitud.id,
+                  }),
+              }
+            );
+
+          const pushResult =
+            await pushResponse
+              .json()
+              .catch(() => null);
+
+          if (!pushResponse.ok) {
+            console.warn(
+              "La solicitud se creó, pero el Push no pudo enviarse:",
+              pushResult
+            );
+          } else {
+            console.log(
+              "Push nuevo trabajo:",
+              pushResult
+            );
+          }
+        } else {
+          console.warn(
+            "La solicitud se creó, pero no encontramos access token para enviar Push."
+          );
+        }
+      } catch (pushError) {
+        console.warn(
+          "La solicitud se creó, pero ocurrió un error enviando Push:",
+          pushError
+        );
+      }
+
       setCantidadFotos(
         fotos.length
       );
