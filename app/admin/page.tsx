@@ -4145,12 +4145,9 @@ export default function AdminPage() {
                       className="rounded-3xl border border-slate-200 bg-white p-6 shadow"
                     >
 
-                      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0 flex-1">
-
                           <div className="flex flex-wrap items-center gap-2">
-
                             <span
                               className={`rounded-full px-3 py-1 text-sm font-extrabold ${estiloEstadoOrden(
                                 solicitud.status,
@@ -4162,192 +4159,17 @@ export default function AdminPage() {
                                 solicitud.job_stage
                               )}
                             </span>
-
-                            {solicitud.preferred_provider_id ? (
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700">
-                                Profesional asignado
-                              </span>
-                            ) : (
-                              <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
-                                Sin profesional asignado
-                              </span>
-                            )}
-
                           </div>
 
-                          <h3 className="mt-3 text-2xl font-extrabold text-slate-900">
+                          <h3 className="mt-3 truncate text-xl font-extrabold text-slate-900">
                             {solicitud.title}
                           </h3>
 
-                          <p className="mt-2 whitespace-pre-wrap leading-6 text-slate-600">
-                            {solicitud.description}
+                          <p className="mt-2 break-all text-sm font-semibold text-slate-500">
+                            Orden: {solicitud.id}
                           </p>
-
                         </div>
 
-                        <div className="shrink-0 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                          Creada {formatearFecha(
-                            solicitud.created_at
-                          )}
-                        </div>
-
-                      </div>
-
-                      <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-
-                        <div className="rounded-2xl bg-slate-50 p-5">
-
-                          <p className="text-sm font-bold text-slate-500">
-                            Cliente
-                          </p>
-
-                          <p className="mt-1 font-extrabold text-slate-900">
-                            {solicitud.customer_name ||
-                              "Cliente FixFlow"}
-                          </p>
-
-                          <p className="mt-2 break-all text-sm text-slate-600">
-                            {solicitud.customer_email ||
-                              "Email no indicado"}
-                          </p>
-
-                          <p className="mt-1 text-sm text-slate-600">
-                            {solicitud.customer_phone ||
-                              "Teléfono no indicado"}
-                          </p>
-
-                        </div>
-
-                        <div className="rounded-2xl bg-slate-50 p-5">
-
-                          <p className="text-sm font-bold text-slate-500">
-                            Profesional
-                          </p>
-
-                          <p className="mt-1 font-extrabold text-slate-900">
-                            {profesional?.business_name ||
-                              "Sin asignar"}
-                          </p>
-
-                          <p className="mt-1 text-sm text-blue-700">
-                            {profesional
-                              ? nombreOficio(
-                                  profesional.trade
-                                )
-                              : "Esperando profesional"}
-                          </p>
-
-                          {solicitud.preferred_provider_id && (
-                            <p className="mt-2 break-all text-xs text-slate-500">
-                              ID: {solicitud.preferred_provider_id}
-                            </p>
-                          )}
-
-                        </div>
-
-                        <div className="rounded-2xl bg-slate-50 p-5">
-
-                          <p className="text-sm font-bold text-slate-500">
-                            Ubicación
-                          </p>
-
-                          <p className="mt-1 font-semibold text-slate-900">
-                            {solicitud.address_line1 ||
-                              "Dirección no indicada"}
-                          </p>
-
-                          {solicitud.address_line2 && (
-                            <p className="mt-1 text-sm text-slate-600">
-                              {solicitud.address_line2}
-                            </p>
-                          )}
-
-                          <p className="mt-1 text-sm text-slate-600">
-                            {solicitud.city}, {solicitud.state} {solicitud.zip_code}
-                          </p>
-
-                        </div>
-
-                        <div className="rounded-2xl bg-slate-50 p-5">
-
-                          <p className="text-sm font-bold text-slate-500">
-                            Fecha solicitada
-                          </p>
-
-                          <p className="mt-1 font-extrabold text-slate-900">
-                            {solicitud.preferred_date ||
-                              "Flexible"}
-                          </p>
-
-                        </div>
-
-                        <div className="rounded-2xl bg-slate-50 p-5">
-
-                          <p className="text-sm font-bold text-slate-500">
-                            Hora solicitada
-                          </p>
-
-                          <p className="mt-1 font-extrabold text-slate-900">
-                            {solicitud.preferred_time ||
-                              "Flexible"}
-                          </p>
-
-                        </div>
-
-                        <div className="rounded-2xl bg-slate-50 p-5">
-
-                          <p className="text-sm font-bold text-slate-500">
-                            Etapa interna
-                          </p>
-
-                          <p className="mt-1 font-extrabold text-slate-900">
-                            {solicitud.job_stage ||
-                              "Sin etapa"}
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                      {solicitud.status ===
-                        "cancelled" && (
-                        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
-
-                          <p className="font-extrabold text-red-800">
-                            🚫 Orden cancelada
-                          </p>
-
-                          <p className="mt-2 text-sm leading-6 text-red-700">
-                            {solicitud.cancellation_reason ||
-                              "No se registró un motivo de cancelación."}
-                          </p>
-
-                          {solicitud.cancelled_at && (
-                            <p className="mt-2 text-xs font-semibold text-red-600">
-                              Cancelada {formatearFecha(
-                                solicitud.cancelled_at
-                              )}
-                            </p>
-                          )}
-
-                        </div>
-                      )}
-
-                      <div className="mt-5 flex flex-wrap gap-2 text-xs text-slate-500">
-
-                        <span className="rounded-lg bg-slate-100 px-3 py-2">
-                          Request ID: {solicitud.id}
-                        </span>
-
-                        {solicitud.customer_id && (
-                          <span className="rounded-lg bg-slate-100 px-3 py-2">
-                            Customer ID: {solicitud.customer_id}
-                          </span>
-                        )}
-
-                      </div>
-
-                      <div className="mt-5 border-t border-slate-200 pt-5">
                         <button
                           type="button"
                           onClick={() =>
@@ -4355,7 +4177,7 @@ export default function AdminPage() {
                               `/admin/trabajos/${solicitud.id}`
                             )
                           }
-                          className="w-full rounded-xl bg-blue-700 px-5 py-3.5 font-extrabold text-white transition hover:bg-blue-800 sm:w-auto"
+                          className="w-full shrink-0 rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800 sm:w-auto"
                         >
                           🔎 Ver detalle del trabajo
                         </button>

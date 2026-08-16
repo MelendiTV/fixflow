@@ -286,22 +286,33 @@ export default function AdminTrabajoDetallePage() {
         setProvider(null);
       }
 
+      let ofertaQuery = supabase
+        .from("offers")
+        .select(`
+          id,
+          request_id,
+          professional_id,
+          price,
+          arrival_minutes,
+          estimated_job_minutes,
+          message,
+          status,
+          created_at
+        `)
+        .eq("request_id", id);
+
+      if (solicitudActual.preferred_provider_id) {
+        ofertaQuery = ofertaQuery.eq(
+          "professional_id",
+          solicitudActual.preferred_provider_id
+        );
+      }
+
       const { data: ofertaData, error: ofertaError } =
-        await supabase
-          .from("offers")
-          .select(`
-            id,
-            request_id,
-            professional_id,
-            price,
-            arrival_minutes,
-            estimated_job_minutes,
-            message,
-            status,
-            created_at
-          `)
-          .eq("request_id", id)
-          .eq("status", "selected")
+        await ofertaQuery
+          .order("created_at", {
+            ascending: false,
+          })
           .limit(1)
           .maybeSingle();
 
