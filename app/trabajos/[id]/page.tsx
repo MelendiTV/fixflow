@@ -3814,16 +3814,40 @@ export default function TrabajoDetallePage() {
                                         </div>
                                       )}
 
-                                      <label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
-                                        ☁️ Subir evidencia
-                                        <input
-                                          type="file"
-                                          multiple
-                                          accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
-                                          onChange={seleccionarEvidenciaFinal}
-                                          className="hidden"
-                                        />
-                                      </label>
+                                      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
+                                          📷 Tomar foto
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            onChange={seleccionarEvidenciaFinal}
+                                            className="hidden"
+                                          />
+                                        </label>
+
+                                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
+                                          🎥 Grabar video
+                                          <input
+                                            type="file"
+                                            accept="video/*"
+                                            capture="environment"
+                                            onChange={seleccionarEvidenciaFinal}
+                                            className="hidden"
+                                          />
+                                        </label>
+
+                                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-4 py-3 font-extrabold text-slate-700 transition hover:bg-slate-50">
+                                          📁 Galería
+                                          <input
+                                            type="file"
+                                            multiple
+                                            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                                            onChange={seleccionarEvidenciaFinal}
+                                            className="hidden"
+                                          />
+                                        </label>
+                                      </div>
                                     </div>
                                   </div>
 
