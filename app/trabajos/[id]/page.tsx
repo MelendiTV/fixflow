@@ -3054,32 +3054,77 @@ export default function TrabajoDetallePage() {
         {/* AVISO RECLAMO ACTIVO */}
 
         {reclamoActivo && (
-          <section className="mb-6 rounded-3xl border-2 border-amber-300 bg-amber-50 p-7 shadow-lg">
+          <section
+            className={`mb-6 rounded-3xl border-2 p-7 shadow-lg ${
+              profesionalYaRespondio
+                ? "border-emerald-300 bg-emerald-50"
+                : "border-amber-300 bg-amber-50"
+            }`}
+          >
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-2xl text-white">
-                  ⚠️
+                <div
+                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-2xl text-white ${
+                    profesionalYaRespondio
+                      ? "bg-emerald-600"
+                      : "bg-amber-500"
+                  }`}
+                >
+                  {profesionalYaRespondio ? "✅" : "⚠️"}
                 </div>
 
                 <div>
-                  <p className="text-sm font-black uppercase tracking-[0.16em] text-amber-700">
-                    Reclamo activo
+                  <p
+                    className={`text-sm font-black uppercase tracking-[0.16em] ${
+                      profesionalYaRespondio
+                        ? "text-emerald-700"
+                        : "text-amber-700"
+                    }`}
+                  >
+                    {profesionalYaRespondio
+                      ? "Respuesta enviada"
+                      : "Reclamo activo"}
                   </p>
 
-                  <h2 className="mt-1 text-2xl font-black text-amber-950">
-                    El cliente reportó un problema con este trabajo
+                  <h2
+                    className={`mt-1 text-2xl font-black ${
+                      profesionalYaRespondio
+                        ? "text-emerald-950"
+                        : "text-amber-950"
+                    }`}
+                  >
+                    {profesionalYaRespondio
+                      ? "Tu respuesta ya fue enviada a FixFlow"
+                      : "El cliente reportó un problema con este trabajo"}
                   </h2>
 
-                  <p className="mt-2 max-w-3xl leading-7 text-amber-900">
-                    El pago permanece retenido mientras FixFlow revisa el caso.
-                    No puedes marcar el trabajo como completado hasta que el reclamo sea resuelto.
+                  <p
+                    className={`mt-2 max-w-3xl leading-7 ${
+                      profesionalYaRespondio
+                        ? "text-emerald-900"
+                        : "text-amber-900"
+                    }`}
+                  >
+                    {profesionalYaRespondio
+                      ? "Tu respuesta y evidencia quedaron registradas. El pago permanece retenido mientras FixFlow revisa el caso y toma una decisión."
+                      : "El pago permanece retenido mientras FixFlow revisa el caso. No puedes marcar el trabajo como completado hasta que el reclamo sea resuelto."}
                   </p>
 
-                  {!reclamo?.provider_response && (
+                  {!profesionalYaRespondio && (
                     <p className="mt-3 font-bold text-amber-900">
                       Tienes {tiempoRespuestaReclamo.texto} para responder y adjuntar tu evidencia.
                     </p>
                   )}
+
+                  {profesionalYaRespondio &&
+                    reclamo?.provider_responded_at && (
+                      <p className="mt-3 text-sm font-bold text-emerald-800">
+                        Respuesta enviada{" "}
+                        {formatearFechaHora(
+                          reclamo.provider_responded_at
+                        )}
+                      </p>
+                    )}
                 </div>
               </div>
 
@@ -3098,9 +3143,15 @@ export default function TrabajoDetallePage() {
                     });
                   }
                 }}
-                className="shrink-0 rounded-xl bg-amber-600 px-6 py-3.5 font-black text-white transition hover:bg-amber-700"
+                className={`shrink-0 rounded-xl px-6 py-3.5 font-black text-white transition ${
+                  profesionalYaRespondio
+                    ? "bg-emerald-700 hover:bg-emerald-800"
+                    : "bg-amber-600 hover:bg-amber-700"
+                }`}
               >
-                Ver y responder reclamo
+                {profesionalYaRespondio
+                  ? "Ver reclamo"
+                  : "Ver y responder reclamo"}
               </button>
             </div>
           </section>
