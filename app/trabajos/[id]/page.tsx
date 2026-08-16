@@ -1910,7 +1910,9 @@ export default function TrabajoDetallePage() {
     }
 
     if (
-      reclamo.provider_response
+      reclamo.provider_response ||
+      reclamo.provider_responded_at ||
+      evidenciasReclamo.length > 0
     ) {
       setError(
         "Ya enviaste tu respuesta y evidencia para este reclamo. No se pueden hacer cambios después de enviarla."
@@ -1959,6 +1961,56 @@ export default function TrabajoDetallePage() {
     setMensaje("");
 
     try {
+      // Confirmar contra la base de datos que el profesional no haya
+      // respondido ya desde otra pestaña, dispositivo o intento anterior.
+      const {
+        data: reclamoActualDb,
+        error: reclamoActualError,
+      } = await supabase
+        .from("job_claims")
+        .select(`
+          id,
+          provider_response,
+          provider_responded_at
+        `)
+        .eq("id", reclamo.id)
+        .eq("provider_id", providerId)
+        .maybeSingle();
+
+      if (reclamoActualError) {
+        throw new Error(
+          `No pudimos comprobar el estado actual del reclamo: ${reclamoActualError.message}`
+        );
+      }
+
+      const {
+        data: evidenciaExistenteDb,
+        error: evidenciaExistenteError,
+      } = await supabase
+        .from("claim_evidence")
+        .select("id")
+        .eq("claim_id", reclamo.id)
+        .eq("uploaded_by", providerId)
+        .eq("uploaded_by_role", "provider")
+        .limit(1);
+
+      if (evidenciaExistenteError) {
+        throw new Error(
+          `No pudimos comprobar la evidencia ya enviada: ${evidenciaExistenteError.message}`
+        );
+      }
+
+      if (
+        reclamoActualDb?.provider_response ||
+        reclamoActualDb?.provider_responded_at ||
+        (evidenciaExistenteDb && evidenciaExistenteDb.length > 0)
+      ) {
+        await cargarTodo();
+        throw new Error(
+          "Ya enviaste tu respuesta y evidencia para este reclamo. No se permiten segundos envíos."
+        );
+      }
+
       const {
         error: respuestaError,
       } = await supabase
@@ -2130,8 +2182,8 @@ export default function TrabajoDetallePage() {
       setMensaje(
         nuevasEvidencias.length ===
         1
-          ? "Evidencia enviada correctamente al reclamo."
-          : `${nuevasEvidencias.length} archivos de evidencia enviados correctamente.`
+          ? "Respuesta y evidencia enviadas correctamente. El envío quedó cerrado para revisión de FixFlow."
+          : `${nuevasEvidencias.length} archivos de evidencia y tu respuesta fueron enviados. El envío quedó cerrado para revisión de FixFlow.`
       );
     } catch (err) {
       console.error(
@@ -2823,6 +2875,14 @@ export default function TrabajoDetallePage() {
       reclamo.status === "open" ||
       reclamo.status === "reviewing" ||
       reclamo.status === "in_review"
+    );
+
+  const profesionalYaRespondio =
+    !!reclamo &&
+    Boolean(
+      reclamo.provider_response ||
+      reclamo.provider_responded_at ||
+      evidenciasReclamo.length > 0
     );
 
   const puedeSolicitarCambioPresupuesto =
@@ -4268,18 +4328,22 @@ export default function TrabajoDetallePage() {
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  {reclamo.status === "open" ||
-                  reclamo.status === "reviewing" ||
-                  reclamo.status === "in_review"
+                  {profesionalYaRespondio
+                    ? "Respuesta enviada al reclamo"
+                    : reclamo.status === "open" ||
+                      reclamo.status === "reviewing" ||
+                      reclamo.status === "in_review"
                     ? "Adjuntar evidencia al reclamo"
                     : "Historial del reclamo"}
                 </h2>
 
                 <p className="mt-2 max-w-3xl text-slate-600">
-                  {reclamo.status === "open" ||
-                  reclamo.status === "reviewing" ||
-                  reclamo.status === "in_review"
-                    ? "Puedes enviar fotos o videos para que FixFlow tenga evidencia de ambas partes antes de resolver el reclamo."
+                  {profesionalYaRespondio
+                    ? "Tu respuesta quedó registrada. Ya no puedes agregar, quitar ni modificar información de este reclamo."
+                    : reclamo.status === "open" ||
+                      reclamo.status === "reviewing" ||
+                      reclamo.status === "in_review"
+                    ? "Puedes enviar una sola respuesta con fotos o videos para que FixFlow tenga evidencia de ambas partes antes de resolver el reclamo."
                     : "Consulta los detalles, la evidencia y la resolución final de este reclamo."}
                 </p>
               </div>
@@ -4304,7 +4368,7 @@ export default function TrabajoDetallePage() {
             {(reclamo.status === "open" ||
               reclamo.status === "reviewing" ||
               reclamo.status === "in_review") &&
-              !reclamo.provider_response && (
+              !profesionalYaRespondio && (
               <div
                 className={`mt-5 rounded-2xl border p-5 ${
                   tiempoRespuestaReclamo.vencido
@@ -4402,7 +4466,7 @@ export default function TrabajoDetallePage() {
 
             {(reclamo.status === "open" ||
               reclamo.status === "reviewing") &&
-              !reclamo.provider_response &&
+              !profesionalYaRespondio &&
               !tiempoRespuestaReclamo.vencido && (
               <>
                 <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
@@ -4536,7 +4600,7 @@ export default function TrabajoDetallePage() {
               </>
             )}
 
-            {!reclamo.provider_response &&
+            {!profesionalYaRespondio &&
               tiempoRespuestaReclamo.vencido && (
                 <div className="mt-5 rounded-2xl border border-red-300 bg-red-50 p-5">
                   <p className="font-black text-red-900">
@@ -4549,7 +4613,7 @@ export default function TrabajoDetallePage() {
                 </div>
               )}
 
-            {reclamo.provider_response && (
+            {profesionalYaRespondio && (
               <div className="mt-5 rounded-2xl border border-emerald-300 bg-emerald-50 p-5">
                 <p className="font-black text-emerald-900">
                   ✅ Tu respuesta ya fue enviada
@@ -4565,7 +4629,8 @@ export default function TrabajoDetallePage() {
                   </p>
 
                   <p className="mt-2 whitespace-pre-wrap text-slate-700">
-                    {reclamo.provider_response}
+                    {reclamo.provider_response ||
+                      "El profesional envió evidencia para responder al reclamo."}
                   </p>
                 </div>
               </div>
