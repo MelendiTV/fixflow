@@ -1635,12 +1635,12 @@ export default function TrabajoDetallePage() {
               : "No se pudo procesar la liberación programada."
           );
         }
-      }, 5 * 60 * 1000);
+      }, 36 * 60 * 60 * 1000);
 
       await cargarTodo();
 
       setMensaje(
-        "Trabajo completado. El pago permanecerá protegido durante 5 minutos para esta prueba."
+        "Trabajo completado. El pago permanecerá protegido durante 36 horas."
       );
     } catch (err) {
       console.error(
