@@ -2849,6 +2849,38 @@ export default function AdminPage() {
                 {totalReclamosActivos + providers.length} alerta{totalReclamosActivos + providers.length === 1 ? "" : "s"} pendiente{totalReclamosActivos + providers.length === 1 ? "" : "s"}
               </p>
             </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/admin/actividad"
+                )
+              }
+              className="rounded-3xl border border-indigo-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-2xl">
+                  📈
+                </div>
+
+                <span className="text-xl font-black text-indigo-700">
+                  →
+                </span>
+              </div>
+
+              <h3 className="mt-5 text-xl font-black text-slate-950">
+                Actividad de la plataforma
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Mide trabajos, ofertas, clientes, profesionales y el rendimiento operativo de FixFlow.
+              </p>
+
+              <p className="mt-5 text-sm font-black text-indigo-700">
+                Ver actividad
+              </p>
+            </button>
           </div>
         </section>
 
