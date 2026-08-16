@@ -37,6 +37,16 @@ type FotoTrabajo = {
   file_url: string;
 };
 
+type EvidenciaFinal = {
+  id: string;
+  request_id: string;
+  provider_id: string;
+  file_type: "image" | "video";
+  file_path: string;
+  file_url: string | null;
+  created_at: string;
+};
+
 type Oferta = {
   id: string;
   request_id: string;
@@ -311,6 +321,24 @@ export default function TrabajoDetallePage() {
   const [
     completando,
     setCompletando,
+  ] =
+    useState(false);
+
+  const [
+    evidenciasFinales,
+    setEvidenciasFinales,
+  ] =
+    useState<EvidenciaFinal[]>([]);
+
+  const [
+    archivosEvidenciaFinal,
+    setArchivosEvidenciaFinal,
+  ] =
+    useState<File[]>([]);
+
+  const [
+    subiendoEvidenciaFinal,
+    setSubiendoEvidenciaFinal,
   ] =
     useState(false);
 
@@ -737,6 +765,42 @@ export default function TrabajoDetallePage() {
         setFotos(
           fotosData ||
             []
+        );
+      }
+
+      /*
+        EVIDENCIA FINAL DEL TRABAJO
+      */
+
+      const {
+        data: evidenciaFinalData,
+        error: evidenciaFinalError,
+      } = await supabase
+        .from("job_completion_evidence")
+        .select(`
+          id,
+          request_id,
+          provider_id,
+          file_type,
+          file_path,
+          file_url,
+          created_at
+        `)
+        .eq("request_id", id)
+        .eq("provider_id", user.id)
+        .order("created_at", {
+          ascending: true,
+        });
+
+      if (evidenciaFinalError) {
+        console.error(
+          "Error cargando evidencia final:",
+          evidenciaFinalError
+        );
+        setEvidenciasFinales([]);
+      } else {
+        setEvidenciasFinales(
+          (evidenciaFinalData || []) as EvidenciaFinal[]
         );
       }
 
@@ -1409,6 +1473,256 @@ export default function TrabajoDetallePage() {
   }
 
   /*
+    EVIDENCIA FINAL DEL TRABAJO
+  */
+
+  function seleccionarEvidenciaFinal(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const nuevos = Array.from(
+      event.target.files || []
+    );
+
+    if (nuevos.length === 0) {
+      return;
+    }
+
+    const permitidos = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+    ];
+
+    if (
+      nuevos.some(
+        (file) => !permitidos.includes(file.type)
+      )
+    ) {
+      setError(
+        "Solo puedes subir fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    if (
+      nuevos.some(
+        (file) => file.size > 50 * 1024 * 1024
+      )
+    ) {
+      setError(
+        "Cada foto o video debe pesar 50 MB o menos."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const combinados = [
+      ...archivosEvidenciaFinal,
+      ...nuevos,
+    ];
+
+    const fotosSeleccionadas =
+      combinados.filter((file) =>
+        file.type.startsWith("image/")
+      ).length;
+
+    const videosSeleccionados =
+      combinados.filter((file) =>
+        file.type.startsWith("video/")
+      ).length;
+
+    const fotosGuardadas =
+      evidenciasFinales.filter(
+        (item) => item.file_type === "image"
+      ).length;
+
+    const videosGuardados =
+      evidenciasFinales.filter(
+        (item) => item.file_type === "video"
+      ).length;
+
+    if (
+      fotosGuardadas + fotosSeleccionadas > 10
+    ) {
+      setError(
+        "Puedes guardar un máximo de 10 fotos como evidencia final."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    if (
+      videosGuardados + videosSeleccionados > 2
+    ) {
+      setError(
+        "Puedes guardar un máximo de 2 videos como evidencia final."
+      );
+      event.target.value = "";
+      return;
+    }
+
+    setArchivosEvidenciaFinal(combinados);
+    setError("");
+    event.target.value = "";
+  }
+
+  function quitarEvidenciaFinalSeleccionada(
+    index: number
+  ) {
+    setArchivosEvidenciaFinal(
+      (actuales) =>
+        actuales.filter((_, i) => i !== index)
+    );
+  }
+
+  async function guardarEvidenciaFinal() {
+    if (!trabajo || !providerId) {
+      return false;
+    }
+
+    if (
+      trabajo.status !== "in_progress" ||
+      trabajo.job_stage !== "working" ||
+      trabajo.preferred_provider_id !== providerId
+    ) {
+      setError(
+        "Solo puedes subir evidencia final mientras el trabajo está iniciado y asignado a tu cuenta."
+      );
+      return false;
+    }
+
+    if (archivosEvidenciaFinal.length === 0) {
+      setError(
+        "Selecciona al menos una foto del trabajo terminado."
+      );
+      return false;
+    }
+
+    const totalFotos =
+      evidenciasFinales.filter(
+        (item) => item.file_type === "image"
+      ).length +
+      archivosEvidenciaFinal.filter((file) =>
+        file.type.startsWith("image/")
+      ).length;
+
+    if (totalFotos < 1) {
+      setError(
+        "Para completar el trabajo debes guardar al menos 1 foto. Los videos son opcionales."
+      );
+      return false;
+    }
+
+    setSubiendoEvidenciaFinal(true);
+    setError("");
+    setMensaje("");
+
+    const guardadas: EvidenciaFinal[] = [];
+
+    try {
+      for (
+        const [index, file] of
+        archivosEvidenciaFinal.entries()
+      ) {
+        const nombreSeguro = file.name
+          .replace(/[^a-zA-Z0-9._-]/g, "-")
+          .slice(0, 80);
+
+        const ruta =
+          `${trabajo.id}/${providerId}/${Date.now()}-${index}-${nombreSeguro}`;
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("job-completion-evidence")
+            .upload(ruta, file, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: file.type,
+            });
+
+        if (uploadError) {
+          throw new Error(
+            `No pudimos subir "${file.name}": ${uploadError.message}`
+          );
+        }
+
+        const fileType: "image" | "video" =
+          file.type.startsWith("video/")
+            ? "video"
+            : "image";
+
+        const {
+          data: evidenciaData,
+          error: evidenciaError,
+        } = await supabase
+          .from("job_completion_evidence")
+          .insert({
+            request_id: trabajo.id,
+            provider_id: providerId,
+            file_type: fileType,
+            file_path: ruta,
+            file_url: ruta,
+          })
+          .select(`
+            id,
+            request_id,
+            provider_id,
+            file_type,
+            file_path,
+            file_url,
+            created_at
+          `)
+          .single();
+
+        if (evidenciaError) {
+          await supabase.storage
+            .from("job-completion-evidence")
+            .remove([ruta]);
+
+          throw new Error(
+            `El archivo subió, pero no pudimos registrarlo: ${evidenciaError.message}`
+          );
+        }
+
+        guardadas.push(
+          evidenciaData as EvidenciaFinal
+        );
+      }
+
+      setEvidenciasFinales((actuales) => [
+        ...actuales,
+        ...guardadas,
+      ]);
+      setArchivosEvidenciaFinal([]);
+
+      setMensaje(
+        guardadas.length === 1
+          ? "Evidencia final guardada. Ya puedes completar el trabajo."
+          : `${guardadas.length} archivos de evidencia final guardados. Ya puedes completar el trabajo.`
+      );
+
+      return true;
+    } catch (err) {
+      console.error(
+        "Error guardando evidencia final:",
+        err
+      );
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo guardar la evidencia final."
+      );
+      return false;
+    } finally {
+      setSubiendoEvidenciaFinal(false);
+    }
+  }
+
+  /*
     COMPLETAR
   */
 
@@ -1451,6 +1765,18 @@ export default function TrabajoDetallePage() {
     if (trabajo.job_stage !== "working") {
       setError(
         "Primero debes iniciar el trabajo."
+      );
+      return;
+    }
+
+    const tieneFotoFinal =
+      evidenciasFinales.some(
+        (item) => item.file_type === "image"
+      );
+
+    if (!tieneFotoFinal) {
+      setError(
+        "Antes de completar el trabajo debes guardar al menos 1 foto como evidencia final."
       );
       return;
     }
@@ -3490,13 +3816,99 @@ export default function TrabajoDetallePage() {
                             </button>
                           )}
 
+                          {etapaActual === 4 &&
+                            !reclamoActivo &&
+                            trabajo.status === "in_progress" && (
+                              <div className="sm:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                                <p className="text-sm font-black uppercase tracking-[0.14em] text-emerald-700">
+                                  📸 Evidencia del trabajo terminado
+                                </p>
+                                <h3 className="mt-1 text-lg font-black text-emerald-950">
+                                  Sube al menos 1 foto antes de completar
+                                </h3>
+                                <p className="mt-2 text-sm leading-6 text-emerald-900">
+                                  Para proteger al cliente y al profesional, FixFlow requiere al menos 1 foto del resultado final. Puedes guardar hasta 10 fotos y 2 videos.
+                                </p>
+
+                                {evidenciasFinales.length > 0 && (
+                                  <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
+                                    <p className="font-black text-emerald-900">
+                                      ✅ Evidencia ya guardada:{" "}
+                                      {evidenciasFinales.filter(
+                                        (item) => item.file_type === "image"
+                                      ).length} foto(s) y{" "}
+                                      {evidenciasFinales.filter(
+                                        (item) => item.file_type === "video"
+                                      ).length} video(s)
+                                    </p>
+                                  </div>
+                                )}
+
+                                <label className="mt-4 block cursor-pointer rounded-xl border-2 border-dashed border-emerald-300 bg-white px-4 py-4 text-center font-extrabold text-emerald-800 hover:bg-emerald-50">
+                                  Seleccionar fotos o videos
+                                  <input
+                                    type="file"
+                                    multiple
+                                    accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                                    onChange={seleccionarEvidenciaFinal}
+                                    className="hidden"
+                                  />
+                                </label>
+
+                                {archivosEvidenciaFinal.length > 0 && (
+                                  <div className="mt-4 space-y-2">
+                                    {archivosEvidenciaFinal.map(
+                                      (file, index) => (
+                                        <div
+                                          key={`${file.name}-${index}`}
+                                          className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3"
+                                        >
+                                          <div className="min-w-0">
+                                            <p className="truncate text-sm font-bold text-slate-800">
+                                              {file.type.startsWith("video/")
+                                                ? "🎥"
+                                                : "📷"}{" "}
+                                              {file.name}
+                                            </p>
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              quitarEvidenciaFinalSeleccionada(index)
+                                            }
+                                            className="shrink-0 rounded-lg border border-red-200 px-3 py-1 text-sm font-bold text-red-700 hover:bg-red-50"
+                                          >
+                                            Quitar
+                                          </button>
+                                        </div>
+                                      )
+                                    )}
+
+                                    <button
+                                      type="button"
+                                      disabled={subiendoEvidenciaFinal}
+                                      onClick={guardarEvidenciaFinal}
+                                      className="w-full rounded-xl bg-emerald-700 px-5 py-3 font-extrabold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      {subiendoEvidenciaFinal
+                                        ? "Guardando evidencia..."
+                                        : "📤 Guardar evidencia final"}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                           {etapaActual ===
                             4 && (
                             <button
                               type="button"
                               disabled={
                                 completando ||
-                                reclamoActivo
+                                reclamoActivo ||
+                                !evidenciasFinales.some(
+                                  (item) => item.file_type === "image"
+                                )
                               }
                               onClick={
                                 marcarCompletado
@@ -3509,6 +3921,10 @@ export default function TrabajoDetallePage() {
                             >
                               {reclamoActivo
                                 ? "⚠️ Bloqueado por reclamo"
+                                : !evidenciasFinales.some(
+                                    (item) => item.file_type === "image"
+                                  )
+                                ? "📸 Sube y guarda 1 foto para completar"
                                 : completando
                                 ? "Completando..."
                                 : "✅ Completar trabajo"}
