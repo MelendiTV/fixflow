@@ -3814,9 +3814,9 @@ export default function TrabajoDetallePage() {
                                         </div>
                                       )}
 
-                                      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
-                                          📷 Cámara
+                                      <div className="mt-5">
+                                        <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
+                                          📷 Abrir cámara
                                           <input
                                             type="file"
                                             accept="image/*,video/*"
@@ -3826,16 +3826,9 @@ export default function TrabajoDetallePage() {
                                           />
                                         </label>
 
-                                        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-4 py-3 font-extrabold text-slate-700 transition hover:bg-slate-50">
-                                          📁 Galería
-                                          <input
-                                            type="file"
-                                            multiple
-                                            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
-                                            onChange={seleccionarEvidenciaFinal}
-                                            className="hidden"
-                                          />
-                                        </label>
+                                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                                          La evidencia final debe capturarse desde la cámara del dispositivo para reducir el uso de fotos o videos de otros trabajos.
+                                        </p>
                                       </div>
                                     </div>
                                   </div>
