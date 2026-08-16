@@ -4347,6 +4347,20 @@ export default function AdminPage() {
 
                       </div>
 
+                      <div className="mt-5 border-t border-slate-200 pt-5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              `/admin/trabajos/${solicitud.id}`
+                            )
+                          }
+                          className="w-full rounded-xl bg-blue-700 px-5 py-3.5 font-extrabold text-white transition hover:bg-blue-800 sm:w-auto"
+                        >
+                          🔎 Ver detalle del trabajo
+                        </button>
+                      </div>
+
                     </article>
                   );
                 }
