@@ -28,6 +28,7 @@ type Trabajo = {
   customer_id: string;
   preferred_provider_id: string | null;
   cancellation_reason: string | null;
+  completed_at: string | null;
 };
 
 type FotoTrabajo = {
@@ -862,7 +863,8 @@ export default function TrabajoDetallePage() {
           customer_name,
           customer_id,
           preferred_provider_id,
-          cancellation_reason
+          cancellation_reason,
+          completed_at
         `)
         .eq(
           "id",
@@ -3189,6 +3191,65 @@ export default function TrabajoDetallePage() {
     return 1;
   }
 
+  const reclamoActivoChat =
+    Boolean(
+      reclamo &&
+        (
+          reclamo.status === "open" ||
+          reclamo.status === "reviewing" ||
+          reclamo.status === "in_review"
+        )
+    );
+
+  const chatDentroDe12Horas =
+    Boolean(
+      trabajo?.status ===
+        "completed" &&
+        trabajo.completed_at &&
+        ahora -
+          new Date(
+            trabajo.completed_at
+          ).getTime() <
+          12 * 60 * 60 * 1000
+    );
+
+  const chatPuedeEnviar =
+    Boolean(
+      trabajo &&
+        !reclamoActivoChat &&
+        (
+          trabajo.status ===
+            "in_progress" ||
+          chatDentroDe12Horas
+        )
+    );
+
+  function motivoChatBloqueado() {
+    if (reclamoActivoChat) {
+      return "Chat bloqueado porque existe un reclamo activo. FixFlow Admin gestiona el caso desde este momento.";
+    }
+
+    if (
+      trabajo?.status ===
+        "completed"
+    ) {
+      if (!trabajo.completed_at) {
+        return "El trabajo está completado y el chat ya está cerrado.";
+      }
+
+      return "El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.";
+    }
+
+    if (
+      trabajo?.status ===
+        "cancelled"
+    ) {
+      return "Este trabajo fue cancelado. El chat está cerrado.";
+    }
+
+    return "El chat estará disponible cuando seas el profesional contratado.";
+  }
+
   async function enviarMensajeChat() {
     const texto =
       mensajeChat.trim();
@@ -3197,12 +3258,7 @@ export default function TrabajoDetallePage() {
       !texto ||
       !usuarioChatId ||
       !trabajo ||
-      (
-        trabajo.status !==
-          "in_progress" &&
-        trabajo.status !==
-          "completed"
-      )
+      !chatPuedeEnviar
     ) {
       return;
     }
@@ -5050,12 +5106,8 @@ export default function TrabajoDetallePage() {
 
         {/* CHAT PRIVADO FIXFLOW */}
 
-        {(
-          trabajo.status ===
-            "in_progress" ||
-          trabajo.status ===
-            "completed"
-        ) &&
+        {trabajo.status !==
+          "open" &&
           trabajo.preferred_provider_id ===
             providerId && (
             <section
@@ -5182,50 +5234,72 @@ export default function TrabajoDetallePage() {
               </div>
 
               <div className="border-t border-slate-200 bg-white p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                  <textarea
-                    value={mensajeChat}
-                    onChange={(e) =>
-                      setMensajeChat(
-                        e.target.value
-                      )
-                    }
-                    onKeyDown={(e) => {
-                      if (
-                        e.key ===
-                          "Enter" &&
-                        !e.shiftKey
-                      ) {
-                        e.preventDefault();
-                        enviarMensajeChat();
-                      }
-                    }}
-                    rows={2}
-                    maxLength={1500}
-                    placeholder="Escribe un mensaje..."
-                    className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
-                  />
+                {chatPuedeEnviar ? (
+                  <>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                      <textarea
+                        value={mensajeChat}
+                        onChange={(e) =>
+                          setMensajeChat(
+                            e.target.value
+                          )
+                        }
+                        onKeyDown={(e) => {
+                          if (
+                            e.key ===
+                              "Enter" &&
+                            !e.shiftKey
+                          ) {
+                            e.preventDefault();
+                            enviarMensajeChat();
+                          }
+                        }}
+                        rows={2}
+                        maxLength={1500}
+                        placeholder="Escribe un mensaje..."
+                        className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
+                      />
 
-                  <button
-                    type="button"
-                    disabled={
-                      enviandoMensajeChat ||
-                      !mensajeChat.trim()
-                    }
-                    onClick={
-                      enviarMensajeChat
-                    }
-                    className="rounded-2xl bg-blue-700 px-6 py-3.5 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {enviandoMensajeChat
-                      ? "Enviando..."
-                      : "Enviar"}
-                  </button>
-                </div>
+                      <button
+                        type="button"
+                        disabled={
+                          enviandoMensajeChat ||
+                          !mensajeChat.trim()
+                        }
+                        onClick={
+                          enviarMensajeChat
+                        }
+                        className="rounded-2xl bg-blue-700 px-6 py-3.5 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {enviandoMensajeChat
+                          ? "Enviando..."
+                          : "Enviar"}
+                      </button>
+                    </div>
 
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  🔒 Los números personales no se muestran. Usa este chat para coordinar el trabajo dentro de FixFlow.
-                </p>
+                    {trabajo.status ===
+                      "completed" &&
+                      trabajo.completed_at && (
+                        <p className="mt-2 text-xs font-bold text-amber-700">
+                          ⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.
+                        </p>
+                      )}
+
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      🔒 Los números personales no se muestran. Usa este chat para coordinar el trabajo dentro de FixFlow.
+                    </p>
+                  </>
+                ) : (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <p className="font-black text-amber-950">
+                      🔒 Chat bloqueado
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-amber-900">
+                      {motivoChatBloqueado()}
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
           )}

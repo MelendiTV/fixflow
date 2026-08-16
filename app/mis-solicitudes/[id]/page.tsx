@@ -22,6 +22,7 @@ type Solicitud = {
   job_stage: string | null;
   cancellation_reason: string | null;
   cancelled_at: string | null;
+  completed_at: string | null;
 };
 
 type Oferta = {
@@ -654,6 +655,13 @@ export default function MisSolicitudDetallePage() {
       null
     );
 
+  const [
+    ahoraChat,
+    setAhoraChat,
+  ] = useState(
+    Date.now()
+  );
+
   /*
     CARGA INICIAL
   */
@@ -791,6 +799,24 @@ export default function MisSolicitudDetallePage() {
     });
   }, [mensajesChat.length]);
 
+  useEffect(() => {
+    const timer =
+      window.setInterval(
+        () => {
+          setAhoraChat(
+            Date.now()
+          );
+        },
+        60 * 1000
+      );
+
+    return () => {
+      window.clearInterval(
+        timer
+      );
+    };
+  }, []);
+
   /*
     REALTIME DE LA SOLICITUD
   */
@@ -851,6 +877,12 @@ export default function MisSolicitudDetallePage() {
                     undefined
                       ? nuevo.cancelled_at
                       : actual.cancelled_at,
+
+                  completed_at:
+                    nuevo.completed_at !==
+                    undefined
+                      ? nuevo.completed_at
+                      : actual.completed_at,
                 };
               }
             );
@@ -1191,7 +1223,8 @@ export default function MisSolicitudDetallePage() {
           status,
           job_stage,
           cancellation_reason,
-          cancelled_at
+          cancelled_at,
+          completed_at
         `)
         .eq(
           "id",
@@ -2684,6 +2717,65 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
     }
   }
 
+  const reclamoActivoChat =
+    Boolean(
+      claim &&
+        (
+          claim.status === "open" ||
+          claim.status === "reviewing" ||
+          claim.status === "in_review"
+        )
+    );
+
+  const chatDentroDe12Horas =
+    Boolean(
+      solicitud?.status ===
+        "completed" &&
+        solicitud.completed_at &&
+        ahoraChat -
+          new Date(
+            solicitud.completed_at
+          ).getTime() <
+          12 * 60 * 60 * 1000
+    );
+
+  const chatPuedeEnviar =
+    Boolean(
+      solicitud &&
+        !reclamoActivoChat &&
+        (
+          solicitud.status ===
+            "in_progress" ||
+          chatDentroDe12Horas
+        )
+    );
+
+  function motivoChatBloqueado() {
+    if (reclamoActivoChat) {
+      return "Chat bloqueado porque existe un reclamo activo. A partir de este momento FixFlow Admin gestiona el caso.";
+    }
+
+    if (
+      solicitud?.status ===
+        "completed"
+    ) {
+      if (!solicitud.completed_at) {
+        return "El trabajo está completado y el chat ya está cerrado.";
+      }
+
+      return "El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.";
+    }
+
+    if (
+      solicitud?.status ===
+        "cancelled"
+    ) {
+      return "Este trabajo fue cancelado. El chat está cerrado.";
+    }
+
+    return "El chat estará disponible cuando el trabajo esté contratado.";
+  }
+
   async function enviarMensajeChat() {
     const texto =
       mensajeChat.trim();
@@ -2692,12 +2784,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       !texto ||
       !usuarioChatId ||
       !solicitud ||
-      (
-        solicitud.status !==
-          "in_progress" &&
-        solicitud.status !==
-          "completed"
-      )
+      !chatPuedeEnviar
     ) {
       return;
     }
@@ -4086,12 +4173,8 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         {/* CHAT PRIVADO FIXFLOW */}
 
         {ofertaSeleccionada &&
-          (
-            solicitud.status ===
-              "in_progress" ||
-            solicitud.status ===
-              "completed"
-          ) && (
+          solicitud.status !==
+            "open" && (
             <section
               id="chat-fixflow"
               className="mt-8 scroll-mt-6 overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-xl"
@@ -4218,50 +4301,72 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               </div>
 
               <div className="border-t border-slate-200 bg-white p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                  <textarea
-                    value={mensajeChat}
-                    onChange={(e) =>
-                      setMensajeChat(
-                        e.target.value
-                      )
-                    }
-                    onKeyDown={(e) => {
-                      if (
-                        e.key ===
-                          "Enter" &&
-                        !e.shiftKey
-                      ) {
-                        e.preventDefault();
-                        enviarMensajeChat();
-                      }
-                    }}
-                    rows={2}
-                    maxLength={1500}
-                    placeholder="Escribe un mensaje..."
-                    className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
-                  />
+                {chatPuedeEnviar ? (
+                  <>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                      <textarea
+                        value={mensajeChat}
+                        onChange={(e) =>
+                          setMensajeChat(
+                            e.target.value
+                          )
+                        }
+                        onKeyDown={(e) => {
+                          if (
+                            e.key ===
+                              "Enter" &&
+                            !e.shiftKey
+                          ) {
+                            e.preventDefault();
+                            enviarMensajeChat();
+                          }
+                        }}
+                        rows={2}
+                        maxLength={1500}
+                        placeholder="Escribe un mensaje..."
+                        className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
+                      />
 
-                  <button
-                    type="button"
-                    disabled={
-                      enviandoMensajeChat ||
-                      !mensajeChat.trim()
-                    }
-                    onClick={
-                      enviarMensajeChat
-                    }
-                    className="rounded-2xl bg-blue-700 px-6 py-3.5 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {enviandoMensajeChat
-                      ? "Enviando..."
-                      : "Enviar"}
-                  </button>
-                </div>
+                      <button
+                        type="button"
+                        disabled={
+                          enviandoMensajeChat ||
+                          !mensajeChat.trim()
+                        }
+                        onClick={
+                          enviarMensajeChat
+                        }
+                        className="rounded-2xl bg-blue-700 px-6 py-3.5 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {enviandoMensajeChat
+                          ? "Enviando..."
+                          : "Enviar"}
+                      </button>
+                    </div>
 
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  🔒 FixFlow mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.
-                </p>
+                    {solicitud.status ===
+                      "completed" &&
+                      solicitud.completed_at && (
+                        <p className="mt-2 text-xs font-bold text-amber-700">
+                          ⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.
+                        </p>
+                      )}
+
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      🔒 FixFlow mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.
+                    </p>
+                  </>
+                ) : (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <p className="font-black text-amber-950">
+                      🔒 Chat bloqueado
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-amber-900">
+                      {motivoChatBloqueado()}
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
           )}
