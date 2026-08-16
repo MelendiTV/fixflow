@@ -131,6 +131,16 @@ type CompletionEvidence = {
   signed_url: string | null;
 };
 
+type JobMessage = {
+  id: string;
+  request_id: string;
+  sender_id: string;
+  sender_role: "customer" | "provider" | "admin";
+  message: string;
+  read_at: string | null;
+  created_at: string;
+};
+
 function nombreOficio(trade: string | null) {
   const nombres: Record<string, string> = {
     plumbing: "Plomería",
@@ -181,6 +191,8 @@ export default function AdminTrabajoDetallePage() {
   const [changeOrders, setChangeOrders] = useState<ChangeOrder[]>([]);
   const [claims, setClaims] = useState<JobClaim[]>([]);
   const [evidencias, setEvidencias] = useState<CompletionEvidence[]>([]);
+  const [mensajesChat, setMensajesChat] = useState<JobMessage[]>([]);
+  const [chatRealtime, setChatRealtime] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -188,6 +200,58 @@ export default function AdminTrabajoDetallePage() {
     if (id) {
       cargarTodo();
     }
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    const canalChatAdmin =
+      supabase
+        .channel(
+          `chat-admin-${id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "job_messages",
+            filter:
+              `request_id=eq.${id}`,
+          },
+          (payload) => {
+            const nuevo =
+              payload.new as JobMessage;
+
+            setMensajesChat(
+              (actuales) =>
+                actuales.some(
+                  (item) =>
+                    item.id === nuevo.id
+                )
+                  ? actuales
+                  : [
+                      ...actuales,
+                      nuevo,
+                    ]
+            );
+          }
+        )
+        .subscribe(
+          (status) => {
+            setChatRealtime(
+              status === "SUBSCRIBED"
+            );
+          }
+        );
+
+    return () => {
+      supabase.removeChannel(
+        canalChatAdmin
+      );
+    };
   }, [id]);
 
   async function cargarTodo() {
@@ -286,33 +350,22 @@ export default function AdminTrabajoDetallePage() {
         setProvider(null);
       }
 
-      let ofertaQuery = supabase
-        .from("offers")
-        .select(`
-          id,
-          request_id,
-          professional_id,
-          price,
-          arrival_minutes,
-          estimated_job_minutes,
-          message,
-          status,
-          created_at
-        `)
-        .eq("request_id", id);
-
-      if (solicitudActual.preferred_provider_id) {
-        ofertaQuery = ofertaQuery.eq(
-          "professional_id",
-          solicitudActual.preferred_provider_id
-        );
-      }
-
       const { data: ofertaData, error: ofertaError } =
-        await ofertaQuery
-          .order("created_at", {
-            ascending: false,
-          })
+        await supabase
+          .from("offers")
+          .select(`
+            id,
+            request_id,
+            professional_id,
+            price,
+            arrival_minutes,
+            estimated_job_minutes,
+            message,
+            status,
+            created_at
+          `)
+          .eq("request_id", id)
+          .eq("status", "selected")
           .limit(1)
           .maybeSingle();
 
@@ -447,6 +500,37 @@ export default function AdminTrabajoDetallePage() {
       setClaims(
         (claimsData || []) as JobClaim[]
       );
+
+      const {
+        data: mensajesData,
+        error: mensajesError,
+      } = await supabase
+        .from("job_messages")
+        .select(`
+          id,
+          request_id,
+          sender_id,
+          sender_role,
+          message,
+          read_at,
+          created_at
+        `)
+        .eq("request_id", id)
+        .order("created_at", {
+          ascending: true,
+        });
+
+      if (mensajesError) {
+        console.error(
+          "Error cargando historial del chat:",
+          mensajesError
+        );
+        setMensajesChat([]);
+      } else {
+        setMensajesChat(
+          (mensajesData || []) as JobMessage[]
+        );
+      }
 
       const {
         data: evidenceData,
@@ -870,6 +954,168 @@ export default function AdminTrabajoDetallePage() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+          <div className="border-b border-slate-200 bg-slate-950 px-7 py-6 text-white">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-wide text-blue-300">
+                  💬 Comunicación protegida
+                </p>
+
+                <h2 className="mt-2 text-2xl font-black">
+                  Historial del chat
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Conversación completa entre cliente y profesional asociada a esta orden.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <span className="w-fit rounded-full bg-white/10 px-3 py-1.5 text-xs font-black">
+                  {mensajesChat.length} mensaje{mensajesChat.length === 1 ? "" : "s"}
+                </span>
+
+                <span
+                  className={`w-fit rounded-full px-3 py-1.5 text-xs font-black ${
+                    chatRealtime
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-slate-700 text-slate-200"
+                  }`}
+                >
+                  {chatRealtime
+                    ? "● En tiempo real"
+                    : "Conectando..."}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="max-h-[520px] overflow-y-auto bg-slate-50 p-6">
+            {mensajesChat.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+                <div className="text-4xl">
+                  💬
+                </div>
+
+                <p className="mt-3 font-black text-slate-800">
+                  No hay conversación registrada
+                </p>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Si cliente y profesional usan el chat de esta orden, los mensajes aparecerán aquí.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {mensajesChat.map(
+                  (item) => {
+                    const esCliente =
+                      item.sender_role ===
+                      "customer";
+
+                    const esAdmin =
+                      item.sender_role ===
+                      "admin";
+
+                    const nombre =
+                      esAdmin
+                        ? "FixFlow Admin"
+                        : esCliente
+                        ? solicitud.customer_name ||
+                          "Cliente"
+                        : provider?.business_name ||
+                          "Profesional";
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`flex ${
+                          esCliente
+                            ? "justify-start"
+                            : "justify-end"
+                        }`}
+                      >
+                        <div
+                          className={`max-w-[88%] rounded-2xl px-4 py-3 shadow-sm sm:max-w-[72%] ${
+                            esAdmin
+                              ? "border border-violet-200 bg-violet-50"
+                              : esCliente
+                              ? "rounded-bl-md border border-blue-200 bg-white"
+                              : "rounded-br-md bg-emerald-700 text-white"
+                          }`}
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p
+                              className={`text-xs font-black ${
+                                esAdmin
+                                  ? "text-violet-700"
+                                  : esCliente
+                                  ? "text-blue-700"
+                                  : "text-emerald-100"
+                              }`}
+                            >
+                              {nombre}
+                            </p>
+
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
+                                esAdmin
+                                  ? "bg-violet-100 text-violet-700"
+                                  : esCliente
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-white/15 text-white"
+                              }`}
+                            >
+                              {esAdmin
+                                ? "Admin"
+                                : esCliente
+                                ? "Cliente"
+                                : "Profesional"}
+                            </span>
+                          </div>
+
+                          <p
+                            className={`mt-2 whitespace-pre-wrap break-words text-sm leading-6 ${
+                              esAdmin
+                                ? "text-slate-800"
+                                : esCliente
+                                ? "text-slate-800"
+                                : "text-white"
+                            }`}
+                          >
+                            {item.message}
+                          </p>
+
+                          <p
+                            className={`mt-2 text-right text-[11px] ${
+                              esAdmin
+                                ? "text-violet-500"
+                                : esCliente
+                                ? "text-slate-400"
+                                : "text-emerald-100"
+                            }`}
+                          >
+                            {formatearFecha(
+                              item.created_at
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-slate-200 bg-white px-7 py-4">
+            <p className="text-xs leading-5 text-slate-500">
+              🔒 Vista administrativa de solo lectura. El historial permanece disponible aunque el chat esté bloqueado por reclamo, cancelación o por haber vencido las 12 horas después de completar el trabajo.
+            </p>
+          </div>
         </section>
 
         <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
