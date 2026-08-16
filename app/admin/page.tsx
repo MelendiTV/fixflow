@@ -3362,16 +3362,60 @@ export default function AdminPage() {
                   void relojReclamos;
 
                   return (
-                    <article
-                      key={
-                        reclamo.id
-                      }
-                      className={`rounded-3xl border bg-white p-6 shadow ${
+                    <details
+                      key={reclamo.id}
+                      className={`group rounded-3xl border bg-white shadow ${
                         activo
                           ? "border-red-300"
                           : "border-slate-200"
                       }`}
                     >
+                      <summary className="cursor-pointer list-none p-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`rounded-full px-3 py-1 text-sm font-extrabold ${estiloEstadoReclamo(
+                                  reclamo.status
+                                )}`}
+                              >
+                                {nombreEstadoReclamo(
+                                  reclamo.status
+                                )}
+                              </span>
+
+                              {activo && (
+                                <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-extrabold text-red-700">
+                                  💰 Pago retenido
+                                </span>
+                              )}
+                            </div>
+
+                            <h3 className="mt-3 text-2xl font-extrabold text-slate-900">
+                              {trabajo?.title ||
+                                reclamo.reason ||
+                                "Reclamo de trabajo"}
+                            </h3>
+
+                            <p className="mt-2 break-all text-sm font-semibold text-slate-500">
+                              Orden: {reclamo.request_id}
+                            </p>
+                          </div>
+
+                          <div className="shrink-0">
+                            <span className="inline-flex rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800">
+                              <span className="group-open:hidden">
+                                🔎 Ver detalles del reclamo
+                              </span>
+                              <span className="hidden group-open:inline">
+                                ↑ Ocultar detalles
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </summary>
+
+                      <div className="border-t border-slate-200 p-6">
 
                       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 
@@ -3895,7 +3939,8 @@ export default function AdminPage() {
                         </div>
                       )}
 
-                    </article>
+                                          </div>
+                    </details>
                   );
                 }
               )}
