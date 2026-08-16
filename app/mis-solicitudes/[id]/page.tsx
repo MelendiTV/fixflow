@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -146,6 +146,16 @@ type CompletionEvidence = {
   file_url: string | null;
   created_at: string;
   signed_url: string | null;
+};
+
+type JobMessage = {
+  id: string;
+  request_id: string;
+  sender_id: string;
+  sender_role: "customer" | "provider" | "admin";
+  message: string;
+  read_at: string | null;
+  created_at: string;
 };
 
 function nombreOficio(
@@ -419,6 +429,23 @@ function calcularCancelacionCliente(
   };
 }
 
+
+function formatearHoraChat(
+  fecha: string
+) {
+  return new Intl.DateTimeFormat(
+    "es-US",
+    {
+      hour: "numeric",
+      minute: "2-digit",
+      month: "short",
+      day: "numeric",
+    }
+  ).format(
+    new Date(fecha)
+  );
+}
+
 export default function MisSolicitudDetallePage() {
   const params =
     useParams<{
@@ -592,6 +619,41 @@ export default function MisSolicitudDetallePage() {
     setEvidenciasFinales,
   ] = useState<CompletionEvidence[]>([]);
 
+  const [
+    usuarioChatId,
+    setUsuarioChatId,
+  ] = useState<string | null>(null);
+
+  const [
+    mensajesChat,
+    setMensajesChat,
+  ] = useState<JobMessage[]>([]);
+
+  const [
+    mensajeChat,
+    setMensajeChat,
+  ] = useState("");
+
+  const [
+    cargandoChat,
+    setCargandoChat,
+  ] = useState(true);
+
+  const [
+    enviandoMensajeChat,
+    setEnviandoMensajeChat,
+  ] = useState(false);
+
+  const [
+    chatRealtimeConectado,
+    setChatRealtimeConectado,
+  ] = useState(false);
+
+  const finalChatRef =
+    useRef<HTMLDivElement | null>(
+      null
+    );
+
   /*
     CARGA INICIAL
   */
@@ -601,6 +663,133 @@ export default function MisSolicitudDetallePage() {
       cargarDetalle();
     }
   }, [id]);
+
+  /*
+    CHAT PRIVADO FIXFLOW
+  */
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let activo = true;
+
+    async function iniciarChat() {
+      setCargandoChat(true);
+
+      try {
+        const {
+          data: { user },
+          error: userError,
+        } =
+          await supabase.auth.getUser();
+
+        if (
+          userError ||
+          !user ||
+          !activo
+        ) {
+          return;
+        }
+
+        setUsuarioChatId(
+          user.id
+        );
+
+        const {
+          data,
+          error: mensajesError,
+        } = await supabase
+          .from("job_messages")
+          .select(`
+            id,
+            request_id,
+            sender_id,
+            sender_role,
+            message,
+            read_at,
+            created_at
+          `)
+          .eq("request_id", id)
+          .order("created_at", {
+            ascending: true,
+          });
+
+        if (mensajesError) {
+          console.error(
+            "Error cargando chat:",
+            mensajesError
+          );
+        } else if (activo) {
+          setMensajesChat(
+            (data || []) as JobMessage[]
+          );
+        }
+      } finally {
+        if (activo) {
+          setCargandoChat(false);
+        }
+      }
+    }
+
+    iniciarChat();
+
+    const canalChat =
+      supabase
+        .channel(
+          `chat-cliente-${id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "job_messages",
+            filter:
+              `request_id=eq.${id}`,
+          },
+          (payload) => {
+            const nuevo =
+              payload.new as JobMessage;
+
+            setMensajesChat(
+              (actuales) =>
+                actuales.some(
+                  (item) =>
+                    item.id === nuevo.id
+                )
+                  ? actuales
+                  : [
+                      ...actuales,
+                      nuevo,
+                    ]
+            );
+          }
+        )
+        .subscribe(
+          (status) => {
+            setChatRealtimeConectado(
+              status === "SUBSCRIBED"
+            );
+          }
+        );
+
+    return () => {
+      activo = false;
+
+      supabase.removeChannel(
+        canalChat
+      );
+    };
+  }, [id]);
+
+  useEffect(() => {
+    finalChatRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [mensajesChat.length]);
 
   /*
     REALTIME DE LA SOLICITUD
@@ -2495,6 +2684,90 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
     }
   }
 
+  async function enviarMensajeChat() {
+    const texto =
+      mensajeChat.trim();
+
+    if (
+      !texto ||
+      !usuarioChatId ||
+      !solicitud ||
+      (
+        solicitud.status !==
+          "in_progress" &&
+        solicitud.status !==
+          "completed"
+      )
+    ) {
+      return;
+    }
+
+    setEnviandoMensajeChat(true);
+    setError("");
+
+    try {
+      const {
+        data,
+        error: insertError,
+      } = await supabase
+        .from("job_messages")
+        .insert({
+          request_id:
+            solicitud.id,
+          sender_id:
+            usuarioChatId,
+          sender_role:
+            "customer",
+          message:
+            texto,
+        })
+        .select(`
+          id,
+          request_id,
+          sender_id,
+          sender_role,
+          message,
+          read_at,
+          created_at
+        `)
+        .single();
+
+      if (insertError) {
+        throw new Error(
+          `No se pudo enviar el mensaje: ${insertError.message}`
+        );
+      }
+
+      setMensajeChat("");
+
+      if (data) {
+        const nuevo =
+          data as JobMessage;
+
+        setMensajesChat(
+          (actuales) =>
+            actuales.some(
+              (item) =>
+                item.id === nuevo.id
+            )
+              ? actuales
+              : [
+                  ...actuales,
+                  nuevo,
+                ]
+        );
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo enviar el mensaje."
+      );
+    } finally {
+      setEnviandoMensajeChat(false);
+    }
+  }
+
   if (cargando) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -3809,6 +4082,189 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
           </section>
         )}
+
+        {/* CHAT PRIVADO FIXFLOW */}
+
+        {ofertaSeleccionada &&
+          (
+            solicitud.status ===
+              "in_progress" ||
+            solicitud.status ===
+              "completed"
+          ) && (
+            <section
+              id="chat-fixflow"
+              className="mt-8 scroll-mt-6 overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-xl"
+            >
+              <div className="border-b border-slate-200 bg-slate-950 px-6 py-5 text-white">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest text-blue-300">
+                      🔒 Comunicación protegida
+                    </p>
+
+                    <h2 className="mt-1 text-2xl font-black">
+                      Chat con{" "}
+                      {ofertaSeleccionada.profesional
+                        ?.business_name ||
+                        "el profesional"}
+                    </h2>
+
+                    <p className="mt-1 text-sm text-slate-300">
+                      Los números de teléfono personales permanecen privados.
+                    </p>
+                  </div>
+
+                  <span
+                    className={`w-fit rounded-full px-3 py-1.5 text-xs font-black ${
+                      chatRealtimeConectado
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-slate-700 text-slate-200"
+                    }`}
+                  >
+                    {chatRealtimeConectado
+                      ? "● En tiempo real"
+                      : "Conectando..."}
+                  </span>
+                </div>
+              </div>
+
+              <div className="max-h-[430px] min-h-[260px] overflow-y-auto bg-slate-50 p-5">
+                {cargandoChat ? (
+                  <div className="flex min-h-[220px] items-center justify-center text-sm font-bold text-slate-500">
+                    Cargando conversación...
+                  </div>
+                ) : mensajesChat.length === 0 ? (
+                  <div className="flex min-h-[220px] flex-col items-center justify-center text-center">
+                    <div className="text-4xl">
+                      💬
+                    </div>
+
+                    <p className="mt-3 font-black text-slate-800">
+                      Todavía no hay mensajes
+                    </p>
+
+                    <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">
+                      Usa este chat para coordinar el servicio sin compartir tu número personal.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {mensajesChat.map(
+                      (item) => {
+                        const mio =
+                          item.sender_id ===
+                          usuarioChatId;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={`flex ${
+                              mio
+                                ? "justify-end"
+                                : "justify-start"
+                            }`}
+                          >
+                            <div
+                              className={`max-w-[86%] rounded-2xl px-4 py-3 shadow-sm sm:max-w-[72%] ${
+                                mio
+                                  ? "rounded-br-md bg-blue-700 text-white"
+                                  : "rounded-bl-md border border-slate-200 bg-white text-slate-800"
+                              }`}
+                            >
+                              <p
+                                className={`text-xs font-black ${
+                                  mio
+                                    ? "text-blue-100"
+                                    : "text-blue-700"
+                                }`}
+                              >
+                                {mio
+                                  ? "Tú"
+                                  : item.sender_role ===
+                                    "admin"
+                                  ? "FixFlow Admin"
+                                  : ofertaSeleccionada.profesional
+                                      ?.business_name ||
+                                    "Profesional"}
+                              </p>
+
+                              <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6">
+                                {item.message}
+                              </p>
+
+                              <p
+                                className={`mt-1 text-right text-[11px] ${
+                                  mio
+                                    ? "text-blue-200"
+                                    : "text-slate-400"
+                                }`}
+                              >
+                                {formatearHoraChat(
+                                  item.created_at
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+
+                    <div
+                      ref={finalChatRef}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-slate-200 bg-white p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <textarea
+                    value={mensajeChat}
+                    onChange={(e) =>
+                      setMensajeChat(
+                        e.target.value
+                      )
+                    }
+                    onKeyDown={(e) => {
+                      if (
+                        e.key ===
+                          "Enter" &&
+                        !e.shiftKey
+                      ) {
+                        e.preventDefault();
+                        enviarMensajeChat();
+                      }
+                    }}
+                    rows={2}
+                    maxLength={1500}
+                    placeholder="Escribe un mensaje..."
+                    className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
+                  />
+
+                  <button
+                    type="button"
+                    disabled={
+                      enviandoMensajeChat ||
+                      !mensajeChat.trim()
+                    }
+                    onClick={
+                      enviarMensajeChat
+                    }
+                    className="rounded-2xl bg-blue-700 px-6 py-3.5 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {enviandoMensajeChat
+                      ? "Enviando..."
+                      : "Enviar"}
+                  </button>
+                </div>
+
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  🔒 FixFlow mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.
+                </p>
+              </div>
+            </section>
+          )}
 
         {/* EVIDENCIA FINAL DEL PROFESIONAL */}
 
