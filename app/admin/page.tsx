@@ -100,19 +100,6 @@ type SolicitudAdmin = {
   cancelled_at: string | null;
 };
 
-type PaymentSettings = {
-  id: string;
-  provider_commission_percent: number;
-  customer_service_fee_percent: number;
-  customer_cancel_on_the_way_percent: number;
-  customer_cancel_arrived_percent: number;
-  cancellation_provider_percent: number;
-  currency: string;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-};
-
 type JobClaim = {
   id: string;
   request_id: string;
@@ -598,39 +585,6 @@ export default function AdminPage() {
       "todos"
     );
 
-  /*
-    CONFIGURACIÓN DE PAGOS
-  */
-
-  const [
-    paymentSettings,
-    setPaymentSettings,
-  ] =
-    useState<PaymentSettings | null>(
-      null
-    );
-
-  const [
-    providerCommissionInput,
-    setProviderCommissionInput,
-  ] =
-    useState("10");
-
-  const [
-    customerFeeInput,
-    setCustomerFeeInput,
-  ] =
-    useState("5");
-
-  const [
-    guardandoPagos,
-    setGuardandoPagos,
-  ] =
-    useState(false);
-
-  const [cancelOnTheWayInput, setCancelOnTheWayInput] = useState("10");
-  const [cancelArrivedInput, setCancelArrivedInput] = useState("20");
-  const [cancellationProviderInput, setCancellationProviderInput] = useState("80");
 
   /*
     MODAL DE RESOLUCIÓN PARCIAL
@@ -768,75 +722,6 @@ export default function AdminPage() {
     setError("");
 
     try {
-      /*
-        CONFIGURACIÓN DE PAGOS
-      */
-
-      const {
-        data: paymentSettingsData,
-        error: paymentSettingsError,
-      } = await supabase
-        .from(
-          "payment_settings"
-        )
-        .select(`
-          id,
-          provider_commission_percent,
-          customer_service_fee_percent,
-          customer_cancel_on_the_way_percent,
-          customer_cancel_arrived_percent,
-          cancellation_provider_percent,
-          currency,
-          active,
-          created_at,
-          updated_at
-        `)
-        .eq(
-          "active",
-          true
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        )
-        .limit(1)
-        .maybeSingle();
-
-      if (
-        paymentSettingsError
-      ) {
-        throw new Error(
-          `Error cargando configuración de pagos: ${paymentSettingsError.message}`
-        );
-      }
-
-      if (
-        paymentSettingsData
-      ) {
-        const settings =
-          paymentSettingsData as PaymentSettings;
-
-        setPaymentSettings(
-          settings
-        );
-
-        setProviderCommissionInput(
-          String(
-            settings.provider_commission_percent
-          )
-        );
-
-        setCustomerFeeInput(
-          String(
-            settings.customer_service_fee_percent
-          )
-        );
-        setCancelOnTheWayInput(String(settings.customer_cancel_on_the_way_percent));
-        setCancelArrivedInput(String(settings.customer_cancel_arrived_percent));
-        setCancellationProviderInput(String(settings.cancellation_provider_percent));
-      }
 
       /*
         TODOS LOS PROFESIONALES
@@ -2208,188 +2093,6 @@ export default function AdminPage() {
     }
   }
 
-  /*
-    GUARDAR CONFIGURACIÓN DE PAGOS
-  */
-
-  async function guardarConfiguracionPagos() {
-    setError(
-      ""
-    );
-
-    setMensaje(
-      ""
-    );
-
-    if (
-      !paymentSettings
-    ) {
-      setError(
-        "No se encontró una configuración de pagos activa."
-      );
-
-      return;
-    }
-
-    const providerPercent =
-      Number(
-        providerCommissionInput
-      );
-
-    const customerPercent =
-      Number(
-        customerFeeInput
-      );
-    const cancelOnTheWayPercent = Number(cancelOnTheWayInput);
-    const cancelArrivedPercent = Number(cancelArrivedInput);
-    const cancellationProviderPercent = Number(cancellationProviderInput);
-
-    if (
-      !Number.isFinite(
-        providerPercent
-      ) ||
-      providerPercent < 0 ||
-      providerPercent > 100
-    ) {
-      setError(
-        "La comisión al profesional debe estar entre 0% y 100%."
-      );
-
-      return;
-    }
-
-    if (
-      !Number.isFinite(
-        customerPercent
-      ) ||
-      customerPercent < 0 ||
-      customerPercent > 100
-    ) {
-      setError(
-        "La tarifa de servicio al cliente debe estar entre 0% y 100%."
-      );
-
-      return;
-    }
-
-    if (
-      !Number.isFinite(cancelOnTheWayPercent) ||
-      cancelOnTheWayPercent < 0 ||
-      cancelOnTheWayPercent > 100 ||
-      !Number.isFinite(cancelArrivedPercent) ||
-      cancelArrivedPercent < 0 ||
-      cancelArrivedPercent > 100 ||
-      !Number.isFinite(cancellationProviderPercent) ||
-      cancellationProviderPercent < 0 ||
-      cancellationProviderPercent > 100
-    ) {
-      setError("Los porcentajes de cancelación deben estar entre 0% y 100%.");
-      return;
-    }
-
-    const confirmar =
-      window.confirm(
-        `¿Guardar configuración?\n\nComisión profesional: ${providerPercent.toFixed(2)}%\nTarifa cliente: ${customerPercent.toFixed(2)}%\nCancelación en camino: ${cancelOnTheWayPercent.toFixed(2)}%\nCancelación al llegar: ${cancelArrivedPercent.toFixed(2)}%\nPenalidad para profesional: ${cancellationProviderPercent.toFixed(2)}%`
-      );
-
-    if (
-      !confirmar
-    ) {
-      return;
-    }
-
-    setGuardandoPagos(
-      true
-    );
-
-    try {
-      const ahora =
-        new Date().toISOString();
-
-      const {
-        data,
-        error: updateError,
-      } = await supabase
-        .from(
-          "payment_settings"
-        )
-        .update({
-          provider_commission_percent:
-            providerPercent,
-          customer_service_fee_percent:
-            customerPercent,
-          customer_cancel_on_the_way_percent:
-            cancelOnTheWayPercent,
-          customer_cancel_arrived_percent:
-            cancelArrivedPercent,
-          cancellation_provider_percent:
-            cancellationProviderPercent,
-          updated_at:
-            ahora,
-        })
-        .eq(
-          "id",
-          paymentSettings.id
-        )
-        .select(`
-          id,
-          provider_commission_percent,
-          customer_service_fee_percent,
-          customer_cancel_on_the_way_percent,
-          customer_cancel_arrived_percent,
-          cancellation_provider_percent,
-          currency,
-          active,
-          created_at,
-          updated_at
-        `)
-        .single();
-
-      if (
-        updateError
-      ) {
-        throw new Error(
-          `No se pudo guardar la configuración: ${updateError.message}`
-        );
-      }
-
-      const settings =
-        data as PaymentSettings;
-
-      setPaymentSettings(
-        settings
-      );
-
-      setProviderCommissionInput(
-        String(
-          settings.provider_commission_percent
-        )
-      );
-
-      setCustomerFeeInput(
-        String(
-          settings.customer_service_fee_percent
-        )
-      );
-      setCancelOnTheWayInput(String(settings.customer_cancel_on_the_way_percent));
-      setCancelArrivedInput(String(settings.customer_cancel_arrived_percent));
-      setCancellationProviderInput(String(settings.cancellation_provider_percent));
-
-      setMensaje(
-        "Configuración de pagos guardada correctamente."
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo guardar la configuración de pagos."
-      );
-    } finally {
-      setGuardandoPagos(
-        false
-      );
-    }
-  }
 
   /*
     NAVEGACIÓN RÁPIDA DEL ADMIN
@@ -2943,231 +2646,120 @@ export default function AdminPage() {
 
         </section>
 
-        {/* CONFIGURACIÓN DE PAGOS */}
+        {/* ACCESOS ADMINISTRATIVOS */}
 
         <section className="mb-10">
-
           <div className="mb-5">
-
-            <p className="text-sm font-bold uppercase tracking-wide text-emerald-700">
-              Finanzas
+            <p className="text-sm font-bold uppercase tracking-wide text-blue-700">
+              Accesos administrativos
             </p>
 
             <h2 className="mt-1 text-3xl font-extrabold text-slate-900">
-              Configuración de pagos
+              Herramientas de control
             </h2>
 
             <p className="mt-2 text-slate-600">
-              Define cuánto cobra FixFlow al profesional y al cliente por cada trabajo.
+              Entra directamente a las áreas que necesitas administrar sin llenar el panel principal.
             </p>
-
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow">
-
-            {paymentSettings ? (
-              <>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-                  <label className="block">
-                    <span className="text-sm font-extrabold text-slate-700">
-                      Comisión al profesional (%)
-                    </span>
-
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value={
-                        providerCommissionInput
-                      }
-                      onChange={(e) =>
-                        setProviderCommissionInput(
-                          e.target.value
-                        )
-                      }
-                      className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-lg font-extrabold text-slate-900 outline-none focus:border-blue-500"
-                    />
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      Se descuenta del precio acordado con el profesional.
-                    </p>
-                  </label>
-
-                  <label className="block">
-                    <span className="text-sm font-extrabold text-slate-700">
-                      Tarifa de servicio al cliente (%)
-                    </span>
-
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value={
-                        customerFeeInput
-                      }
-                      onChange={(e) =>
-                        setCustomerFeeInput(
-                          e.target.value
-                        )
-                      }
-                      className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-lg font-extrabold text-slate-900 outline-none focus:border-blue-500"
-                    />
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      Se añade al total que paga el cliente.
-                    </p>
-                  </label>
-
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/admin/configuracion-financiera"
+                )
+              }
+              className="rounded-3xl border border-emerald-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-2xl">
+                  💰
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-                  <div className="rounded-2xl bg-slate-50 p-5">
-                    <p className="text-sm font-bold text-slate-500">
-                      Moneda
-                    </p>
-                    <p className="mt-1 text-xl font-black text-slate-900">
-                      {paymentSettings.currency}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-green-50 p-5">
-                    <p className="text-sm font-bold text-green-700">
-                      Configuración
-                    </p>
-                    <p className="mt-1 text-xl font-black text-green-900">
-                      {paymentSettings.active
-                        ? "Activa"
-                        : "Inactiva"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-blue-50 p-5">
-                    <p className="text-sm font-bold text-blue-700">
-                      Ejemplo $300
-                    </p>
-                    <p className="mt-1 text-sm font-extrabold text-blue-900">
-                      Cliente: $
-                      {(
-                        300 +
-                        (300 *
-                          (Number(
-                            customerFeeInput
-                          ) || 0)) /
-                          100
-                      ).toFixed(2)}
-                    </p>
-                    <p className="mt-1 text-sm font-extrabold text-blue-900">
-                      Profesional: $
-                      {(
-                        300 -
-                        (300 *
-                          (Number(
-                            providerCommissionInput
-                          ) || 0)) /
-                          100
-                      ).toFixed(2)}
-                    </p>
-                  </div>
-
-                </div>
-
-                <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                  <p className="font-extrabold text-emerald-900">
-                    Ingreso estimado de FixFlow en un trabajo de $300
-                  </p>
-
-                  <p className="mt-2 text-3xl font-black text-emerald-800">
-                    $
-                    {(
-                      (300 *
-                        (Number(
-                          providerCommissionInput
-                        ) || 0)) /
-                        100 +
-                      (300 *
-                        (Number(
-                          customerFeeInput
-                        ) || 0)) /
-                        100
-                    ).toFixed(2)}
-                  </p>
-                </div>
-
-                <div className="mt-6 border-t border-slate-200 pt-6">
-                  <h3 className="text-lg font-black text-slate-900">
-                    Configuración de cancelaciones
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-600">
-                    Define la penalidad según la etapa del trabajo y cuánto recibe el profesional.
-                  </p>
-
-                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <label className="block">
-                      <span className="text-sm font-extrabold text-slate-700">
-                        Pro en camino (%)
-                      </span>
-                      <input type="number" min="0" max="100" step="0.01"
-                        value={cancelOnTheWayInput}
-                        onChange={(e) => setCancelOnTheWayInput(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-bold text-slate-900 outline-none focus:border-blue-500"
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="text-sm font-extrabold text-slate-700">
-                        Pro ya llegó (%)
-                      </span>
-                      <input type="number" min="0" max="100" step="0.01"
-                        value={cancelArrivedInput}
-                        onChange={(e) => setCancelArrivedInput(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-bold text-slate-900 outline-none focus:border-blue-500"
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="text-sm font-extrabold text-slate-700">
-                        De la penalidad para el Pro (%)
-                      </span>
-                      <input type="number" min="0" max="100" step="0.01"
-                        value={cancellationProviderInput}
-                        onChange={(e) => setCancellationProviderInput(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-bold text-slate-900 outline-none focus:border-blue-500"
-                      />
-                    </label>
-                  </div>
-
-                  <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-600">
-                    Contratado: cancelación gratis · Trabajo iniciado: no se cancela, pasa a reclamo · El resto de la penalidad corresponde a FixFlow.
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  disabled={
-                    guardandoPagos
-                  }
-                  onClick={
-                    guardarConfiguracionPagos
-                  }
-                  className="mt-6 w-full rounded-xl bg-emerald-600 px-6 py-4 text-lg font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {guardandoPagos
-                    ? "Guardando..."
-                    : "💰 Guardar configuración de pagos"}
-                </button>
-              </>
-            ) : (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
-                No se encontró una configuración de pagos activa.
+                <span className="text-xl font-black text-emerald-700">
+                  →
+                </span>
               </div>
-            )}
 
+              <h3 className="mt-5 text-xl font-black text-slate-950">
+                Configuración financiera
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Comisiones, tarifa al cliente, cancelaciones y porcentajes para el profesional.
+              </p>
+
+              <p className="mt-5 text-sm font-black text-emerald-700">
+                Administrar configuración
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                irASeccionAdmin(
+                  "reclamos-admin"
+                )
+              }
+              className="rounded-3xl border border-red-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-red-400 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-2xl">
+                  ⚠️
+                </div>
+
+                <span className="text-xl font-black text-red-700">
+                  →
+                </span>
+              </div>
+
+              <h3 className="mt-5 text-xl font-black text-slate-950">
+                Reclamos de trabajos
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Revisa disputas abiertas, en revisión y reclamos ya resueltos.
+              </p>
+
+              <p className="mt-5 text-sm font-black text-red-700">
+                {totalReclamosActivos} reclamo{totalReclamosActivos === 1 ? "" : "s"} activo{totalReclamosActivos === 1 ? "" : "s"}
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                irASeccionAdmin(
+                  "ordenes-admin"
+                )
+              }
+              className="rounded-3xl border border-blue-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-2xl">
+                  📋
+                </div>
+
+                <span className="text-xl font-black text-blue-700">
+                  →
+                </span>
+              </div>
+
+              <h3 className="mt-5 text-xl font-black text-slate-950">
+                Control de órdenes
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Consulta todas las órdenes y abre el expediente completo de cada trabajo.
+              </p>
+
+              <p className="mt-5 text-sm font-black text-blue-700">
+                {solicitudesAdmin.length} orden{solicitudesAdmin.length === 1 ? "" : "es"} registrada{solicitudesAdmin.length === 1 ? "" : "s"}
+              </p>
+            </button>
           </div>
-
         </section>
 
         {/* RECLAMOS */}
