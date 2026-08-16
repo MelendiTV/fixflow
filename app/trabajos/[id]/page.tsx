@@ -3786,169 +3786,167 @@ export default function TrabajoDetallePage() {
                             </button>
                           )}
 
-                          {etapaActual ===
-                            4 && (
-                            <button
-                              type="button"
-                              disabled={
-                                !puedeSolicitarCambioPresupuesto
-                              }
-                              onClick={() => {
-                                setMostrarCambioPresupuesto(
-                                  true
-                                );
-                                setError("");
-                                setMensaje("");
-                              }}
-                              className={`rounded-xl px-5 py-3 font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                cambioPresupuestoPendiente
-                                  ? "bg-slate-400"
-                                  : reclamoActivo
-                                  ? "bg-slate-400"
-                                  : "bg-violet-600 hover:bg-violet-700"
-                              }`}
-                            >
-                              {cambioPresupuestoPendiente
-                                ? "⏳ Cambio pendiente"
-                                : reclamoActivo
-                                ? "⚠️ Bloqueado por reclamo"
-                                : "💰 Solicitar cambio de presupuesto"}
-                            </button>
-                          )}
+                          {etapaActual === 4 && !reclamoActivo && trabajo.status === "in_progress" && (
+                            <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-sm">
+                              <div className="grid grid-cols-1 gap-0 md:grid-cols-[1.15fr_0.85fr]">
+                                <div className="p-5 md:p-6">
+                                  <div className="flex items-start gap-4">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-2xl">
+                                      📷
+                                    </div>
 
-                          {etapaActual === 4 &&
-                            !reclamoActivo &&
-                            trabajo.status === "in_progress" && (
-                              <div className="sm:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                                <p className="text-sm font-black uppercase tracking-[0.14em] text-emerald-700">
-                                  📸 Evidencia del trabajo terminado
-                                </p>
-                                <h3 className="mt-1 text-lg font-black text-emerald-950">
-                                  Sube al menos 1 foto antes de completar
-                                </h3>
-                                <p className="mt-2 text-sm leading-6 text-emerald-900">
-                                  Para proteger al cliente y al profesional, FixFlow requiere al menos 1 foto del resultado final. Puedes guardar hasta 10 fotos y 2 videos.
-                                </p>
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="text-lg font-black text-slate-950">
+                                        Evidencia final (obligatoria)
+                                      </h3>
+                                      <p className="mt-1 text-sm font-semibold text-slate-700">
+                                        Sube al menos 1 foto del trabajo terminado.
+                                      </p>
+                                      <p className="mt-1 text-sm text-slate-500">
+                                        1 foto obligatoria · hasta 10 fotos y 2 videos
+                                      </p>
 
-                                {evidenciasFinales.length > 0 && (
-                                  <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
-                                    <p className="font-black text-emerald-900">
-                                      ✅ Evidencia ya guardada:{" "}
-                                      {evidenciasFinales.filter(
-                                        (item) => item.file_type === "image"
-                                      ).length} foto(s) y{" "}
-                                      {evidenciasFinales.filter(
-                                        (item) => item.file_type === "video"
-                                      ).length} video(s)
-                                    </p>
+                                      {evidenciasFinales.length > 0 && (
+                                        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                                          <p className="text-sm font-black text-emerald-800">
+                                            ✓ Evidencia guardada: {evidenciasFinales.filter((item) => item.file_type === "image").length} foto(s) · {evidenciasFinales.filter((item) => item.file_type === "video").length} video(s)
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      <label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
+                                        ☁️ Subir evidencia
+                                        <input
+                                          type="file"
+                                          multiple
+                                          accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+                                          onChange={seleccionarEvidenciaFinal}
+                                          className="hidden"
+                                        />
+                                      </label>
+                                    </div>
                                   </div>
-                                )}
 
-                                <label className="mt-4 block cursor-pointer rounded-xl border-2 border-dashed border-emerald-300 bg-white px-4 py-4 text-center font-extrabold text-emerald-800 hover:bg-emerald-50">
-                                  Seleccionar fotos o videos
-                                  <input
-                                    type="file"
-                                    multiple
-                                    accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
-                                    onChange={seleccionarEvidenciaFinal}
-                                    className="hidden"
-                                  />
-                                </label>
-
-                                {archivosEvidenciaFinal.length > 0 && (
-                                  <div className="mt-4 space-y-2">
-                                    {archivosEvidenciaFinal.map(
-                                      (file, index) => (
+                                  {archivosEvidenciaFinal.length > 0 && (
+                                    <div className="mt-5 space-y-2 border-t border-slate-100 pt-5">
+                                      {archivosEvidenciaFinal.map((file, index) => (
                                         <div
                                           key={`${file.name}-${index}`}
-                                          className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3"
+                                          className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3"
                                         >
-                                          <div className="min-w-0">
-                                            <p className="truncate text-sm font-bold text-slate-800">
-                                              {file.type.startsWith("video/")
-                                                ? "🎥"
-                                                : "📷"}{" "}
-                                              {file.name}
-                                            </p>
-                                          </div>
+                                          <p className="min-w-0 truncate text-sm font-bold text-slate-800">
+                                            {file.type.startsWith("video/") ? "🎥" : "📷"} {file.name}
+                                          </p>
                                           <button
                                             type="button"
-                                            onClick={() =>
-                                              quitarEvidenciaFinalSeleccionada(index)
-                                            }
-                                            className="shrink-0 rounded-lg border border-red-200 px-3 py-1 text-sm font-bold text-red-700 hover:bg-red-50"
+                                            onClick={() => quitarEvidenciaFinalSeleccionada(index)}
+                                            className="shrink-0 rounded-lg border border-red-200 bg-white px-3 py-1 text-sm font-bold text-red-700 hover:bg-red-50"
                                           >
                                             Quitar
                                           </button>
                                         </div>
-                                      )
-                                    )}
+                                      ))}
 
-                                    <button
-                                      type="button"
-                                      disabled={subiendoEvidenciaFinal}
-                                      onClick={guardarEvidenciaFinal}
-                                      className="w-full rounded-xl bg-emerald-700 px-5 py-3 font-extrabold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      {subiendoEvidenciaFinal
-                                        ? "Guardando evidencia..."
-                                        : "📤 Guardar evidencia final"}
-                                    </button>
+                                      <button
+                                        type="button"
+                                        disabled={subiendoEvidenciaFinal}
+                                        onClick={guardarEvidenciaFinal}
+                                        className="w-full rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        {subiendoEvidenciaFinal ? "Guardando evidencia..." : "Guardar evidencia"}
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="border-t border-slate-100 bg-slate-50/70 p-5 md:border-l md:border-t-0 md:p-6">
+                                  <div className="flex items-center gap-3">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-xl">🛡️</span>
+                                    <h3 className="font-black text-slate-950">Consejo FixFlow</h3>
                                   </div>
-                                )}
+                                  <p className="mt-4 text-sm leading-7 text-slate-600">
+                                    La evidencia protege tanto al cliente como a ti. Asegúrate de mostrar claramente el resultado final.
+                                  </p>
+                                </div>
                               </div>
-                            )}
+                            </div>
+                          )}
 
-                          {etapaActual ===
-                            4 && (
+                          {etapaActual === 4 && (
+                            <button
+                              type="button"
+                              disabled={!puedeSolicitarCambioPresupuesto}
+                              onClick={() => {
+                                setMostrarCambioPresupuesto(true);
+                                setError("");
+                                setMensaje("");
+                              }}
+                              className={`sm:col-span-2 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                cambioPresupuestoPendiente || reclamoActivo
+                                  ? "border-slate-200 bg-slate-100 text-slate-500"
+                                  : "border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100"
+                              }`}
+                            >
+                              <span className="flex items-center gap-3">
+                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-xl">💰</span>
+                                <span>
+                                  <span className="block font-black">
+                                    {cambioPresupuestoPendiente
+                                      ? "Cambio de presupuesto pendiente"
+                                      : reclamoActivo
+                                      ? "Cambio bloqueado por reclamo"
+                                      : "Solicitar cambio de presupuesto"}
+                                  </span>
+                                  {!cambioPresupuestoPendiente && !reclamoActivo && (
+                                    <span className="mt-0.5 block text-sm font-medium text-slate-600">
+                                      Si el trabajo requiere algo adicional
+                                    </span>
+                                  )}
+                                </span>
+                              </span>
+                              <span className="text-2xl">›</span>
+                            </button>
+                          )}
+
+                          {etapaActual === 4 && (
                             <button
                               type="button"
                               disabled={
                                 completando ||
                                 reclamoActivo ||
-                                !evidenciasFinales.some(
-                                  (item) => item.file_type === "image"
-                                )
+                                !evidenciasFinales.some((item) => item.file_type === "image")
                               }
-                              onClick={
-                                marcarCompletado
-                              }
-                              className={`rounded-xl px-5 py-3 font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                reclamoActivo
-                                  ? "bg-slate-400"
-                                  : "bg-green-600 hover:bg-green-700"
+                              onClick={marcarCompletado}
+                              className={`rounded-2xl border-2 px-5 py-4 font-extrabold transition disabled:cursor-not-allowed ${
+                                reclamoActivo || !evidenciasFinales.some((item) => item.file_type === "image")
+                                  ? "border-slate-200 bg-slate-200 text-slate-500"
+                                  : "border-green-600 bg-green-600 text-white hover:bg-green-700"
                               }`}
                             >
                               {reclamoActivo
-                                ? "⚠️ Bloqueado por reclamo"
-                                : !evidenciasFinales.some(
-                                    (item) => item.file_type === "image"
-                                  )
-                                ? "📸 Sube y guarda 1 foto para completar"
+                                ? "🔒 Bloqueado por reclamo"
+                                : !evidenciasFinales.some((item) => item.file_type === "image")
+                                ? "🔒 Completar trabajo\nSube y guarda al menos 1 foto para habilitar"
                                 : completando
                                 ? "Completando..."
-                                : "✅ Completar trabajo"}
+                                : "✓ Completar trabajo"}
                             </button>
                           )}
 
                           <button
                             type="button"
-                            onClick={
-                              contactarCliente
-                            }
-                            className="rounded-xl border-2 border-blue-700 bg-white px-5 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50"
+                            onClick={contactarCliente}
+                            className="rounded-2xl border-2 border-blue-300 bg-white px-5 py-4 font-extrabold text-blue-700 transition hover:bg-blue-50"
                           >
                             💬 Contactar al cliente
                           </button>
 
                           <button
                             type="button"
-                            onClick={
-                              abrirDireccion
-                            }
-                            className="rounded-xl border-2 border-blue-700 bg-white px-5 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50 sm:col-span-2"
+                            onClick={abrirDireccion}
+                            className="sm:col-span-2 rounded-2xl border-2 border-blue-300 bg-white px-5 py-4 font-extrabold text-blue-700 transition hover:bg-blue-50"
                           >
-                            📍 Ver dirección
+                            📍 Ver dirección en el mapa
                           </button>
 
                           {etapaActual <
