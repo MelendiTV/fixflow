@@ -2663,7 +2663,7 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <button
               type="button"
               onClick={() =>
@@ -2757,6 +2757,38 @@ export default function AdminPage() {
 
               <p className="mt-5 text-sm font-black text-blue-700">
                 {solicitudesAdmin.length} orden{solicitudesAdmin.length === 1 ? "" : "es"} registrada{solicitudesAdmin.length === 1 ? "" : "s"}
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/admin/finanzas"
+                )
+              }
+              className="rounded-3xl border border-violet-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-violet-400 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-2xl">
+                  📊
+                </div>
+
+                <span className="text-xl font-black text-violet-700">
+                  →
+                </span>
+              </div>
+
+              <h3 className="mt-5 text-xl font-black text-slate-950">
+                Finanzas y ganancias
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Controla ingresos de FixFlow, volumen procesado, pagos al profesional, retenciones y reembolsos.
+              </p>
+
+              <p className="mt-5 text-sm font-black text-violet-700">
+                Abrir panel financiero
               </p>
             </button>
           </div>
