@@ -1,0 +1,907 @@
+"use client";
+
+import {
+  Suspense,
+  useState,
+} from "react";
+
+import {
+  createClient,
+} from "@supabase/supabase-js";
+
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+
+import {
+  useLanguage,
+} from "@/app/components/LanguageProvider";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
+
+function RegistroClienteContenido() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { language } = useLanguage();
+
+  const redirectParam =
+    searchParams.get("redirect");
+
+  const [fullName, setFullName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [phone, setPhone] =
+    useState("");
+
+  const [addressLine1, setAddressLine1] =
+    useState("");
+
+  const [addressLine2, setAddressLine2] =
+    useState("");
+
+  const [city, setCity] =
+    useState("");
+
+  const [state, setState] =
+    useState("");
+
+  const [zip, setZip] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState("");
+
+  const text =
+    language === "es"
+      ? {
+          volver: "Volver al inicio",
+
+          titulo: "Crear cuenta de cliente",
+          descripcion:
+            "Crea tu cuenta para solicitar servicios y administrar tus trabajos.",
+
+          nombreCompleto: "Nombre completo",
+          nombrePlaceholder:
+            "Tu nombre y apellido",
+
+          email: "Correo electrónico",
+          emailPlaceholder:
+            "cliente@email.com",
+
+          telefono: "Teléfono",
+          telefonoPlaceholder:
+            "(702) 555-1234",
+
+          direccion: "Dirección",
+          direccionPlaceholder:
+            "Número y nombre de la calle",
+
+          direccion2:
+            "Apartamento, unidad o suite (opcional)",
+          direccion2Placeholder:
+            "Apt 101",
+
+          ciudad: "Ciudad",
+          ciudadPlaceholder:
+            "Las Vegas",
+
+          estado: "Estado",
+          estadoPlaceholder:
+            "NV",
+
+          codigoPostal: "Código postal",
+          zipPlaceholder:
+            "89101",
+
+          password: "Contraseña",
+          passwordPlaceholder:
+            "Crea una contraseña",
+
+          confirmPassword:
+            "Confirmar contraseña",
+          confirmPasswordPlaceholder:
+            "Escribe nuevamente tu contraseña",
+
+          crearCuenta:
+            "Crear cuenta",
+
+          creando:
+            "Creando cuenta...",
+
+          yaCuenta:
+            "¿Ya tienes una cuenta?",
+
+          iniciarSesion:
+            "Iniciar sesión",
+
+          passwordsNoCoinciden:
+            "Las contraseñas no coinciden.",
+
+          passwordCorta:
+            "La contraseña debe tener al menos 8 caracteres.",
+
+          nombreRequerido:
+            "Escribe tu nombre completo.",
+
+          telefonoRequerido:
+            "Escribe tu número de teléfono.",
+
+          direccionRequerida:
+            "Escribe la dirección de la casa o apartamento.",
+
+          ubicacionRequerida:
+            "Completa ciudad, estado y código postal.",
+
+          usuarioNoCreado:
+            "No se pudo crear el usuario.",
+
+          creado:
+            "Cuenta creada correctamente.",
+
+          confirmarEmail:
+            "Cuenta creada. Revisa tu correo electrónico para confirmar tu cuenta.",
+
+          errorRegistro:
+            "No se pudo crear la cuenta",
+
+          errorInesperado:
+            "Ocurrió un error inesperado.",
+
+          cargando:
+            "Cargando...",
+        }
+      : {
+          volver: "Back to home",
+
+          titulo: "Create customer account",
+          descripcion:
+            "Create your account to request services and manage your jobs.",
+
+          nombreCompleto: "Full name",
+          nombrePlaceholder:
+            "Your first and last name",
+
+          email: "Email address",
+          emailPlaceholder:
+            "customer@email.com",
+
+          telefono: "Phone",
+          telefonoPlaceholder:
+            "(702) 555-1234",
+
+          direccion: "Street address",
+          direccionPlaceholder:
+            "Street number and name",
+
+          direccion2:
+            "Apartment, unit or suite (optional)",
+          direccion2Placeholder:
+            "Apt 101",
+
+          ciudad: "City",
+          ciudadPlaceholder:
+            "Las Vegas",
+
+          estado: "State",
+          estadoPlaceholder:
+            "NV",
+
+          codigoPostal: "ZIP code",
+          zipPlaceholder:
+            "89101",
+
+          password: "Password",
+          passwordPlaceholder:
+            "Create a password",
+
+          confirmPassword:
+            "Confirm password",
+          confirmPasswordPlaceholder:
+            "Enter your password again",
+
+          crearCuenta:
+            "Create account",
+
+          creando:
+            "Creating account...",
+
+          yaCuenta:
+            "Already have an account?",
+
+          iniciarSesion:
+            "Sign in",
+
+          passwordsNoCoinciden:
+            "Passwords do not match.",
+
+          passwordCorta:
+            "Password must be at least 8 characters.",
+
+          nombreRequerido:
+            "Enter your full name.",
+
+          telefonoRequerido:
+            "Enter your phone number.",
+
+          direccionRequerida:
+            "Enter your home or apartment address.",
+
+          ubicacionRequerida:
+            "Complete city, state, and ZIP code.",
+
+          usuarioNoCreado:
+            "Unable to create the user.",
+
+          creado:
+            "Account created successfully.",
+
+          confirmarEmail:
+            "Account created. Check your email to confirm your account.",
+
+          errorRegistro:
+            "Unable to create account",
+
+          errorInesperado:
+            "An unexpected error occurred.",
+
+          cargando:
+            "Loading...",
+        };
+
+  function obtenerDestinoSeguro() {
+    if (
+      redirectParam &&
+      redirectParam.startsWith("/") &&
+      !redirectParam.startsWith("//")
+    ) {
+      return redirectParam;
+    }
+
+    return "/mis-solicitudes";
+  }
+
+  async function registrarCliente(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
+
+    if (loading) {
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+
+    const nombreLimpio =
+      fullName.trim();
+
+    const correoLimpio =
+      email.trim().toLowerCase();
+
+    const telefonoLimpio =
+      phone.trim();
+
+    const direccionLimpia =
+      addressLine1.trim();
+
+    const direccion2Limpia =
+      addressLine2.trim();
+
+    const ciudadLimpia =
+      city.trim();
+
+    const estadoLimpio =
+      state.trim().toUpperCase();
+
+    const zipLimpio =
+      zip.trim();
+
+    if (!nombreLimpio) {
+      setError(text.nombreRequerido);
+      return;
+    }
+
+    if (!telefonoLimpio) {
+      setError(text.telefonoRequerido);
+      return;
+    }
+
+    if (!direccionLimpia) {
+      setError(text.direccionRequerida);
+      return;
+    }
+
+    if (
+      !ciudadLimpia ||
+      !estadoLimpio ||
+      !zipLimpio
+    ) {
+      setError(text.ubicacionRequerida);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError(text.passwordCorta);
+      return;
+    }
+
+    if (
+      password !==
+      confirmPassword
+    ) {
+      setError(
+        text.passwordsNoCoinciden
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      /*
+        CREAR USUARIO EN SUPABASE AUTH
+
+        IMPORTANTE:
+        Toda la información del cliente se envía
+        como metadata.
+
+        El trigger seguro de Supabase se encarga
+        de crear automáticamente public.profiles.
+
+        El navegador NO inserta directamente
+        en profiles.
+      */
+
+      const {
+        data,
+        error: signUpError,
+      } =
+        await supabase.auth.signUp({
+          email:
+            correoLimpio,
+
+          password,
+
+          options: {
+            data: {
+              full_name:
+                nombreLimpio,
+
+              phone:
+                telefonoLimpio,
+
+              role:
+                "customer",
+
+              address_line1:
+                direccionLimpia,
+
+              address_line2:
+                direccion2Limpia || null,
+
+              city:
+                ciudadLimpia,
+
+              state:
+                estadoLimpio,
+
+              zip:
+                zipLimpio,
+            },
+          },
+        });
+
+      if (signUpError) {
+        throw new Error(
+          signUpError.message
+        );
+      }
+
+      const user =
+        data.user;
+
+      if (!user) {
+        throw new Error(
+          text.usuarioNoCreado
+        );
+      }
+
+      /*
+        SI SUPABASE YA CREÓ UNA SESIÓN,
+        ENTRAMOS DIRECTAMENTE.
+      */
+
+      if (data.session) {
+        setSuccess(
+          text.creado
+        );
+
+        window.location.href =
+          obtenerDestinoSeguro();
+
+        return;
+      }
+
+      /*
+        SI SUPABASE REQUIERE CONFIRMAR EMAIL
+      */
+
+      setSuccess(
+        text.confirmarEmail
+      );
+
+      setTimeout(() => {
+        const destino =
+          obtenerDestinoSeguro();
+
+        router.push(
+          `/login-cliente?redirect=${encodeURIComponent(
+            destino
+          )}`
+        );
+      }, 2000);
+    } catch (err) {
+      console.error(
+        "Error registrando cliente:",
+        err
+      );
+
+      setError(
+        err instanceof Error
+          ? `${text.errorRegistro}: ${err.message}`
+          : text.errorInesperado
+      );
+
+      setLoading(false);
+    }
+  }
+
+  function irALogin() {
+    const destino =
+      obtenerDestinoSeguro();
+
+    router.push(
+      `/login-cliente?redirect=${encodeURIComponent(
+        destino
+      )}`
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-100 px-4 py-10">
+      <div className="mx-auto w-full max-w-2xl">
+
+        <button
+          type="button"
+          onClick={() =>
+            router.push("/")
+          }
+          className="font-bold text-blue-700 hover:underline"
+        >
+          ← {text.volver}
+        </button>
+
+        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+
+          <div className="bg-blue-700 p-8 text-white">
+
+            <div className="text-2xl font-black">
+              RELYDO
+            </div>
+
+            <h1 className="mt-2 text-3xl font-extrabold">
+              {text.titulo}
+            </h1>
+
+            <p className="mt-2 text-blue-100">
+              {text.descripcion}
+            </p>
+
+          </div>
+
+          <div className="p-8">
+
+            {error && (
+              <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-red-700">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-6 rounded-xl border border-green-300 bg-green-50 p-4 text-green-800">
+                {success}
+              </div>
+            )}
+
+            <form
+              onSubmit={
+                registrarCliente
+              }
+              className="space-y-5"
+            >
+
+              {/* NOMBRE */}
+
+              <div>
+                <label
+                  htmlFor="fullName"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.nombreCompleto}
+                </label>
+
+                <input
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) =>
+                    setFullName(
+                      e.target.value
+                    )
+                  }
+                  required
+                  disabled={loading}
+                  autoComplete="name"
+                  placeholder={
+                    text.nombrePlaceholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* EMAIL */}
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.email}
+                </label>
+
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(
+                      e.target.value
+                    )
+                  }
+                  required
+                  disabled={loading}
+                  autoComplete="email"
+                  placeholder={
+                    text.emailPlaceholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* TELÉFONO */}
+
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.telefono}
+                </label>
+
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(
+                      e.target.value
+                    )
+                  }
+                  required
+                  disabled={loading}
+                  autoComplete="tel"
+                  placeholder={
+                    text.telefonoPlaceholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* DIRECCIÓN */}
+
+              <div>
+                <label
+                  htmlFor="addressLine1"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.direccion}
+                </label>
+
+                <input
+                  id="addressLine1"
+                  type="text"
+                  value={addressLine1}
+                  onChange={(e) =>
+                    setAddressLine1(
+                      e.target.value
+                    )
+                  }
+                  required
+                  disabled={loading}
+                  autoComplete="address-line1"
+                  placeholder={
+                    text.direccionPlaceholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* APARTAMENTO */}
+
+              <div>
+                <label
+                  htmlFor="addressLine2"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.direccion2}
+                </label>
+
+                <input
+                  id="addressLine2"
+                  type="text"
+                  value={addressLine2}
+                  onChange={(e) =>
+                    setAddressLine2(
+                      e.target.value
+                    )
+                  }
+                  disabled={loading}
+                  autoComplete="address-line2"
+                  placeholder={
+                    text.direccion2Placeholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* CIUDAD / ESTADO / ZIP */}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="mb-2 block font-bold text-slate-900"
+                  >
+                    {text.ciudad}
+                  </label>
+
+                  <input
+                    id="city"
+                    type="text"
+                    value={city}
+                    onChange={(e) =>
+                      setCity(
+                        e.target.value
+                      )
+                    }
+                    required
+                    disabled={loading}
+                    autoComplete="address-level2"
+                    placeholder={
+                      text.ciudadPlaceholder
+                    }
+                    className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="mb-2 block font-bold text-slate-900"
+                  >
+                    {text.estado}
+                  </label>
+
+                  <input
+                    id="state"
+                    type="text"
+                    value={state}
+                    onChange={(e) =>
+                      setState(
+                        e.target.value
+                          .toUpperCase()
+                          .slice(0, 2)
+                      )
+                    }
+                    required
+                    disabled={loading}
+                    autoComplete="address-level1"
+                    maxLength={2}
+                    placeholder={
+                      text.estadoPlaceholder
+                    }
+                    className="w-full rounded-xl border border-slate-300 p-4 uppercase text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="zip"
+                    className="mb-2 block font-bold text-slate-900"
+                  >
+                    {text.codigoPostal}
+                  </label>
+
+                  <input
+                    id="zip"
+                    type="text"
+                    value={zip}
+                    onChange={(e) =>
+                      setZip(
+                        e.target.value
+                      )
+                    }
+                    required
+                    disabled={loading}
+                    autoComplete="postal-code"
+                    placeholder={
+                      text.zipPlaceholder
+                    }
+                    className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                  />
+                </div>
+
+              </div>
+
+              {/* CONTRASEÑA */}
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.password}
+                </label>
+
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(
+                      e.target.value
+                    )
+                  }
+                  required
+                  disabled={loading}
+                  autoComplete="new-password"
+                  minLength={8}
+                  placeholder={
+                    text.passwordPlaceholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* CONFIRMAR CONTRASEÑA */}
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.confirmPassword}
+                </label>
+
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) =>
+                    setConfirmPassword(
+                      e.target.value
+                    )
+                  }
+                  required
+                  disabled={loading}
+                  autoComplete="new-password"
+                  minLength={8}
+                  placeholder={
+                    text.confirmPasswordPlaceholder
+                  }
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              {/* CREAR CUENTA */}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-blue-700 py-4 text-lg font-extrabold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading
+                  ? text.creando
+                  : text.crearCuenta}
+              </button>
+
+            </form>
+
+            {/* LOGIN */}
+
+            <div className="mt-6 border-t border-slate-200 pt-6 text-center">
+
+              <p className="text-sm text-slate-600">
+                {text.yaCuenta}
+              </p>
+
+              <button
+                type="button"
+                onClick={irALogin}
+                disabled={loading}
+                className="mt-2 font-bold text-blue-700 hover:underline disabled:opacity-50"
+              >
+                {text.iniciarSesion}
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function RegistroClienteFallback() {
+  const { language } =
+    useLanguage();
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-100">
+
+      <div className="rounded-2xl bg-white px-8 py-7 shadow-lg">
+
+        <p className="font-bold text-slate-700">
+          {language === "es"
+            ? "Cargando..."
+            : "Loading..."}
+        </p>
+
+      </div>
+
+    </main>
+  );
+}
+
+export default function RegistroClientePage() {
+  return (
+    <Suspense
+      fallback={
+        <RegistroClienteFallback />
+      }
+    >
+      <RegistroClienteContenido />
+    </Suspense>
+  );
+}
