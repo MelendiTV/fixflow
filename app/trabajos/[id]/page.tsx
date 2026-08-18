@@ -613,7 +613,7 @@ export default function TrabajoDetallePage() {
   }, [id]);
 
   /*
-    CHAT PRIVADO FIXFLOW
+    CHAT PRIVADO RELYDO
   */
 
   useEffect(() => {
@@ -5174,7 +5174,7 @@ export default function TrabajoDetallePage() {
           </div>
         </div>
 
-        {/* CHAT PRIVADO FIXFLOW */}
+        {/* CHAT PRIVADO RELYDO */}
 
         {trabajo.status !==
           "open" &&

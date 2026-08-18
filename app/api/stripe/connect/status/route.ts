@@ -374,7 +374,7 @@ export async function GET(
     );
 
     // ======================================================
-    // 9. DEVOLVER DIAGNÓSTICO A FIXFLOW
+    // 9. DEVOLVER DIAGNÓSTICO A RELYDO
     // ======================================================
 
     return NextResponse.json({

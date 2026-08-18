@@ -317,7 +317,7 @@ export async function POST(
     }
 
     // ======================================================
-    // 8. URL BASE DE FIXFLOW
+    // 8. URL BASE DE RELYDO
     // ======================================================
 
     const origin =

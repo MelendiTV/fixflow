@@ -492,7 +492,7 @@ export async function POST(request: NextRequest) {
     // ======================================================
 
     console.log("======================================");
-    console.log("PAGO CONFIRMADO Y RETENIDO EN FIXFLOW");
+    console.log("PAGO CONFIRMADO Y RETENIDO EN RELYDO");
     console.log("Request:", requestId);
     console.log("Offer:", offerId);
     console.log("Cliente pagó:", customerTotalAmount);

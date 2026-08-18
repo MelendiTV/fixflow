@@ -382,7 +382,7 @@ export async function POST(
     }
 
     // ======================================================
-    // 8. CARGAR CONFIGURACIÓN ACTUAL DE FIXFLOW
+    // 8. CARGAR CONFIGURACIÓN ACTUAL DE RELYDO
     // ======================================================
 
     const {

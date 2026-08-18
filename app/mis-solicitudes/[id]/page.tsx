@@ -673,7 +673,7 @@ export default function MisSolicitudDetallePage() {
   }, [id]);
 
   /*
-    CHAT PRIVADO FIXFLOW
+    CHAT PRIVADO RELYDO
   */
 
   useEffect(() => {
@@ -4170,7 +4170,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           </section>
         )}
 
-        {/* CHAT PRIVADO FIXFLOW */}
+        {/* CHAT PRIVADO RELYDO */}
 
         {ofertaSeleccionada &&
           solicitud.status !==
