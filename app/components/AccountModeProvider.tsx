@@ -38,20 +38,12 @@ export function AccountModeProvider({
     accountRole === "provider";
 
   useEffect(() => {
-    const savedMode =
-      window.localStorage.getItem(STORAGE_KEY);
-
     if (accountRole === "provider") {
-      const providerMode: AccountMode =
-        savedMode === "customer"
-          ? "customer"
-          : "provider";
-
-      setModeState(providerMode);
+      setModeState("provider");
 
       window.localStorage.setItem(
         STORAGE_KEY,
-        providerMode
+        "provider"
       );
 
       return;

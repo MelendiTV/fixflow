@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import NotificationsBell from "@/app/components/NotificationsBell";
+import { AccountModeSwitcher } from "@/app/components/AccountModeSwitcher";
+import { useAccountMode } from "@/app/components/AccountModeProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -81,6 +83,7 @@ function iconoEstado(status: string, jobStage: string | null) {
 
 export default function MisSolicitudesPage() {
   const router = useRouter();
+  const { setAccountRole } = useAccountMode();
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -210,9 +213,18 @@ export default function MisSolicitudesPage() {
         throw new Error("No se encontró tu perfil de cliente.");
       }
 
-      if (profileData.role !== "customer") {
-        throw new Error("Esta cuenta no está registrada como cliente.");
+      if (
+        profileData.role !== "customer" &&
+        profileData.role !== "provider"
+      ) {
+        throw new Error("Esta cuenta no tiene acceso al modo cliente.");
       }
+
+      setAccountRole(
+        profileData.role === "provider"
+          ? "provider"
+          : "customer"
+      );
 
       setCliente(profileData);
 
@@ -612,6 +624,12 @@ export default function MisSolicitudesPage() {
                   <p className="mt-1 max-w-[220px] truncate text-sm font-bold text-white">
                     {email}
                   </p>
+
+                  {cliente?.role === "provider" && (
+                    <div className="mt-3 rounded-xl bg-white/95 p-2 text-slate-900">
+                      <AccountModeSwitcher />
+                    </div>
+                  )}
 
                   <button
                     type="button"
