@@ -37,7 +37,7 @@ export function AccountModeSwitcher() {
     setMode(nextMode);
 
     if (nextMode === "provider") {
-      router.push("/pro");
+      router.push("/panel-profesional");
       return;
     }
 
