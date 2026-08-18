@@ -41,7 +41,7 @@ export default function Home() {
             }
             className="text-3xl font-bold"
           >
-            FixFlow
+            RELYDO
           </button>
 
           <nav className="flex items-center gap-6">

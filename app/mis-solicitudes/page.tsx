@@ -520,7 +520,7 @@ export default function MisSolicitudesPage() {
                   Panel del cliente
                 </div>
 
-                <div className="mt-4 text-2xl font-black">FixFlow</div>
+                <div className="mt-4 text-2xl font-black">RELYDO</div>
 
                 <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
                   <div className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-white/25 bg-white/10 shadow-lg">

@@ -416,7 +416,7 @@ export default function AdminActividadPage() {
           </h1>
 
           <p className="mt-3 max-w-3xl text-slate-300">
-            Observa cómo se mueve FixFlow: trabajos, contratación, finalización, ofertas, clientes y profesionales.
+            Observa cómo se mueve RELYDO: trabajos, contratación, finalización, ofertas, clientes y profesionales.
           </p>
         </section>
 

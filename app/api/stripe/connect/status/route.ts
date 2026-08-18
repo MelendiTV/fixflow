@@ -274,7 +274,7 @@ export async function GET(
       return NextResponse.json(
         {
           error:
-            `Stripe respondió correctamente, pero no pudimos actualizar FixFlow: ${updateError.message}`,
+            `Stripe respondió correctamente, pero no pudimos actualizar RELYDO: ${updateError.message}`,
         },
         {
           status: 500,

@@ -352,7 +352,7 @@ export default function ConfiguracionFinancieraPage() {
       providerPercent) /
       100;
 
-  const ejemploFixFlow =
+  const  ejemploRelydo =
     ejemploServicio *
       (providerPercent / 100) +
     ejemploServicio *
@@ -517,7 +517,7 @@ export default function ConfiguracionFinancieraPage() {
                   </p>
 
                   <p className="mt-2 text-3xl font-black text-emerald-800">
-                    ${ejemploFixFlow.toFixed(2)}
+                    ${ejemploRelydo.toFixed(2)}
                   </p>
                 </div>
 

@@ -85,7 +85,7 @@ export default function Servicios() {
 
         <div className="text-center">
           <div className="text-3xl font-black text-blue-700">
-            FixFlow
+            RELYDO
           </div>
 
           <h1 className="mt-3 text-4xl font-extrabold text-slate-900 md:text-5xl">

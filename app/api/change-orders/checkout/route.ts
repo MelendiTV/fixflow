@@ -711,7 +711,7 @@ export async function POST(
 
             payment_intent_data: {
               transfer_group:
-                `fixflow_request_${changeOrder.request_id}`,
+                `relydo_request_${changeOrder.request_id}`,
 
               metadata: {
                 payment_type:

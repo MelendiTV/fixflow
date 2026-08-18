@@ -405,7 +405,7 @@ export async function POST(request: NextRequest) {
     }
 
     const transferGroup =
-      `fixflow_request_${claim.request_id}`;
+      `relydo_request_${claim.request_id}`;
 
     // ======================================================
     // 6. COMPROBAR TRANSFERENCIAS EXISTENTES
@@ -632,7 +632,7 @@ export async function POST(request: NextRequest) {
             },
             {
               idempotencyKey:
-                `fixflow_release_payment_${payment.id}`,
+                `relydo_release_payment_${payment.id}`,
             }
           );
 
@@ -758,7 +758,7 @@ export async function POST(request: NextRequest) {
           },
           {
             idempotencyKey:
-              `fixflow_claim_full_refund_${payment.id}`,
+              `relydo_claim_full_refund_${payment.id}`,
           }
         );
 
@@ -1052,7 +1052,7 @@ export async function POST(request: NextRequest) {
           },
           {
             idempotencyKey:
-              `fixflow_claim_partial_refund_${payment.id}_${Math.round(
+              `relydo_claim_partial_refund_${payment.id}_${Math.round(
                 customerRefundAmount * 100
               )}`,
           }
@@ -1225,7 +1225,7 @@ export async function POST(request: NextRequest) {
           },
           {
             idempotencyKey:
-              `fixflow_claim_partial_transfer_${payment.id}_${expectedProviderCents}`,
+              `relydo_claim_partial_transfer_${payment.id}_${expectedProviderCents}`,
           }
         );
 

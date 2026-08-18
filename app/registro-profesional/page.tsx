@@ -350,7 +350,7 @@ export default function RegistroProfesional() {
             <div className="flex flex-col gap-2">
 
               <div className="text-2xl font-black tracking-tight">
-                FixFlow
+                RELYDO
               </div>
 
               <h1 className="text-3xl font-extrabold md:text-4xl">
@@ -887,7 +887,7 @@ export default function RegistroProfesional() {
                       </h3>
 
                       <p className="mt-1 text-sm leading-6 text-amber-800">
-                        Crear una cuenta no significa que FixFlow haya verificado al profesional. Después de confirmar tu correo deberás subir los documentos necesarios.
+                        Crear una cuenta no significa que RELYDO haya verificado al profesional. Después de confirmar tu correo deberás subir los documentos necesarios.
                       </p>
 
                     </div>

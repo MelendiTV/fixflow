@@ -219,7 +219,7 @@ export async function POST(
         requestId,
         customerRefundAmount: 0,
         providerAwardAmount: 0,
-        fixflowCancellationAmount: 0,
+        relydoCancellationAmount: 0,
       });
     }
 
@@ -293,7 +293,7 @@ export async function POST(
         penaltyPercent: 0,
         penaltyAmount: 0,
         providerAwardAmount: 0,
-        fixflowCancellationAmount: 0,
+        relydoCancellationAmount: 0,
         customerRefundAmount: 0,
       });
     }
@@ -552,7 +552,7 @@ export async function POST(
           )
       );
 
-    const fixflowCancellationAmount =
+    const relydoCancellationAmount =
       dinero(
         penaltyAmount -
           providerAwardAmount
@@ -575,7 +575,7 @@ export async function POST(
         providerAwardAmount
       ) ||
       !Number.isFinite(
-        fixflowCancellationAmount
+        relydoCancellationAmount
       ) ||
       !Number.isFinite(
         customerRefundAmount
@@ -595,7 +595,7 @@ export async function POST(
     // ======================================================
 
     const transferGroup =
-      `fixflow_request_${requestId}`;
+      `relydo_request_${requestId}`;
 
     const existingTransfers =
       await stripe.transfers.list({
@@ -825,7 +825,7 @@ export async function POST(
           },
           {
             idempotencyKey:
-              `fixflow_customer_cancel_transfer_${payment.id}_${expectedProviderCents}`,
+              `relydo_customer_cancel_transfer_${payment.id}_${expectedProviderCents}`,
           }
         );
 
@@ -927,7 +927,7 @@ export async function POST(
           },
           {
             idempotencyKey:
-              `fixflow_customer_cancel_refund_${payment.id}_${Math.round(
+              `relydo_customer_cancel_refund_${payment.id}_${Math.round(
                 customerRefundAmount *
                   100
               )}`,
@@ -971,7 +971,7 @@ export async function POST(
           cancellation_provider_amount:
             providerAwardAmount,
           cancellation_platform_amount:
-            fixflowCancellationAmount,
+            relydoCancellationAmount,
           cancellation_processed_at:
             now,
           updated_at:
@@ -1035,7 +1035,7 @@ export async function POST(
       penaltyPercent,
       penaltyAmount,
       providerAwardAmount,
-      fixflowCancellationAmount,
+      relydoCancellationAmount,
       customerRefundAmount,
       stripeTransferId,
       stripeRefundId,

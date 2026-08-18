@@ -1275,7 +1275,7 @@ export default function PanelProfesional() {
 
                             <div className="mt-1.5 flex items-center justify-between gap-4 text-slate-600">
                               <span>
-                                Tarifa FixFlow ({Number(
+                                Tarifa RELYDO ({Number(
                                   trabajo.pago.provider_commission_percent
                                 ).toFixed(2)}%)
                               </span>

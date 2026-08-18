@@ -548,7 +548,7 @@ export default function PerfilProfesional() {
                         <div className="mt-4 border-t border-slate-100 pt-4">
 
                           <span className="text-sm font-bold text-green-700">
-                            ✓ Servicio realizado mediante FixFlow
+                            ✓ Servicio realizado mediante RELYDO
                           </span>
 
                         </div>

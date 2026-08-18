@@ -514,7 +514,7 @@ export default function CompletarVerificacion() {
 
               <div>
                 <div className="text-2xl font-black">
-                  FixFlow
+                  RELYDO
                 </div>
 
                 <h1 className="mt-2 text-3xl font-extrabold">
@@ -715,7 +715,7 @@ export default function CompletarVerificacion() {
                 </h3>
 
                 <p className="mt-2 text-sm leading-6 text-amber-800">
-                  Enviar documentos no significa que la cuenta esté verificada. Hasta que FixFlow complete la revisión, el estado permanecerá pendiente.
+                  Enviar documentos no significa que la cuenta esté verificada. Hasta que RELYDO complete la revisión, el estado permanecerá pendiente.
                 </p>
 
                 <p className="mt-2 text-sm text-amber-800">

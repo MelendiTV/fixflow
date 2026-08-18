@@ -56,13 +56,13 @@ export async function POST(
 
     const secret =
       request.headers.get(
-        "x-fixflow-secret"
+        "x-relydo-secret"
       );
 
     if (
-      !process.env.FIXFLOW_CRON_SECRET ||
+      !process.env.RELYDO_CRON_SECRET ||
       secret !==
-        process.env.FIXFLOW_CRON_SECRET
+        process.env.RELYDO_CRON_SECRET
     ) {
       return NextResponse.json(
         {

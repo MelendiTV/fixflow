@@ -447,7 +447,7 @@ export default function AdminFinanzasPage() {
         0
       );
 
-    const ingresoFixFlowBase =
+    const ingresoRelydoBase =
       paymentsFiltrados.reduce(
         (acc, p) =>
           acc +
@@ -511,7 +511,7 @@ export default function AdminFinanzasPage() {
         0
       );
 
-    const ingresoFixFlowAdicional =
+    const ingresoRelydoAdicional =
       changeOrdersFiltrados.reduce(
         (acc, c) =>
           acc +
@@ -592,9 +592,9 @@ export default function AdminFinanzasPage() {
       comisionesPro:
         comisionesProBase +
         comisionesProAdicionales,
-      ingresoFixFlow:
-        ingresoFixFlowBase +
-        ingresoFixFlowAdicional,
+      ingresoRelydo:
+        ingresoRelydoBase +
+        ingresoRelydoAdicional,
       pagadoProfesionales:
         netoProfesionalBase +
         netoProfesionalAdicional,
@@ -630,7 +630,7 @@ export default function AdminFinanzasPage() {
         ...p,
         trabajo:
           trabajo?.title ||
-          "Trabajo FixFlow",
+          "Trabajo RELYDO",
         cliente:
           trabajo?.customer_name ||
           "Cliente RELYDO",
@@ -780,9 +780,9 @@ export default function AdminFinanzasPage() {
           />
 
           <Tarjeta
-            titulo="Ingresos FixFlow"
+            titulo="Ingresos RELYDO"
             valor={dinero(
-              resumen.ingresoFixFlow
+              resumen.ingresoRelydo
             )}
             descripcion="Tarifa del cliente + comisión del profesional registradas por la plataforma."
             clase="border-emerald-200 bg-emerald-50"
@@ -993,7 +993,7 @@ export default function AdminFinanzasPage() {
             </p>
 
             <p className="mt-2 text-sm leading-6 text-amber-900">
-              “Ingresos FixFlow” representa las comisiones y tarifas registradas en la base de datos. No se presenta como beneficio neto contable porque aquí todavía no se están descontando automáticamente costos externos como comisiones de Stripe, impuestos, publicidad u otros gastos operativos.
+              “Ingresos RELYDO” representa las comisiones y tarifas registradas en la base de datos. No se presenta como beneficio neto contable porque aquí todavía no se están descontando automáticamente costos externos como comisiones de Stripe, impuestos, publicidad u otros gastos operativos.
             </p>
           </div>
         </section>

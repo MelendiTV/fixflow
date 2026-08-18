@@ -250,11 +250,11 @@ export async function POST(
 
             business_profile: {
               product_description:
-                "Servicios profesionales contratados mediante FixFlow",
+                "Servicios profesionales contratados mediante RELYDO",
             },
 
             metadata: {
-              fixflow_provider_id:
+              relydo_provider_id:
                 user.id,
 
               business_name:

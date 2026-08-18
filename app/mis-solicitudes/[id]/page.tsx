@@ -411,7 +411,7 @@ function calcularCancelacionCliente(
     penalidad * (porcentajePro / 100)
   );
 
-  const fixflow = redondearDinero(
+  const relydo = redondearDinero(
     penalidad - profesional
   );
 
@@ -425,7 +425,7 @@ function calcularCancelacionCliente(
     penalidadPercent,
     penalidad,
     profesional,
-    fixflow,
+    relydo,
     reembolso,
   };
 }
@@ -2032,7 +2032,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         `Total pagado: $${resumen.totalPagado.toFixed(2)}\n` +
         `Penalidad: ${resumen.penalidadPercent.toFixed(2)}% = $${resumen.penalidad.toFixed(2)}\n` +
         `Profesional: $${resumen.profesional.toFixed(2)}\n` +
-        `FixFlow: $${resumen.fixflow.toFixed(2)}\n` +
+        `RELYDO: $${resumen.relydo.toFixed(2)}\n` +
         `Reembolso al cliente: $${resumen.reembolso.toFixed(2)}\n\n` +
         `Esta acción no se puede deshacer.`;
     }
@@ -3040,7 +3040,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       paymentSettings
     );
 
-  const canceladoPorFixFlow =
+  const canceladoPorRelydo =
     solicitud.status === "cancelled" &&
     Boolean(
       solicitud.cancellation_reason
@@ -3388,20 +3388,20 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               <div className="flex-1">
 
                 <p className="text-sm font-extrabold uppercase tracking-wide text-red-700">
-                  {canceladoPorFixFlow
+                  {canceladoPorRelydo
                     ? "Resolución de RELYDO"
                     : "Solicitud cancelada"}
                 </p>
 
                 <h2 className="mt-2 text-2xl font-extrabold text-red-900">
-                  {canceladoPorFixFlow
+                  {canceladoPorRelydo
                     ? "Trabajo cancelado por resolución de RELYDO"
                     : "Este trabajo fue cancelado"}
                 </h2>
 
                 <p className="mt-2 text-red-800">
-                  {canceladoPorFixFlow
-                    ? "FixFlow cerró este trabajo después de resolver el reclamo. El servicio ya no continuará."
+                  {canceladoPorRelydo
+                    ? "RELYDO cerró este trabajo después de resolver el reclamo. El servicio ya no continuará."
                     : "Esta solicitud ya no está activa."}
                 </p>
 
@@ -3409,7 +3409,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   <div className="mt-5 rounded-2xl bg-white p-5">
 
                     <p className="text-sm font-bold text-slate-500">
-                      {canceladoPorFixFlow
+                      {canceladoPorRelydo
                         ? "Decisión"
                         : "Motivo"}
                     </p>
@@ -3421,7 +3421,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   </div>
                 )}
 
-                {canceladoPorFixFlow &&
+                {canceladoPorRelydo &&
                   reclamoResuelto && (
                     <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
                       <p className="text-sm font-black uppercase tracking-wide text-blue-700">
@@ -4176,7 +4176,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           solicitud.status !==
             "open" && (
             <section
-              id="chat-fixflow"
+              id="chat-relydo"
               className="mt-8 scroll-mt-6 overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-xl"
             >
               <div className="border-b border-slate-200 bg-slate-950 px-6 py-5 text-white">
@@ -4690,7 +4690,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       Tu reclamo quedó registrado
                     </h2>
                     <p className="mt-2 text-slate-600">
-                      FixFlow conserva este reporte asociado al trabajo.
+                      RELYDO conserva este reporte asociado al trabajo.
                     </p>
                   </div>
 
@@ -4958,7 +4958,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     </label>
 
                     <p className="mb-3 text-sm text-slate-600">
-                      Describe qué muestran las fotos o videos y qué debe considerar FixFlow al revisar tu reclamo.
+                      Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar tu reclamo.
                     </p>
 
                     <textarea
@@ -5157,7 +5157,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                           {paymentSettings && (
                             <>
                               <p className="mt-2 text-xs font-semibold text-green-700">
-                                + ${calcularMontosPago(oferta.price, paymentSettings).customerFeeAmount.toFixed(2)} tarifa FixFlow
+                                + ${calcularMontosPago(oferta.price, paymentSettings).customerFeeAmount.toFixed(2)} tarifa RELYDO
                               </p>
                               <p className="mt-1 text-sm font-black text-green-950">
                                 Total: ${calcularMontosPago(oferta.price, paymentSettings).customerTotalAmount.toFixed(2)}

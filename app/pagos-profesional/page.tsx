@@ -1037,7 +1037,7 @@ export default function PagosProfesionalPage() {
                         </div>
 
                         <h3 className="mt-3 text-lg font-black text-slate-950">
-                          {request?.title || "Trabajo FixFlow"}
+                          {request?.title || "Trabajo RELYDO"}
                         </h3>
 
                         <p className="mt-1 text-sm text-slate-500">
@@ -1062,7 +1062,7 @@ export default function PagosProfesionalPage() {
                         valor={formatearDinero(dinero(payment.job_amount))}
                       />
                       <DatoPago
-                        titulo="Comisión FixFlow"
+                        titulo="Comisión RELYDO"
                         valor={formatearDinero(dinero(payment.provider_commission_amount))}
                       />
                       <DatoPago
@@ -1081,7 +1081,7 @@ export default function PagosProfesionalPage() {
                           ⏳ Pago retenido
                         </p>
                         <p className="mt-1 text-xs leading-5 text-amber-800">
-                          Liberación programada para {formatearFecha(payment.release_due_at)}. Si existe un reclamo activo, el pago permanecerá retenido hasta que FixFlow lo resuelva.
+                          Liberación programada para {formatearFecha(payment.release_due_at)}. Si existe un reclamo activo, el pago permanecerá retenido hasta que RELYDO lo resuelva.
                         </p>
                       </div>
                     )}
@@ -1229,7 +1229,7 @@ function obtenerEstadoPago(payment: PaymentRow) {
   if (payment.status === "paid_out") {
     return {
       label: "Pagado",
-      descripcion: "FixFlow ya liberó este pago al profesional.",
+      descripcion: "RELYDO ya liberó este pago al profesional.",
       badgeClass: "bg-emerald-100 text-emerald-800",
     };
   }

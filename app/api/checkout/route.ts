@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
 
                 description: professionalName
                   ? `Servicio realizado por ${professionalName}`
-                  : "Servicio contratado mediante FixFlow",
+                  : "Servicio contratado mediante RELYDO",
               },
 
               unit_amount: amountInCents,

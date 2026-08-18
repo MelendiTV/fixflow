@@ -14,7 +14,7 @@ const supabase = createClient(
 );
 
 const SOUND_STORAGE_KEY =
-  "fixflow_sound_enabled";
+  "relydo_sound_enabled";
 
 type Notification = {
   id: string;
@@ -520,7 +520,7 @@ export default function NotificationsBell({
             );
 
             console.log(
-              "Estado audio FixFlow:",
+              "Estado audio RELYDO:",
               context.state
             );
           };
@@ -727,7 +727,7 @@ export default function NotificationsBell({
       setSonidoActivo(true);
 
       console.log(
-        "🔊 Sonido FixFlow activado"
+        "🔊 Sonido RELYDO activado"
       );
     } catch (error) {
       console.error(
@@ -1486,7 +1486,7 @@ export default function NotificationsBell({
                   >
                     {pushActivo
                       ? "RELYDO puede avisarte en la pantalla del teléfono o laptop aunque la web esté en segundo plano."
-                      : "Permite que FixFlow muestre avisos en la pantalla de este dispositivo."}
+                      : "Permite que RELYDO muestre avisos en la pantalla de este dispositivo."}
                   </p>
 
                   {pushError && (

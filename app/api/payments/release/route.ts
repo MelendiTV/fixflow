@@ -542,7 +542,7 @@ async function procesarLiberacion({
               chargeId,
 
             transfer_group:
-              `fixflow_request_${requestId}`,
+              `relydo_request_${requestId}`,
 
             metadata: {
               request_id:
@@ -575,7 +575,7 @@ async function procesarLiberacion({
           },
           {
             idempotencyKey:
-              `fixflow_release_payment_${payment.id}`,
+              `relydo_release_payment_${payment.id}`,
           }
         );
 
@@ -715,7 +715,7 @@ async function procesarLiberacion({
               changeChargeId,
 
             transfer_group:
-              `fixflow_request_${requestId}`,
+              `relydo_request_${requestId}`,
 
             metadata: {
               request_id:
@@ -745,7 +745,7 @@ async function procesarLiberacion({
           },
           {
             idempotencyKey:
-              `fixflow_release_change_order_${changeOrder.id}`,
+              `relydo_release_change_order_${changeOrder.id}`,
           }
         );
 
@@ -984,14 +984,14 @@ export async function GET(
 ) {
   try {
     const cronSecret =
-      process.env.FIXFLOW_CRON_SECRET;
+      process.env.RELYDO_CRON_SECRET;
 
     if (!cronSecret) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "FIXFLOW_CRON_SECRET no está configurado.",
+            "RELYDO_CRON_SECRET no está configurado.",
         },
         { status: 500 }
       );

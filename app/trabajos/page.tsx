@@ -1264,7 +1264,7 @@ export default function TrabajoDetallePage() {
       )
     ) {
       setError(
-        "Este trabajo tiene un reclamo activo. No puede marcarse como completado hasta que FixFlow resuelva el reclamo."
+        "Este trabajo tiene un reclamo activo. No puede marcarse como completado hasta que RELYDO resuelva el reclamo."
       );
       return;
     }
@@ -2203,7 +2203,7 @@ export default function TrabajoDetallePage() {
 
             <div>
               <p className="text-2xl font-black tracking-tight">
-                FixFlow
+                RELYDO
               </p>
 
               <p className="text-xs font-semibold text-blue-200">
@@ -2290,7 +2290,7 @@ export default function TrabajoDetallePage() {
                   </h2>
 
                   <p className="mt-2 max-w-3xl leading-7 text-amber-900">
-                    El pago permanece retenido mientras FixFlow revisa el caso.
+                    El pago permanece retenido mientras RELYDO revisa el caso.
                     No puedes marcar el trabajo como completado hasta que el reclamo sea resuelto.
                   </p>
 
@@ -2849,7 +2849,7 @@ export default function TrabajoDetallePage() {
                         </span>
                         <div>
                           <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                            FixFlow
+                            RELYDO
                           </p>
                           <h2 className="text-xl font-black text-slate-950">
                             {pago
@@ -2975,7 +2975,7 @@ export default function TrabajoDetallePage() {
                                 Total a recibir
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
-                                Neto después de la tarifa FixFlow
+                                Neto después de la tarifa RELYDO
                               </p>
                             </div>
                             <p className="text-3xl font-black tracking-tight text-slate-950">
@@ -3316,7 +3316,7 @@ export default function TrabajoDetallePage() {
                   </label>
 
                   <p className="mb-3 text-sm text-slate-600">
-                    Describe qué muestran las fotos o videos y qué debe considerar FixFlow al revisar este reclamo.
+                    Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar este reclamo.
                   </p>
 
                   <textarea
@@ -3370,7 +3370,7 @@ export default function TrabajoDetallePage() {
                   </p>
 
                   <p className="mt-2 text-sm leading-6 text-red-800">
-                    Ya no puedes agregar comentarios, fotos o videos a este reclamo. FixFlow lo revisará con la evidencia disponible.
+                    Ya no puedes agregar comentarios, fotos o videos a este reclamo. RELYDO lo revisará con la evidencia disponible.
                   </p>
                 </div>
               )}

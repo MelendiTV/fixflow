@@ -376,7 +376,7 @@ export default function LoginProfesional() {
         <div className="bg-blue-700 px-8 py-8 text-white">
 
           <div className="text-2xl font-black">
-            FixFlow
+            RELYDO
           </div>
 
           <h1 className="mt-2 text-3xl font-extrabold">

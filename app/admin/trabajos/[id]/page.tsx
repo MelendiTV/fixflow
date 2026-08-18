@@ -782,7 +782,7 @@ export default function AdminTrabajoDetallePage() {
                   valor={payment.provider_net_amount}
                 />
                 <Monto
-                  titulo="Ingreso FixFlow"
+                  titulo="Ingreso RELYDO"
                   valor={payment.platform_revenue_amount}
                 />
               </div>

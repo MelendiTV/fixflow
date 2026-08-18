@@ -2478,7 +2478,7 @@ export default function AdminPage() {
             <div>
 
               <div className="text-2xl font-black">
-                FixFlow
+                RELYDO
               </div>
 
               <h1 className="mt-2 text-3xl font-extrabold">
@@ -3825,7 +3825,7 @@ export default function AdminPage() {
                   </h3>
 
                   <p className="mt-2 text-sm leading-6 text-purple-100">
-                    Escribe cuánto recibirá el profesional. FixFlow calcula automáticamente cuánto se devuelve al cliente.
+                    Escribe cuánto recibirá el profesional. RELYDO calcula automáticamente cuánto se devuelve al cliente.
                   </p>
                 </div>
 
