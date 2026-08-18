@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import NotificationsBell from "@/app/components/NotificationsBell";
+import { AccountModeSwitcher } from "@/app/components/AccountModeSwitcher";
+import { useAccountMode } from "@/app/components/AccountModeProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -149,6 +151,7 @@ function formatearFecha(fecha: string | null) {
 
 export default function PanelProfesional() {
   const router = useRouter();
+  const { setAccountRole } = useAccountMode();
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
@@ -264,6 +267,8 @@ export default function PanelProfesional() {
         router.replace("/login-profesional");
         return;
       }
+
+      setAccountRole("provider");
 
       const { data: providerProfile, error: profileError } = await supabase
         .from("provider_profiles")
@@ -733,6 +738,10 @@ export default function PanelProfesional() {
                   <p className="mt-1 max-w-[220px] truncate text-sm font-bold text-white">
                     {email}
                   </p>
+
+                  <div className="mt-3 rounded-xl bg-white/95 p-2 text-slate-900">
+                    <AccountModeSwitcher />
+                  </div>
 
                   <button
                     type="button"
