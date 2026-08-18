@@ -516,7 +516,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            `Stripe cobró correctamente, pero FixFlow no pudo guardar el pago adicional: ${updateError.message}`,
+            `Stripe cobró correctamente, pero RELYDO no pudo guardar el pago adicional: ${updateError.message}`,
         },
         {
           status: 500,

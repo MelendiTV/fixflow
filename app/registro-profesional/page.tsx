@@ -913,7 +913,7 @@ export default function RegistroProfesional() {
                 )}
 
                 <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-slate-700">
-                  Al registrarte, confirmas que la información suministrada es correcta y aceptas el proceso de verificación de FixFlow.
+                  Al registrarte, confirmas que la información suministrada es correcta y aceptas el proceso de verificación de RELYDO.
                 </div>
 
                 <button

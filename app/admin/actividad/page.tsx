@@ -195,7 +195,7 @@ export default function AdminActividadPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No pudimos cargar la actividad de FixFlow."
+          : "No pudimos cargar la actividad de RELYDO."
       );
     } finally {
       setLoading(false);
@@ -377,7 +377,7 @@ export default function AdminActividadPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl bg-white px-8 py-7 font-bold text-slate-700 shadow">
-          Cargando actividad de FixFlow...
+          Cargando actividad de RELYDO...
         </div>
       </main>
     );

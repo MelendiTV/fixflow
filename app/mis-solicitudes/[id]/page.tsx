@@ -340,7 +340,7 @@ function nombreEstadoPagoCliente(
   status: string
 ) {
   if (status === "ready_for_payout") {
-    return "Pago retenido por FixFlow";
+    return "Pago retenido por RELYDO";
   }
 
   if (status === "paid_out") {
@@ -1270,7 +1270,7 @@ export default function MisSolicitudDetallePage() {
         .maybeSingle();
 
       if (paymentSettingsError) {
-        throw new Error(`No pudimos cargar las tarifas de FixFlow: ${paymentSettingsError.message}`);
+        throw new Error(`No pudimos cargar las tarifas de RELYDO: ${paymentSettingsError.message}`);
       }
 
       setPaymentSettings(paymentSettingsData ? paymentSettingsData as PaymentSettings : null);
@@ -1610,7 +1610,7 @@ export default function MisSolicitudDetallePage() {
       }
 
       // El reclamo debe conservarse visible aunque el trabajo
-      // haya quedado cancelado por una resolución de FixFlow.
+      // haya quedado cancelado por una resolución de RELYDO.
       const {
         data: claimData,
         error: claimError,
@@ -1691,7 +1691,7 @@ export default function MisSolicitudDetallePage() {
 
     if (!paymentSettings) {
       setError(
-        "No pudimos cargar la configuración de pagos de FixFlow. Actualiza la página e inténtalo nuevamente."
+        "No pudimos cargar la configuración de pagos de RELYDO. Actualiza la página e inténtalo nuevamente."
       );
       return;
     }
@@ -1846,7 +1846,7 @@ Nuevo total: $${Number(
               changeOrder.new_total_amount
             ).toFixed(2)}
 
-Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional y la tarifa de servicio de FixFlow.`
+Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional y la tarifa de servicio de RELYDO.`
           : `¿Confirmas que deseas rechazar este cambio de presupuesto por $${Number(
               changeOrder.additional_amount
             ).toFixed(2)} adicionales?`
@@ -2752,7 +2752,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
   function motivoChatBloqueado() {
     if (reclamoActivoChat) {
-      return "Chat bloqueado porque existe un reclamo activo. A partir de este momento FixFlow Admin gestiona el caso.";
+      return "Chat bloqueado porque existe un reclamo activo. A partir de este momento RELYDO Admin gestiona el caso.";
     }
 
     if (
@@ -3389,13 +3389,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 <p className="text-sm font-extrabold uppercase tracking-wide text-red-700">
                   {canceladoPorFixFlow
-                    ? "Resolución de FixFlow"
+                    ? "Resolución de RELYDO"
                     : "Solicitud cancelada"}
                 </p>
 
                 <h2 className="mt-2 text-2xl font-extrabold text-red-900">
                   {canceladoPorFixFlow
-                    ? "Trabajo cancelado por resolución de FixFlow"
+                    ? "Trabajo cancelado por resolución de RELYDO"
                     : "Este trabajo fue cancelado"}
                 </h2>
 
@@ -3673,7 +3673,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               La cancelación automática ya no está disponible
             </h2>
             <p className="mt-2 leading-7 text-amber-900">
-              El profesional ya comenzó el servicio. Si existe un problema con el trabajo, deberá gestionarse mediante el sistema de reclamos de FixFlow.
+              El profesional ya comenzó el servicio. Si existe un problema con el trabajo, deberá gestionarse mediante el sistema de reclamos de RELYDO.
             </p>
 
             <button
@@ -3792,7 +3792,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                 <p className="text-sm font-bold leading-6 text-amber-900">
-                  Al aceptar, FixFlow te enviará al checkout seguro de Stripe para pagar los ${Number(
+                  Al aceptar, RELYDO te enviará al checkout seguro de Stripe para pagar los ${Number(
                     changeOrderPendiente.additional_amount
                   ).toFixed(2)} adicionales más la tarifa de servicio correspondiente.
                 </p>
@@ -3990,7 +3990,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             <h2 className="mt-2 text-2xl font-extrabold text-green-900">
               {ofertaSeleccionada.profesional
                 ?.business_name ||
-                "Profesional FixFlow"}
+                "Profesional RELYDO"}
             </h2>
 
             <p className="mt-2 text-green-800">
@@ -4015,7 +4015,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     <strong className="text-slate-900">${presupuestoTotalPagado.toFixed(2)}</strong>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-slate-600">Tarifa de servicio FixFlow ({Number(payment.customer_fee_percent).toFixed(2)}%)</span>
+                    <span className="text-slate-600">Tarifa de servicio RELYDO ({Number(payment.customer_fee_percent).toFixed(2)}%)</span>
                     <strong className="text-slate-900">${tarifaClienteTotalPagada.toFixed(2)}</strong>
                   </div>
                   <div className="border-t border-slate-200 pt-3">
@@ -4068,25 +4068,25 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                   {payment.status === "ready_for_payout" && (
                     <p className="mt-3 text-xs leading-5 text-amber-700">
-                      El pago está protegido por FixFlow y todavía no ha sido liberado al profesional.
+                      El pago está protegido por RELYDO y todavía no ha sido liberado al profesional.
                     </p>
                   )}
 
                   {payment.status === "paid_out" && (
                     <p className="mt-3 text-xs leading-5 text-blue-700">
-                      El pago fue procesado y liberado de acuerdo con el flujo de FixFlow.
+                      El pago fue procesado y liberado de acuerdo con el flujo de RELYDO.
                     </p>
                   )}
 
                   {payment.status === "refunded" && (
                     <p className="mt-3 text-xs leading-5 text-emerald-700">
-                      FixFlow procesó el reembolso correspondiente a este trabajo.
+                      RELYDO procesó el reembolso correspondiente a este trabajo.
                     </p>
                   )}
 
                   {payment.status === "partially_refunded" && (
                     <p className="mt-3 text-xs leading-5 text-violet-700">
-                      FixFlow procesó un reembolso parcial para este trabajo.
+                      RELYDO procesó un reembolso parcial para este trabajo.
                     </p>
                   )}
                 </div>
@@ -4266,7 +4266,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                                   ? "Tú"
                                   : item.sender_role ===
                                     "admin"
-                                  ? "FixFlow Admin"
+                                  ? "RELYDO Admin"
                                   : ofertaSeleccionada.profesional
                                       ?.business_name ||
                                     "Profesional"}
@@ -4353,7 +4353,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       )}
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      🔒 FixFlow mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.
+                      🔒 RELYDO mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.
                     </p>
                   </>
                 ) : (
@@ -4756,7 +4756,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     {claim.resolution_notes && (
                       <div className="mt-4 rounded-xl bg-white p-4">
                         <p className="text-sm font-bold text-slate-500">
-                          Resolución de FixFlow
+                          Resolución de RELYDO
                         </p>
                         <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">
                           {claim.resolution_notes}
@@ -5127,7 +5127,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                           <h3 className="mt-2 text-2xl font-extrabold text-slate-900">
                             {oferta.profesional?.business_name ||
-                              "Profesional FixFlow"}
+                              "Profesional RELYDO"}
                           </h3>
 
                           <p className="mt-1 font-semibold text-blue-700">
@@ -5227,7 +5227,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       <div className="mt-4 rounded-xl bg-slate-50 p-4">
 
                         <p className="text-sm text-slate-500">
-                          Trabajos completados en FixFlow
+                          Trabajos completados en RELYDO
                         </p>
 
                         <p className="mt-1 font-extrabold text-slate-900">

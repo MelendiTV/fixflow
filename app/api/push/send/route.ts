@@ -50,7 +50,7 @@ export async function POST(
       Esta ruta NO se llama directamente
       desde el navegador.
 
-      Solo otros procesos seguros de FixFlow
+      Solo otros procesos seguros de RELYDO
       podrán utilizarla.
     */
 
@@ -99,7 +99,7 @@ export async function POST(
 
     const title =
       data.title?.trim() ||
-      "FixFlow";
+      "RELYDO";
 
     const body =
       data.body?.trim() ||

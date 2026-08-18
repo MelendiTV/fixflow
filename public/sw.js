@@ -1,6 +1,6 @@
 self.addEventListener("push", function (event) {
   let data = {
-    title: "FixFlow",
+    title: "RELYDO",
     body: "Tienes una nueva notificación.",
     url: "/",
   };
@@ -25,7 +25,7 @@ self.addEventListener("push", function (event) {
 
   event.waitUntil(
     self.registration.showNotification(
-      data.title || "FixFlow",
+      data.title || "RELYDO",
       options
     )
   );

@@ -2784,7 +2784,7 @@ export default function AdminPage() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Controla ingresos de FixFlow, volumen procesado, pagos al profesional, retenciones y reembolsos.
+                Controla ingresos de RELYDO, volumen procesado, pagos al profesional, retenciones y reembolsos.
               </p>
 
               <p className="mt-5 text-sm font-black text-violet-700">
@@ -2816,7 +2816,7 @@ export default function AdminPage() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Consulta clientes y profesionales, teléfonos, contacto y actividad dentro de FixFlow.
+                Consulta clientes y profesionales, teléfonos, contacto y actividad dentro de RELYDO.
               </p>
 
               <p className="mt-5 text-sm font-black text-cyan-700">
@@ -2874,7 +2874,7 @@ export default function AdminPage() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Mide trabajos, ofertas, clientes, profesionales y el rendimiento operativo de FixFlow.
+                Mide trabajos, ofertas, clientes, profesionales y el rendimiento operativo de RELYDO.
               </p>
 
               <p className="mt-5 text-sm font-black text-indigo-700">
@@ -3046,7 +3046,7 @@ export default function AdminPage() {
 
                           <h3 className="text-2xl font-extrabold text-slate-900">
                             {provider.business_name ||
-                              "Profesional FixFlow"}
+                              "Profesional RELYDO"}
                           </h3>
 
                           <p className="mt-1 font-semibold text-blue-700">

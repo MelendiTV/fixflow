@@ -295,7 +295,7 @@ export default function PagosProfesionalPage() {
         !baseProfile
       ) {
         throw new Error(
-          "No encontramos tu cuenta en FixFlow."
+          "No encontramos tu cuenta en RELYDO."
         );
       }
 
@@ -673,7 +673,7 @@ export default function PagosProfesionalPage() {
 
               <p className="mt-2 text-xl font-black text-slate-950">
                 {profile.business_name ||
-                  "Profesional FixFlow"}
+                  "Profesional RELYDO"}
               </p>
 
               <p className="mt-1 break-all text-sm text-slate-500">
@@ -949,7 +949,7 @@ export default function PagosProfesionalPage() {
 
               <p className="text-center text-xs leading-5 text-slate-500">
                 🔒 Tus datos financieros se procesan de forma segura mediante Stripe.
-                FixFlow no necesita mostrar ni almacenar tu número completo de cuenta o tarjeta.
+                RELYDO no necesita mostrar ni almacenar tu número completo de cuenta o tarjeta.
               </p>
 
             </div>
@@ -970,7 +970,7 @@ export default function PagosProfesionalPage() {
               </h2>
 
               <p className="mt-2 text-sm text-slate-600">
-                Aquí puedes ver qué dinero sigue retenido por FixFlow y qué pagos ya fueron enviados.
+                Aquí puedes ver qué dinero sigue retenido por RELYDO y qué pagos ya fueron enviados.
               </p>
             </div>
 
@@ -1237,7 +1237,7 @@ function obtenerEstadoPago(payment: PaymentRow) {
   if (payment.status === "ready_for_payout") {
     return {
       label: "Retenido",
-      descripcion: "El pago está protegido por FixFlow hasta que venza el período de seguridad.",
+      descripcion: "El pago está protegido por RELYDO hasta que venza el período de seguridad.",
       badgeClass: "bg-amber-100 text-amber-800",
     };
   }
@@ -1245,7 +1245,7 @@ function obtenerEstadoPago(payment: PaymentRow) {
   if (payment.status === "partially_refunded") {
     return {
       label: "Resolución parcial",
-      descripcion: "FixFlow resolvió este pago parcialmente.",
+      descripcion: "RELYDO resolvió este pago parcialmente.",
       badgeClass: "bg-violet-100 text-violet-800",
     };
   }
@@ -1276,7 +1276,7 @@ function obtenerEstadoPago(payment: PaymentRow) {
 
   return {
     label: payment.status || "Pendiente",
-    descripcion: "Movimiento registrado en FixFlow.",
+    descripcion: "Movimiento registrado en RELYDO.",
     badgeClass: "bg-slate-100 text-slate-700",
   };
 }

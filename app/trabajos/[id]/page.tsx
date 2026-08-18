@@ -2767,8 +2767,8 @@ export default function TrabajoDetallePage() {
       setMensaje(
         nuevasEvidencias.length ===
         1
-          ? "Respuesta y evidencia enviadas correctamente. El envío quedó cerrado para revisión de FixFlow."
-          : `${nuevasEvidencias.length} archivos de evidencia y tu respuesta fueron enviados. El envío quedó cerrado para revisión de FixFlow.`
+          ? "Respuesta y evidencia enviadas correctamente. El envío quedó cerrado para revisión de RELYDO."
+          : `${nuevasEvidencias.length} archivos de evidencia y tu respuesta fueron enviados. El envío quedó cerrado para revisión de RELYDO.`
       );
     } catch (err) {
       console.error(
@@ -3296,7 +3296,7 @@ export default function TrabajoDetallePage() {
 
   function motivoChatBloqueado() {
     if (reclamoActivoChat) {
-      return "Chat bloqueado porque existe un reclamo activo. FixFlow Admin gestiona el caso desde este momento.";
+      return "Chat bloqueado porque existe un reclamo activo. RELYDO Admin gestiona el caso desde este momento.";
     }
 
     if (
@@ -3741,13 +3741,13 @@ export default function TrabajoDetallePage() {
 
                 <h2 className="mt-1 text-2xl font-black text-red-950">
                   {canceladoPorFixFlow
-                    ? "Trabajo cancelado por resolución de FixFlow"
+                    ? "Trabajo cancelado por resolución de RELYDO"
                     : "El cliente canceló este trabajo"}
                 </h2>
 
                 <p className="mt-2 leading-6 text-red-800">
                   {canceladoPorFixFlow
-                    ? "FixFlow resolvió el reclamo y cerró este trabajo. Ya no puedes continuar, actualizar el estado ni marcar el trabajo como completado."
+                    ? "RELYDO resolvió el reclamo y cerró este trabajo. Ya no puedes continuar, actualizar el estado ni marcar el trabajo como completado."
                     : "Esta solicitud ya no está activa. No puedes continuar, actualizar el estado ni marcar el trabajo como completado."}
                 </p>
               </div>
@@ -3943,7 +3943,7 @@ export default function TrabajoDetallePage() {
                   titulo="Cliente"
                   valor={
                     trabajo.customer_name ||
-                    "Cliente FixFlow"
+                    "Cliente RELYDO"
                   }
                 />
               </div>
@@ -4878,7 +4878,7 @@ export default function TrabajoDetallePage() {
                             {pago
                               ? cancelado
                                 ? canceladoPorFixFlow
-                                  ? "Resolución financiera de FixFlow"
+                                  ? "Resolución financiera de RELYDO"
                                   : "Compensación por cancelación"
                                 : "Comprobante del servicio"
                               : "Resumen de tu presupuesto"}
@@ -4908,7 +4908,7 @@ export default function TrabajoDetallePage() {
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
                           <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-700">
                             {canceladoPorFixFlow
-                              ? "Trabajo cancelado por resolución de FixFlow"
+                              ? "Trabajo cancelado por resolución de RELYDO"
                               : "Trabajo cancelado por el cliente"}
                           </p>
 
@@ -4916,7 +4916,7 @@ export default function TrabajoDetallePage() {
                             <div>
                               <p className="text-sm font-black uppercase tracking-wide text-slate-500">
                                 {canceladoPorFixFlow
-                                  ? "Compensación definida por FixFlow"
+                                  ? "Compensación definida por RELYDO"
                                   : "Compensación por cancelación"}
                               </p>
                               <p className="mt-1 text-xs leading-5 text-slate-500">
@@ -4961,7 +4961,7 @@ export default function TrabajoDetallePage() {
                                 {reclamo?.resolution_notes && (
                                   <div className="mt-3 rounded-lg bg-white p-3">
                                     <p className="text-xs font-bold text-slate-500">
-                                      Resolución de FixFlow
+                                      Resolución de RELYDO
                                     </p>
                                     <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">
                                       {reclamo.resolution_notes}
@@ -5038,7 +5038,7 @@ export default function TrabajoDetallePage() {
                           <div className="flex items-center justify-between gap-4 border-b border-dashed border-slate-300 py-4">
                             <div>
                               <p className="text-sm font-semibold text-slate-600">
-                                Tarifa de servicio FixFlow
+                                Tarifa de servicio RELYDO
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
                                 {Number(pago.provider_commission_percent).toFixed(2)}% del valor del servicio
@@ -5142,7 +5142,7 @@ export default function TrabajoDetallePage() {
                     <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
                       ❌{" "}
                       {canceladoPorFixFlow
-                        ? "Trabajo cancelado por resolución de FixFlow."
+                        ? "Trabajo cancelado por resolución de RELYDO."
                         : "El cliente canceló este trabajo."}
                     </div>
                   ) : !pago ? (
@@ -5198,7 +5198,7 @@ export default function TrabajoDetallePage() {
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-300">
-                      FixFlow mantiene privado el número real del cliente.
+                      RELYDO mantiene privado el número real del cliente.
                     </p>
                   </div>
 
@@ -5270,7 +5270,7 @@ export default function TrabajoDetallePage() {
                                   ? "Tú"
                                   : item.sender_role ===
                                     "admin"
-                                  ? "FixFlow Admin"
+                                  ? "RELYDO Admin"
                                   : trabajo.customer_name ||
                                     "Cliente"}
                               </p>
@@ -5356,7 +5356,7 @@ export default function TrabajoDetallePage() {
                       )}
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      🔒 Los números personales no se muestran. Usa este chat para coordinar el trabajo dentro de FixFlow.
+                      🔒 Los números personales no se muestran. Usa este chat para coordinar el trabajo dentro de RELYDO.
                     </p>
                   </>
                 ) : (
@@ -5403,7 +5403,7 @@ export default function TrabajoDetallePage() {
                     : reclamo.status === "open" ||
                       reclamo.status === "reviewing" ||
                       reclamo.status === "in_review"
-                    ? "Puedes enviar una sola respuesta con fotos o videos para que FixFlow tenga evidencia de ambas partes antes de resolver el reclamo."
+                    ? "Puedes enviar una sola respuesta con fotos o videos para que RELYDO tenga evidencia de ambas partes antes de resolver el reclamo."
                     : "Consulta los detalles, la evidencia y la resolución final de este reclamo."}
                 </p>
               </div>
@@ -5655,7 +5655,7 @@ export default function TrabajoDetallePage() {
                 </button>
 
                 <p className="mt-3 text-center text-xs leading-5 text-slate-500">
-                  Una vez enviada, la evidencia quedará asociada al reclamo para revisión de FixFlow.
+                  Una vez enviada, la evidencia quedará asociada al reclamo para revisión de RELYDO.
                 </p>
               </>
             )}
@@ -5680,7 +5680,7 @@ export default function TrabajoDetallePage() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-emerald-800">
-                  La evidencia y tu explicación quedaron registradas para revisión de FixFlow. Por seguridad, ya no puedes agregar, quitar ni modificar información de este reclamo.
+                  La evidencia y tu explicación quedaron registradas para revisión de RELYDO. Por seguridad, ya no puedes agregar, quitar ni modificar información de este reclamo.
                 </p>
 
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
@@ -5711,7 +5711,7 @@ export default function TrabajoDetallePage() {
                   {reclamo.resolution_notes && (
                     <div className="mt-4 rounded-xl border border-green-200 bg-white p-4">
                       <p className="text-xs font-black uppercase tracking-wide text-green-700">
-                        Resolución de FixFlow
+                        Resolución de RELYDO
                       </p>
 
                       <p className="mt-2 whitespace-pre-wrap text-slate-700">

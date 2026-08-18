@@ -251,7 +251,7 @@ export default function PanelProfesional() {
         .maybeSingle();
 
       if (baseProfileError || !baseProfile) {
-        throw new Error("No se encontró tu cuenta en FixFlow.");
+        throw new Error("No se encontró tu cuenta en RELYDO.");
       }
 
       if (baseProfile.role === "admin") {
@@ -590,7 +590,7 @@ export default function PanelProfesional() {
     if (estaVerificado) {
       return {
         titulo: "Verificado ✅",
-        descripcion: "Tu cuenta ha sido revisada y aprobada por FixFlow.",
+        descripcion: "Tu cuenta ha sido revisada y aprobada por RELYDO.",
         estilo: "border-green-300 bg-green-50 text-green-900",
         badge: "bg-green-100 text-green-800",
         textoBadge: "Verificado",
@@ -684,7 +684,7 @@ export default function PanelProfesional() {
 
                   <div>
                     <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-                      {profile.business_name || "Profesional FixFlow"}
+                      {profile.business_name || "Profesional RELYDO"}
                     </h1>
 
                     <button
@@ -757,7 +757,7 @@ export default function PanelProfesional() {
               </p>
 
               <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                Tu actividad en FixFlow
+                Tu actividad en RELYDO
               </h2>
 
               <p className="mt-2 text-slate-600">
@@ -1074,7 +1074,7 @@ export default function PanelProfesional() {
                   </p>
 
                   <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                    {profile.business_name || "Profesional FixFlow"}
+                    {profile.business_name || "Profesional RELYDO"}
                   </h2>
 
                   <p className="mt-1 font-bold text-slate-500">
@@ -1307,7 +1307,7 @@ export default function PanelProfesional() {
                     <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                       <InfoBox
                         titulo="Cliente"
-                        valor={trabajo.customer_name || "Cliente FixFlow"}
+                        valor={trabajo.customer_name || "Cliente RELYDO"}
                       />
 
                       <InfoBox

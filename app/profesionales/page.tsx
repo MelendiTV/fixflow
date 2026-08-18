@@ -212,7 +212,7 @@ export default function ProfesionalesPage() {
 
                         <h2 className="mt-3 text-2xl font-extrabold">
                           {profesional.business_name ||
-                            "Profesional FixFlow"}
+                            "Profesional RELYDO"}
                         </h2>
 
                         <p className="mt-1 font-semibold text-blue-100">

@@ -2407,7 +2407,7 @@ export default function TrabajoDetallePage() {
                   titulo="Cliente"
                   valor={
                     trabajo.customer_name ||
-                    "Cliente FixFlow"
+                    "Cliente RELYDO"
                   }
                 />
               </div>
@@ -2958,7 +2958,7 @@ export default function TrabajoDetallePage() {
                           <div className="flex items-center justify-between gap-4 border-b border-dashed border-slate-300 py-4">
                             <div>
                               <p className="text-sm font-semibold text-slate-600">
-                                Tarifa de servicio FixFlow
+                                Tarifa de servicio RELYDO
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
                                 {Number(pago.provider_commission_percent).toFixed(2)}% del valor del servicio
@@ -3109,7 +3109,7 @@ export default function TrabajoDetallePage() {
                 </h2>
 
                 <p className="mt-2 max-w-3xl text-slate-600">
-                  Puedes enviar fotos o videos para que FixFlow tenga evidencia de ambas partes antes de resolver el reclamo.
+                  Puedes enviar fotos o videos para que RELYDO tenga evidencia de ambas partes antes de resolver el reclamo.
                 </p>
               </div>
 
@@ -3357,7 +3357,7 @@ export default function TrabajoDetallePage() {
                 </button>
 
                 <p className="mt-3 text-center text-xs leading-5 text-slate-500">
-                  Una vez enviada, la evidencia quedará asociada al reclamo para revisión de FixFlow.
+                  Una vez enviada, la evidencia quedará asociada al reclamo para revisión de RELYDO.
                 </p>
               </>
             )}
@@ -3382,7 +3382,7 @@ export default function TrabajoDetallePage() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-emerald-800">
-                  La evidencia y tu explicación quedaron registradas para revisión de FixFlow. Por seguridad, ya no puedes agregar, quitar ni modificar información de este reclamo.
+                  La evidencia y tu explicación quedaron registradas para revisión de RELYDO. Por seguridad, ya no puedes agregar, quitar ni modificar información de este reclamo.
                 </p>
 
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">

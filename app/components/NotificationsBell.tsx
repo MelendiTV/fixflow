@@ -394,7 +394,7 @@ export default function NotificationsBell({
     REACTIVAR AUDIO AUTOMÁTICAMENTE
 
     Si el navegador suspende el
-    AudioContext, FixFlow intenta
+    AudioContext, RELYDO intenta
     recuperarlo cuando:
 
     - vuelves a la pestaña
@@ -766,7 +766,7 @@ export default function NotificationsBell({
         "running"
     ) {
       console.warn(
-        "🔇 Audio suspendido. FixFlow intentará reactivarlo cuando vuelvas a interactuar."
+        "🔇 Audio suspendido. RELYDO intentará reactivarlo cuando vuelvas a interactuar."
       );
 
       setSonidoActivo(false);
@@ -1485,7 +1485,7 @@ export default function NotificationsBell({
                     }`}
                   >
                     {pushActivo
-                      ? "FixFlow puede avisarte en la pantalla del teléfono o laptop aunque la web esté en segundo plano."
+                      ? "RELYDO puede avisarte en la pantalla del teléfono o laptop aunque la web esté en segundo plano."
                       : "Permite que FixFlow muestre avisos en la pantalla de este dispositivo."}
                   </p>
 
@@ -1561,10 +1561,10 @@ export default function NotificationsBell({
                     {sonidoActivo
                       ? modo ===
                         "profesional"
-                        ? "FixFlow te avisará cuando llegue una orden o cambie un trabajo."
-                        : "FixFlow te avisará cuando recibas presupuestos o cambie el estado de tu trabajo."
+                        ? "RELYDO te avisará cuando llegue una orden o cambie un trabajo."
+                        : "RELYDO te avisará cuando recibas presupuestos o cambie el estado de tu trabajo."
                       : sonidoDeseadoRef.current
-                      ? "FixFlow intentará reactivar el audio automáticamente."
+                      ? "RELYDO intentará reactivar el audio automáticamente."
                       : "Pulsa Activar sonido para escuchar las notificaciones."}
                   </p>
 

@@ -424,7 +424,7 @@ export async function POST(
         {
           error:
             settingsError
-              ? `No pudimos cargar las tarifas de FixFlow: ${settingsError.message}`
+              ? `No pudimos cargar las tarifas de RELYDO: ${settingsError.message}`
               : "No existe una configuración activa de pagos.",
         },
         {
@@ -588,7 +588,7 @@ export async function POST(
 
           product_data: {
             name:
-              "Tarifa de servicio FixFlow",
+              "Tarifa de servicio RELYDO",
 
             description:
               `${customerFeePercent.toFixed(
@@ -604,7 +604,7 @@ export async function POST(
     //
     // IMPORTANTE:
     // NO transferimos todavía al profesional.
-    // El dinero queda en FixFlow igual que el pago original.
+    // El dinero queda en RELYDO igual que el pago original.
     // ======================================================
 
     const session =

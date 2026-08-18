@@ -612,7 +612,7 @@ async function procesarLiberacion({
           success: false,
           status: 500,
           error:
-            "Stripe creó la transferencia original, pero FixFlow no pudo registrar la liberación en la base de datos.",
+            "Stripe creó la transferencia original, pero RELYDO no pudo registrar la liberación en la base de datos.",
         };
       }
     }
@@ -783,7 +783,7 @@ async function procesarLiberacion({
         );
 
         throw new Error(
-          "Stripe transfirió el adicional, pero FixFlow no pudo registrar la liberación del Change Order."
+          "Stripe transfirió el adicional, pero RELYDO no pudo registrar la liberación del Change Order."
         );
       }
     }

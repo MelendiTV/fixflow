@@ -1010,7 +1010,7 @@ export default function AdminReclamosPage() {
                         titulo="Cliente"
                         valor={
                           trabajo?.customer_name ||
-                          "Cliente FixFlow"
+                          "Cliente RELYDO"
                         }
                         secundario={
                           trabajo?.customer_email ||
@@ -1022,7 +1022,7 @@ export default function AdminReclamosPage() {
                         titulo="Profesional"
                         valor={
                           profesional?.business_name ||
-                          "Profesional FixFlow"
+                          "Profesional RELYDO"
                         }
                         secundario={
                           profesional

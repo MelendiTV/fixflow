@@ -633,10 +633,10 @@ export default function AdminFinanzasPage() {
           "Trabajo FixFlow",
         cliente:
           trabajo?.customer_name ||
-          "Cliente FixFlow",
+          "Cliente RELYDO",
         profesional:
           profesional?.business_name ||
-          "Profesional FixFlow",
+          "Profesional RELYDO",
       };
     });
   }, [
@@ -684,11 +684,11 @@ export default function AdminFinanzasPage() {
           </p>
 
           <h1 className="mt-2 text-3xl font-black">
-            Finanzas y ganancias de FixFlow
+            Finanzas y ganancias de RELYDO
           </h1>
 
           <p className="mt-3 max-w-3xl text-slate-300">
-            Controla el dinero procesado por la plataforma, los ingresos de FixFlow, pagos al profesional, retenciones y reembolsos.
+            Controla el dinero procesado por la plataforma, los ingresos de RELYDO, pagos al profesional, retenciones y reembolsos.
           </p>
         </section>
 
@@ -929,7 +929,7 @@ export default function AdminFinanzasPage() {
                         }
                       />
                       <Importe
-                        titulo="FixFlow"
+                        titulo="RELYDO"
                         valor={
                           p.platform_revenue_amount
                         }

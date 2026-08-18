@@ -102,7 +102,7 @@ export default function CompletarVerificacion() {
       !baseProfile
     ) {
       setError(
-        "No se encontró tu cuenta en FixFlow."
+        "No se encontró tu cuenta en RELYDO."
       );
       setLoading(false);
       return;
@@ -344,7 +344,7 @@ export default function CompletarVerificacion() {
     }
 
     /*
-      FixFlow necesita al menos UN documento
+      RELYDO necesita al menos UN documento
       para verificar manualmente una cuenta.
 
       Si el profesional no requiere licencia,

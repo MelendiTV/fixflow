@@ -988,7 +988,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Stripe procesó la distribución, pero FixFlow no pudo actualizar payments. No repitas manualmente la operación.",
+            "Stripe procesó la distribución, pero RELYDO no pudo actualizar payments. No repitas manualmente la operación.",
           stripeTransferId,
           stripeRefundId,
         },

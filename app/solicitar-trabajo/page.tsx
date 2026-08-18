@@ -1026,7 +1026,7 @@ function SolicitarTrabajoContenido() {
 
                 <h2 className="mt-1 text-xl font-extrabold text-green-900">
                   {profesional.business_name ||
-                    "Profesional FixFlow"}
+                    "Profesional RELYDO"}
                 </h2>
 
                 <p className="mt-1 text-green-800">
@@ -1036,7 +1036,7 @@ function SolicitarTrabajoContenido() {
                 </p>
 
                 <p className="mt-3 text-sm text-green-800">
-                  ✓ Profesional verificado por FixFlow
+                  ✓ Profesional verificado por RELYDO
                 </p>
 
               </div>

@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "No existe una configuración de pagos activa en FixFlow.",
+            "No existe una configuración de pagos activa en RELYDO.",
         },
         { status: 500 }
       );
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "La configuración de comisiones de FixFlow no es válida.",
+            "La configuración de comisiones de RELYDO no es válida.",
         },
         { status: 500 }
       );
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       professionalPrice - providerCommissionAmount
     );
 
-    // Ganancia total de FixFlow
+    // Ganancia total de RELYDO
     const platformRevenueAmount = redondearDinero(
       serviceFee + providerCommissionAmount
     );
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
               product_data: {
                 name:
                   serviceTitle ||
-                  "Servicio FixFlow",
+                  "Servicio RELYDO",
 
                 description: professionalName
                   ? `Servicio realizado por ${professionalName}`

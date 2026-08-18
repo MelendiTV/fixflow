@@ -157,7 +157,7 @@ export default function CompletarPerfilProfesional() {
         !trade
       ) {
         throw new Error(
-          "Faltan datos del registro profesional. Vuelve a registrarte o contacta con FixFlow."
+          "Faltan datos del registro profesional. Vuelve a registrarte o contacta con RELYDO."
         );
       }
 

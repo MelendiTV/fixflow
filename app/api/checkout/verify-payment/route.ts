@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "No existe una configuración de pagos activa en FixFlow.",
+            "No existe una configuración de pagos activa en RELYDO.",
         },
         { status: 500 }
       );
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "El importe confirmado por Stripe no coincide con el total calculado por FixFlow.",
+            "El importe confirmado por Stripe no coincide con el total calculado por RELYDO.",
         },
         { status: 400 }
       );
@@ -302,7 +302,7 @@ export async function POST(request: NextRequest) {
       ).toUpperCase(),
 
       // El pago está recibido, pero todavía retenido
-      // dentro del flujo de FixFlow.
+      // dentro del flujo de RELYDO.
       status: "ready_for_payout",
 
       payment_provider: "stripe",
@@ -358,7 +358,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
           {
-            error: `Stripe confirmó el pago, pero FixFlow no pudo actualizar payments: ${updatePaymentError.message}`,
+            error: `Stripe confirmó el pago, pero RELYDO no pudo actualizar payments: ${updatePaymentError.message}`,
           },
           { status: 500 }
         );
@@ -389,7 +389,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json(
               {
-                error: `Stripe confirmó el pago, pero FixFlow no pudo actualizar el payment existente: ${retryUpdateError.message}`,
+                error: `Stripe confirmó el pago, pero RELYDO no pudo actualizar el payment existente: ${retryUpdateError.message}`,
               },
               { status: 500 }
             );
@@ -402,7 +402,7 @@ export async function POST(request: NextRequest) {
 
           return NextResponse.json(
             {
-              error: `Stripe confirmó el pago, pero FixFlow no pudo crear payments: ${insertPaymentError.message}`,
+              error: `Stripe confirmó el pago, pero RELYDO no pudo crear payments: ${insertPaymentError.message}`,
             },
             { status: 500 }
           );

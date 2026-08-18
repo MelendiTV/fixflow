@@ -659,7 +659,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              "Stripe procesó la transferencia, pero FixFlow no pudo registrar el pago como liberado. No repitas la operación.",
+              "Stripe procesó la transferencia, pero RELYDO no pudo registrar el pago como liberado. No repitas la operación.",
             stripeTransferId: transferId,
           },
           { status: 500 }
@@ -784,7 +784,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              "Stripe hizo el reembolso, pero FixFlow no pudo actualizar payments. No repitas el reembolso.",
+              "Stripe hizo el reembolso, pero RELYDO no pudo actualizar payments. No repitas el reembolso.",
             stripeRefundId: refund.id,
           },
           { status: 500 }
@@ -835,7 +835,7 @@ export async function POST(request: NextRequest) {
             job_stage:
               null,
             cancellation_reason:
-              "Reclamo resuelto a favor del cliente por FixFlow.",
+              "Reclamo resuelto a favor del cliente por RELYDO.",
             cancelled_at:
               new Date().toISOString(),
           })
@@ -877,7 +877,7 @@ export async function POST(request: NextRequest) {
     // - está iniciado (in_progress + working).
     //
     // Si el trabajo todavía está iniciado, una resolución
-    // parcial significa que FixFlow termina la relación de
+    // parcial significa que RELYDO termina la relación de
     // trabajo por decisión del Admin:
     //
     // 1. Reembolsa al cliente el importe definido.
@@ -1082,7 +1082,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error:
-              "Stripe hizo el reembolso parcial, pero FixFlow no pudo actualizar payments. No repitas el reembolso.",
+              "Stripe hizo el reembolso parcial, pero RELYDO no pudo actualizar payments. No repitas el reembolso.",
             stripeRefundId:
               refund.id,
           },
@@ -1278,7 +1278,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "La resolución económica fue procesada, pero FixFlow no pudo actualizar el estado del pago. No repitas los movimientos.",
+            "La resolución económica fue procesada, pero RELYDO no pudo actualizar el estado del pago. No repitas los movimientos.",
           stripeTransferId,
           stripeRefundId,
         },
@@ -1360,7 +1360,7 @@ export async function POST(request: NextRequest) {
             null,
 
           cancellation_reason:
-            "Reclamo resuelto parcialmente por FixFlow.",
+            "Reclamo resuelto parcialmente por RELYDO.",
 
           cancelled_at:
             new Date().toISOString(),

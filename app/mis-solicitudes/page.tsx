@@ -656,7 +656,7 @@ export default function MisSolicitudesPage() {
               </p>
 
               <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                Tu actividad en FixFlow
+                Tu actividad en RELYDO
               </h2>
 
               <p className="mt-2 text-slate-600">

@@ -307,7 +307,7 @@ export async function POST(
         return NextResponse.json(
           {
             error:
-              `Stripe creó la cuenta, pero FixFlow no pudo guardarla: ${saveAccountError.message}`,
+              `Stripe creó la cuenta, pero RELYDO no pudo guardarla: ${saveAccountError.message}`,
           },
           {
             status: 500,

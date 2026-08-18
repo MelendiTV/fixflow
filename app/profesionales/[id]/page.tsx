@@ -283,7 +283,7 @@ export default function PerfilProfesional() {
 
                 <h1 className="text-3xl font-extrabold md:text-4xl">
                   {profesional.business_name ||
-                    "Profesional FixFlow"}
+                    "Profesional RELYDO"}
                 </h1>
 
                 <p className="mt-2 text-xl font-semibold text-blue-100">
@@ -418,7 +418,7 @@ export default function PerfilProfesional() {
                   </p>
 
                   <p className="mt-1 font-extrabold text-green-700">
-                    Verificado por FixFlow
+                    Verificado por RELYDO
                   </p>
 
                 </div>
@@ -567,11 +567,11 @@ export default function PerfilProfesional() {
             <div className="mt-9 rounded-2xl border border-green-200 bg-green-50 p-5">
 
               <h3 className="font-extrabold text-green-900">
-                ✓ Cuenta verificada por FixFlow
+                ✓ Cuenta verificada por RELYDO
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-green-800">
-                Este profesional completó el proceso de verificación requerido por FixFlow.
+                Este profesional completó el proceso de verificación requerido por RELYDO.
               </p>
 
             </div>

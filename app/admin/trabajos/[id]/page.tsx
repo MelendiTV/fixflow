@@ -699,7 +699,7 @@ export default function AdminTrabajoDetallePage() {
               titulo="Cliente"
               valor={
                 solicitud.customer_name ||
-                "Cliente FixFlow"
+                "Cliente RELYDO"
               }
               secundario={
                 solicitud.customer_email ||
@@ -1022,7 +1022,7 @@ export default function AdminTrabajoDetallePage() {
 
                     const nombre =
                       esAdmin
-                        ? "FixFlow Admin"
+                        ? "RELYDO Admin"
                         : esCliente
                         ? solicitud.customer_name ||
                           "Cliente"

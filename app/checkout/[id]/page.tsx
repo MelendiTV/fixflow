@@ -194,7 +194,7 @@ export default function CheckoutPage() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "Stripe confirmó el regreso, pero FixFlow no pudo verificar el pago."
+            "Stripe confirmó el regreso, pero RELYDO no pudo verificar el pago."
         );
       }
 
@@ -355,7 +355,7 @@ export default function CheckoutPage() {
 
       if (settingsError || !settingsData) {
         throw new Error(
-          "No pudimos cargar la configuración de pagos de FixFlow."
+          "No pudimos cargar la configuración de pagos de RELYDO."
         );
       }
 
@@ -430,7 +430,7 @@ export default function CheckoutPage() {
 
             professionalName:
               profesional?.business_name ||
-              "Profesional FixFlow",
+              "Profesional RELYDO",
 
             professionalPrice:
               montos.jobAmount,
@@ -597,7 +597,7 @@ export default function CheckoutPage() {
                   <div>
                     <p className="text-xl font-black text-slate-950">
                       {profesional?.business_name ||
-                        "Profesional FixFlow"}
+                        "Profesional RELYDO"}
                     </p>
 
                     <p className="mt-1 font-semibold text-slate-500">
@@ -704,7 +704,7 @@ export default function CheckoutPage() {
             </p>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Incluye la tarifa de servicio de FixFlow.
+              Incluye la tarifa de servicio de RELYDO.
             </p>
 
             <button
@@ -742,7 +742,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between gap-4">
 
                   <span className="text-slate-600">
-                    Tarifa de servicio FixFlow
+                    Tarifa de servicio RELYDO
                   </span>
 
                   <strong className="text-slate-900">
