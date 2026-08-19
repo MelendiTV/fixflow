@@ -587,7 +587,7 @@ export default function Home() {
       </section>
 
       {/* EXPERIENCIA RELYDO */}
-      <section className="bg-[#f6f8fc] px-5 py-16 md:py-24 lg:px-8">
+      <section className="bg-[#f6f8fc] px-5 py-10 md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-black tracking-[0.22em] text-blue-600">
@@ -608,7 +608,7 @@ export default function Home() {
               <img
                 src={anuncios[0]}
                 alt="RELYDO para clientes"
-                className="block h-full min-h-[420px] w-full rounded-[1.6rem] object-cover object-center"
+                className="block h-auto w-full rounded-[1.6rem] object-contain sm:h-full sm:min-h-[420px] sm:object-cover sm:object-center"
                 loading="lazy"
               />
             </div>
@@ -649,7 +649,7 @@ export default function Home() {
       </section>
 
       {/* BENEFICIOS */}
-      <section className="bg-white px-5 py-16 md:py-24 lg:px-8">
+      <section className="bg-white px-5 py-10 md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
             {beneficios.map((item, index) => (
@@ -681,7 +681,7 @@ export default function Home() {
       </section>
 
       {/* CLIENTES / PROFESIONALES */}
-      <section className="bg-[#020817] px-5 py-16 text-white md:py-24 lg:px-8">
+      <section className="bg-[#020817] px-5 py-10 text-white md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid gap-8 xl:grid-cols-2">
             <article className="overflow-hidden rounded-[2.25rem] border border-white/10 bg-gradient-to-br from-[#08265d] to-[#04122e] shadow-2xl">
@@ -713,7 +713,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="h-[360px] border-t border-white/10 bg-black/15 p-3 md:h-[440px]">
+              <div className="hidden h-[360px] border-t border-white/10 bg-black/15 p-3 sm:block md:h-[440px]">
                 <img
                   src={anuncios[4]}
                   alt="RELYDO cliente"
@@ -752,7 +752,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="h-[360px] border-t border-white/10 bg-black/15 p-3 md:h-[440px]">
+              <div className="hidden h-[360px] border-t border-white/10 bg-black/15 p-3 sm:block md:h-[440px]">
                 <img
                   src={anuncios[7]}
                   alt="RELYDO profesional"
@@ -768,7 +768,7 @@ export default function Home() {
       {/* CÓMO FUNCIONA */}
       <section
         id="como-funciona"
-        className="bg-white px-5 py-16 md:py-24 lg:px-8"
+        className="bg-white px-5 py-10 md:py-24 lg:px-8"
       >
         <div className="mx-auto max-w-[1440px]">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
@@ -808,7 +808,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 grid gap-6 overflow-hidden rounded-[2.25rem] border border-slate-200 bg-slate-950 shadow-2xl lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="mt-12 hidden gap-6 overflow-hidden rounded-[2.25rem] border border-slate-200 bg-slate-950 shadow-2xl sm:grid lg:grid-cols-[0.95fr_1.05fr]">
             <div className="flex flex-col justify-center p-8 text-white md:p-10">
               <p className="text-sm font-black tracking-[0.18em] text-blue-300">
                 RELYDO FLOW
@@ -844,7 +844,7 @@ export default function Home() {
       </section>
 
       {/* SEGURIDAD */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-800 to-[#02102d] px-5 py-16 text-white md:py-24 lg:px-8">
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-800 to-[#02102d] px-5 py-10 text-white md:py-24 lg:px-8">
         <div className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
         <div className="absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-blue-300/10 blur-3xl" />
 
@@ -887,7 +887,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+          <div className="hidden overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur sm:block">
             <img
               src={anuncios[6]}
               alt="RELYDO seguridad"
@@ -899,7 +899,7 @@ export default function Home() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="bg-[#f6f8fc] px-5 py-16 md:py-24 lg:px-8">
+      <section className="bg-[#f6f8fc] px-5 py-10 md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid overflow-hidden rounded-[2.5rem] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] xl:grid-cols-[0.9fr_1.1fr]">
             <div className="flex flex-col justify-center p-8 md:p-12 xl:p-14">
@@ -932,7 +932,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="h-[360px] bg-[#07152f] p-3 md:h-[460px]">
+            <div className="hidden h-[360px] bg-[#07152f] p-3 sm:block md:h-[460px]">
               <img
                 src={anuncios[8]}
                 alt="RELYDO"
@@ -945,84 +945,116 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer
-        id="contacto"
-        className="border-t border-slate-200 bg-white px-5 py-12 lg:px-8"
-      >
-        <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-2 lg:grid-cols-4">
-          <div>
+      <footer id="contacto" className="border-t border-slate-200 bg-white">
+        {/* FOOTER MÓVIL COMPACTO */}
+        <div className="px-5 py-7 sm:hidden">
+          <div className="flex items-center justify-between gap-4">
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="text-2xl font-black tracking-[0.05em] text-slate-950"
+              className="text-xl font-black tracking-[0.05em] text-slate-950"
             >
               RELY<span className="text-blue-600">DO</span>
             </button>
 
-            <p className="mt-4 max-w-xs leading-7 text-slate-600">
-              {text.footerDesc}
-            </p>
+            <button
+              type="button"
+              onClick={() => router.push("/login-cliente")}
+              className="text-sm font-bold text-slate-700"
+            >
+              {text.footerLogin}
+            </button>
           </div>
 
-          <div>
-            <h3 className="font-black">
-              {text.footerPlataforma}
-            </h3>
+          <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-slate-600">
+            <button
+              type="button"
+              onClick={() => router.push("/servicios")}
+              className="text-left"
+            >
+              {text.footerServicios}
+            </button>
 
-            <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <button onClick={() => router.push("/")}>
-                {text.footerInicio}
-              </button>
+            <button
+              type="button"
+              onClick={() => router.push("/profesionales")}
+              className="text-left"
+            >
+              {text.footerProfesionales}
+            </button>
 
-              <button onClick={() => router.push("/servicios")}>
-                {text.footerServicios}
-              </button>
+            <button
+              type="button"
+              onClick={() => router.push("/registro-cliente")}
+              className="text-left"
+            >
+              {text.footerCliente}
+            </button>
 
-              <button onClick={() => router.push("/profesionales")}>
-                {text.footerProfesionales}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/registro-profesional")}
+              className="text-left"
+            >
+              {text.footerPro}
+            </button>
+
+            <span>{text.footerTerminos}</span>
+            <span>{text.footerPrivacidad}</span>
           </div>
 
-          <div>
-            <h3 className="font-black">
-              {text.footerCuenta}
-            </h3>
-
-            <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <button onClick={() => router.push("/login-cliente")}>
-                {text.footerLogin}
-              </button>
-
-              <button onClick={() => router.push("/registro-cliente")}>
-                {text.footerCliente}
-              </button>
-
-              <button onClick={() => router.push("/registro-profesional")}>
-                {text.footerPro}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="font-black">
-              {text.footerLegal}
-            </h3>
-
-            <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <span>
-                {text.footerTerminos}
-              </span>
-
-              <span>
-                {text.footerPrivacidad}
-              </span>
-            </div>
+          <div className="mt-5 border-t border-slate-200 pt-4 text-center text-xs text-slate-500">
+            © {new Date().getFullYear()} RELYDO. {text.derechos}
           </div>
         </div>
 
-        <div className="mx-auto mt-10 max-w-[1440px] border-t border-slate-200 pt-6 text-center text-sm text-slate-500">
-          © {new Date().getFullYear()} RELYDO. {text.derechos}
+        {/* FOOTER DESKTOP / TABLET */}
+        <div className="hidden px-5 py-12 sm:block lg:px-8">
+          <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="text-2xl font-black tracking-[0.05em] text-slate-950"
+              >
+                RELY<span className="text-blue-600">DO</span>
+              </button>
+
+              <p className="mt-4 max-w-xs leading-7 text-slate-600">
+                {text.footerDesc}
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-black">{text.footerPlataforma}</h3>
+              <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
+                <button onClick={() => router.push("/")}>{text.footerInicio}</button>
+                <button onClick={() => router.push("/servicios")}>{text.footerServicios}</button>
+                <button onClick={() => router.push("/profesionales")}>{text.footerProfesionales}</button>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-black">{text.footerCuenta}</h3>
+              <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
+                <button onClick={() => router.push("/login-cliente")}>{text.footerLogin}</button>
+                <button onClick={() => router.push("/registro-cliente")}>{text.footerCliente}</button>
+                <button onClick={() => router.push("/registro-profesional")}>{text.footerPro}</button>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-black">{text.footerLegal}</h3>
+              <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
+                <span>{text.footerTerminos}</span>
+                <span>{text.footerPrivacidad}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-[1440px] border-t border-slate-200 pt-6 text-center text-sm text-slate-500">
+            © {new Date().getFullYear()} RELYDO. {text.derechos}
+          </div>
         </div>
       </footer>
     </main>
