@@ -4013,7 +4013,7 @@ export default function TrabajoDetallePage() {
                 }
                 className="mt-5 w-full rounded-xl bg-blue-700 px-4 py-3 font-extrabold text-white transition hover:bg-blue-800"
               >
-                Ver detalle completo
+                {T("Ver detalle completo", "View full details")}
               </button>
             </div>
           </div>
