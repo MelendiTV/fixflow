@@ -495,7 +495,7 @@ export default function Home() {
               <img
                 src={anuncios[1]}
                 alt="RELYDO app"
-                className="relative h-[190px] w-full rounded-[1.25rem] object-cover object-[72%_center] sm:h-[250px]"
+                className="relative h-[225px] w-full rounded-[1.25rem] object-cover object-[72%_center] sm:h-[285px]"
               />
             </div>
 
