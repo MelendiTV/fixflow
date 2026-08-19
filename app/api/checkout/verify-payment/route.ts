@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { sendRelydoNotification } from "../../../lib/serverNotifications";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
         .from("service_requests")
         .select(`
           id,
+          title,
           customer_id,
           status,
           preferred_provider_id
@@ -343,6 +345,9 @@ export async function POST(request: NextRequest) {
         ? existingPayments[0]
         : null;
 
+    const paymentAlreadyExisted =
+      Boolean(existingPayment);
+
     if (existingPayment) {
       const { error: updatePaymentError } =
         await supabaseAdmin
@@ -485,7 +490,40 @@ export async function POST(request: NextRequest) {
     }
 
     // ======================================================
-    // 11. TODO CORRECTO
+    // 11. NOTIFICAR AL PROFESIONAL
+    //
+    // Solo en la primera confirmación exitosa del pago.
+    // Si el cliente refresca la página y verify-payment
+    // vuelve a ejecutarse, no enviamos el mismo aviso otra vez.
+    // ======================================================
+
+    if (!paymentAlreadyExisted) {
+      try {
+        await sendRelydoNotification({
+          userId:
+            offer.professional_id,
+          type:
+            "provider_hired",
+          title:
+            "¡Has sido contratado!",
+          message:
+            `${serviceRequest.title || "Trabajo RELYDO"}: el cliente confirmó el pago y te contrató para realizar este trabajo.`,
+          requestId,
+          url:
+            `/trabajos/${requestId}`,
+        });
+      } catch (
+        notificationError
+      ) {
+        console.warn(
+          "El pago quedó confirmado y el profesional fue contratado, pero no pudimos enviar la notificación:",
+          notificationError
+        );
+      }
+    }
+
+    // ======================================================
+    // 12. TODO CORRECTO
     //
     // IMPORTANTE:
     // AQUÍ YA NO EXISTE stripe.transfers.create().
