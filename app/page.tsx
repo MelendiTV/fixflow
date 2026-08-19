@@ -490,12 +490,11 @@ export default function Home() {
             </p>
 
             {/* Imagen de impacto exclusiva para móvil */}
-            <div className="relative mt-6 overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/5 p-1.5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] lg:hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent" />
+            <div className="relative mt-6 rounded-[1.6rem] border border-white/15 bg-[#0a2148] p-3 shadow-[0_20px_60px_rgba(0,0,0,0.35)] lg:hidden">
               <img
                 src={anuncios[1]}
                 alt="RELYDO app"
-                className="relative block h-auto w-full rounded-[1.25rem] object-contain"
+                className="block h-auto w-full rounded-[1rem] object-contain"
               />
             </div>
 
