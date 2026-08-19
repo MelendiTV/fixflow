@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -65,6 +66,10 @@ type RequestSummary = {
 
 export default function PagosProfesionalPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+
+  const T = (es: string, en: string) =>
+    language === "es" ? es : en;
 
   const [profile, setProfile] =
     useState<ProviderProfile | null>(null);
@@ -212,7 +217,7 @@ export default function PagosProfesionalPage() {
 
     if (paymentError) {
       throw new Error(
-        `No pudimos cargar tu historial de pagos: ${paymentError.message}`
+        `${T("No pudimos cargar tu historial de pagos", "We could not load your payment history")}: ${paymentError.message}`
       );
     }
 
@@ -295,7 +300,7 @@ export default function PagosProfesionalPage() {
         !baseProfile
       ) {
         throw new Error(
-          "No encontramos tu cuenta en RELYDO."
+          T("No encontramos tu cuenta en RELYDO.", "We could not find your RELYDO account.")
         );
       }
 
@@ -304,7 +309,7 @@ export default function PagosProfesionalPage() {
         "provider"
       ) {
         throw new Error(
-          "Esta cuenta no pertenece a un profesional."
+          T("Esta cuenta no pertenece a un profesional.", "This account does not belong to a professional.")
         );
       }
 
@@ -336,7 +341,7 @@ export default function PagosProfesionalPage() {
         providerError
       ) {
         throw new Error(
-          `No pudimos cargar tu información de pagos: ${providerError.message}`
+          `${T("No pudimos cargar tu información de pagos", "We could not load your payment information")}: ${providerError.message}`
         );
       }
 
@@ -344,7 +349,7 @@ export default function PagosProfesionalPage() {
         !providerProfile
       ) {
         throw new Error(
-          "No encontramos tu perfil profesional."
+          T("No encontramos tu perfil profesional.", "We could not find your professional profile.")
         );
       }
 
@@ -386,7 +391,7 @@ export default function PagosProfesionalPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error inesperado."
+          : T("Ocurrió un error inesperado.", "An unexpected error occurred.")
       );
     } finally {
       setLoading(false);
@@ -423,7 +428,7 @@ export default function PagosProfesionalPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No pudimos actualizar el estado."
+          : T("No pudimos actualizar el estado.", "We could not update the status.")
       );
     } finally {
       setActualizando(false);
@@ -446,7 +451,7 @@ export default function PagosProfesionalPage() {
         !session?.access_token
       ) {
         throw new Error(
-          "Tu sesión expiró. Inicia sesión nuevamente."
+          T("Tu sesión expiró. Inicia sesión nuevamente.", "Your session expired. Please sign in again.")
         );
       }
 
@@ -471,7 +476,7 @@ export default function PagosProfesionalPage() {
       ) {
         throw new Error(
           data?.error ||
-            "No pudimos iniciar la configuración de tu método de depósito."
+            T("No pudimos iniciar la configuración de tu método de depósito.", "We could not start your payout method setup.")
         );
       }
 
@@ -479,7 +484,7 @@ export default function PagosProfesionalPage() {
         !data?.url
       ) {
         throw new Error(
-          "No pudimos obtener el enlace seguro para configurar tu método de depósito."
+          T("No pudimos obtener el enlace seguro para configurar tu método de depósito.", "We could not get the secure link to configure your payout method.")
         );
       }
 
@@ -494,7 +499,7 @@ export default function PagosProfesionalPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No pudimos configurar tu método de depósito."
+          : T("No pudimos configurar tu método de depósito.", "We could not configure your payout method.")
       );
     } finally {
       setConfigurando(false);
@@ -544,7 +549,7 @@ export default function PagosProfesionalPage() {
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
 
           <p className="font-bold text-slate-700">
-            Consultando tu información de pagos...
+            {T("Consultando tu información de pagos...", "Checking your payment information...")}
           </p>
 
         </div>
@@ -560,12 +565,12 @@ export default function PagosProfesionalPage() {
         <div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-xl">
 
           <h1 className="text-2xl font-black text-red-700">
-            No pudimos abrir tus pagos
+            {T("No pudimos abrir tus pagos", "We couldn’t open your payments")}
           </h1>
 
           <p className="mt-4 text-slate-600">
             {error ||
-              "No encontramos tu perfil profesional."}
+              T("No encontramos tu perfil profesional.", "We could not find your professional profile.")}
           </p>
 
           <button
@@ -577,7 +582,7 @@ export default function PagosProfesionalPage() {
             }
             className="mt-6 w-full rounded-xl bg-blue-700 px-5 py-3 font-black text-white hover:bg-blue-800"
           >
-            Volver al panel
+            {T("Volver al panel", "Back to dashboard")}
           </button>
 
         </div>
@@ -635,7 +640,7 @@ export default function PagosProfesionalPage() {
           }
           className="font-bold text-blue-700 hover:underline"
         >
-          ← Volver al panel profesional
+          ← {T("Volver al panel", "Back to dashboard")} profesional
         </button>
 
         <section className="mt-5 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-xl">
@@ -645,11 +650,11 @@ export default function PagosProfesionalPage() {
           <div className="bg-gradient-to-br from-blue-700 to-indigo-700 p-6 text-white md:p-9">
 
             <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-100">
-              Pagos y depósitos
+              {T("Pagos y depósitos", "Payments and payouts")}
             </p>
 
             <h1 className="mt-3 text-3xl font-black tracking-tight md:text-4xl">
-              Configura cómo recibirás tu dinero
+              {T("Configura cómo recibirás tu dinero", "Set up how you’ll receive your money")}
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-6 text-blue-100 md:text-base">
@@ -673,7 +678,7 @@ export default function PagosProfesionalPage() {
 
               <p className="mt-2 text-xl font-black text-slate-950">
                 {profile.business_name ||
-                  "Profesional RELYDO"}
+                  "{T("Profesional RELYDO", "RELYDO Professional")}"}
               </p>
 
               <p className="mt-1 break-all text-sm text-slate-500">
@@ -687,21 +692,21 @@ export default function PagosProfesionalPage() {
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
 
               <EstadoCard
-                titulo="Método de depósito"
+                titulo={T("Método de depósito", "Payout method")}
                 activo={
                   metodoConfigurado
                 }
-                textoActivo="Configurado"
-                textoInactivo="No configurado"
+                textoActivo={T("Configurado", "Configured")}
+                textoInactivo={T("No configurado", "Not configured")}
               />
 
               <EstadoCard
-                titulo="Depósitos"
+                titulo={T("Depósitos", "Payouts")}
                 activo={
                   depositosHabilitados
                 }
-                textoActivo="Habilitados"
-                textoInactivo="Pendientes"
+                textoActivo={T("Habilitados", "Enabled")}
+                textoInactivo={T("Pendientes", "Pending")}
               />
 
             </div>
@@ -711,7 +716,7 @@ export default function PagosProfesionalPage() {
             <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
 
               <p className="font-black text-slate-900">
-                Estado de configuración
+                {T("Estado de configuración", "Setup status")}
               </p>
 
               {!estaVerificado ? (
@@ -719,11 +724,11 @@ export default function PagosProfesionalPage() {
                 <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
 
                   <p className="font-bold text-amber-900">
-                    Tu cuenta profesional todavía no está lista para configurar depósitos.
+                    {T("Tu cuenta profesional todavía no está lista para configurar depósitos.", "Your professional account is not ready to configure payouts yet.")}
                   </p>
 
                   <p className="mt-1 text-sm text-amber-800">
-                    Primero debes completar la verificación profesional.
+                    {T("Primero debes completar la verificación profesional.", "You must complete professional verification first.")}
                   </p>
 
                 </div>
@@ -733,11 +738,11 @@ export default function PagosProfesionalPage() {
                 <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
 
                   <p className="font-black text-emerald-900">
-                    ✓ Pagos y depósitos habilitados
+                    ✓ {T("Pagos y depósitos", "Payments and payouts")} habilitados
                   </p>
 
                   <p className="mt-1 text-sm text-emerald-800">
-                    Tu método de depósito está configurado y tu cuenta está preparada para recibir dinero.
+                    {T("Tu método de depósito está configurado y tu cuenta está preparada para recibir dinero.", "Your payout method is configured and your account is ready to receive money.")}
                   </p>
 
                 </div>
@@ -747,16 +752,16 @@ export default function PagosProfesionalPage() {
                 <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
 
                   <p className="font-black text-blue-900">
-                    Configuración pendiente
+                    {T("Configuración pendiente", "Setup pending")}
                   </p>
 
                   <p className="mt-1 text-sm text-blue-800">
-                    Tu método de depósito ya está conectado, pero Stripe todavía no ha habilitado los depósitos.
+                    {T("Tu método de depósito ya está conectado, pero Stripe todavía no ha habilitado los depósitos.", "Your payout method is connected, but Stripe has not enabled payouts yet.")}
                   </p>
 
                   {detallesEnviados && (
                     <p className="mt-2 text-sm font-bold text-blue-800">
-                      ✓ Información de la cuenta enviada a Stripe.
+                      ✓ {T("Información de la cuenta enviada a Stripe.", "Account information submitted to Stripe.")}
                     </p>
                   )}
 
@@ -767,11 +772,11 @@ export default function PagosProfesionalPage() {
                 <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
 
                   <p className="font-black text-slate-900">
-                    Aún no has configurado tu método de depósito
+                    {T("Aún no has configurado tu método de depósito", "You haven’t configured your payout method yet")}
                   </p>
 
                   <p className="mt-1 text-sm text-slate-600">
-                    Podrás configurar una cuenta bancaria o, cuando sea elegible, una tarjeta de débito compatible para recibir tus depósitos.
+                    {T("Podrás configurar una cuenta bancaria o, cuando sea elegible, una tarjeta de débito compatible para recibir tus depósitos.", "You can configure a bank account or, when eligible, a compatible debit card to receive your payouts.")}
                   </p>
 
                 </div>
@@ -790,11 +795,11 @@ export default function PagosProfesionalPage() {
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5">
 
                 <p className="font-black text-amber-900">
-                  Stripe necesita información adicional
+                  {T("Stripe necesita información adicional", "Stripe needs additional information")}
                 </p>
 
                 <p className="mt-1 text-sm text-amber-800">
-                  Completa los datos pendientes para poder recibir depósitos.
+                  {T("Completa los datos pendientes para poder recibir depósitos.", "Complete the pending information to receive payouts.")}
                 </p>
 
                 <div className="mt-3 space-y-2">
@@ -828,11 +833,11 @@ export default function PagosProfesionalPage() {
               <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
 
                 <p className="font-black text-red-900">
-                  Información requerida
+                  {T("Información requerida", "Required information")}
                 </p>
 
                 <p className="mt-1 text-sm text-red-800">
-                  Stripe tiene información vencida que debe actualizarse.
+                  {T("Stripe tiene información vencida que debe actualizarse.", "Stripe has overdue information that must be updated.")}
                 </p>
 
                 <div className="mt-3 space-y-2">
@@ -864,7 +869,7 @@ export default function PagosProfesionalPage() {
               <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
 
                 <p className="text-sm font-black text-slate-800">
-                  Estado informado por Stripe
+                  {T("Estado informado por Stripe", "Status reported by Stripe")}
                 </p>
 
                 <p className="mt-1 break-all text-xs text-slate-600">
@@ -898,10 +903,10 @@ export default function PagosProfesionalPage() {
                 className="mt-6 w-full rounded-2xl bg-blue-700 px-5 py-4 text-base font-black text-white shadow-lg shadow-blue-700/15 transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60 md:text-lg"
               >
                 {configurando
-                  ? "Abriendo configuración segura..."
+                  ? T("Abriendo configuración segura...", "Opening secure setup...")
                   : metodoConfigurado
-                  ? "Continuar configuración del método de depósito"
-                  : "Configurar método de depósito"}
+                  ? T("Continuar configuración del método de depósito", "Continue payout method setup")
+                  : T("Configurar método de depósito", "Configure payout method")}
               </button>
             )}
 
@@ -919,8 +924,8 @@ export default function PagosProfesionalPage() {
                 className="mt-3 w-full rounded-2xl border-2 border-blue-700 bg-white px-5 py-4 font-black text-blue-700 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {actualizando
-                  ? "Consultando Stripe..."
-                  : "Actualizar estado"}
+                  ? T("Consultando Stripe...", "Checking Stripe...")
+                  : T("Actualizar estado", "Update status")}
               </button>
             )}
 
@@ -938,8 +943,8 @@ export default function PagosProfesionalPage() {
                 className="mt-3 w-full rounded-2xl bg-slate-900 px-5 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {configurando
-                  ? "Abriendo administración segura..."
-                  : "Administrar / cambiar método de depósito"}
+                  ? T("Abriendo administración segura...", "Opening secure management...")
+                  : T("Administrar / cambiar método de depósito", "Manage / change payout method")}
               </button>
             )}
 
@@ -962,15 +967,15 @@ export default function PagosProfesionalPage() {
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
-                Movimientos
+                {T("Movimientos", "Transactions")}
               </p>
 
               <h2 className="mt-2 text-2xl font-black text-slate-950 md:text-3xl">
-                Estado de tus pagos
+                {T("Estado de tus pagos", "Your payment status")}
               </h2>
 
               <p className="mt-2 text-sm text-slate-600">
-                Aquí puedes ver qué dinero sigue retenido por RELYDO y qué pagos ya fueron enviados.
+                {T("Aquí puedes ver qué dinero sigue retenido por RELYDO y qué pagos ya fueron enviados.", "Here you can see which funds are still held by RELYDO and which payments have already been sent.")}
               </p>
             </div>
 
@@ -980,29 +985,29 @@ export default function PagosProfesionalPage() {
               disabled={actualizando}
               className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-50 disabled:opacity-60"
             >
-              {actualizando ? "Actualizando..." : "Actualizar movimientos"}
+              {actualizando ? T("Actualizando...", "Updating...") : T("Actualizar movimientos", "Refresh transactions")}
             </button>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <ResumenPagoCard
-              titulo="Retenido"
+              titulo={T("Retenido", "Held")}
               valor={formatearDinero(resumen.retenidoTotal)}
-              detalle={`${resumen.retenidos} pago${resumen.retenidos === 1 ? "" : "s"}`}
+              detalle={language === "es" ? `${resumen.retenidos} pago${resumen.retenidos === 1 ? "" : "s"}` : `${resumen.retenidos} payment${resumen.retenidos === 1 ? "" : "s"}`}
               tipo="retenido"
             />
 
             <ResumenPagoCard
-              titulo="Pagado"
+              titulo={T("Pagado", "Paid")}
               valor={formatearDinero(resumen.pagadoTotal)}
-              detalle={`${resumen.pagados} pago${resumen.pagados === 1 ? "" : "s"}`}
+              detalle={language === "es" ? `${resumen.pagados} pago${resumen.pagados === 1 ? "" : "s"}` : `${resumen.pagados} payment${resumen.pagados === 1 ? "" : "s"}`}
               tipo="pagado"
             />
 
             <ResumenPagoCard
-              titulo="Reembolsos"
+              titulo={T("Reembolsos", "Refunds")}
               valor={String(resumen.reembolsados)}
-              detalle="pagos afectados"
+              detalle={T("pagos afectados", "affected payments")}
               tipo="reembolso"
             />
           </div>
@@ -1011,13 +1016,13 @@ export default function PagosProfesionalPage() {
             {payments.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-7 text-center">
                 <p className="font-black text-slate-800">
-                  Todavía no tienes movimientos de pago.
+                  {T("Todavía no tienes movimientos de pago.", "You don’t have any payment transactions yet.")}
                 </p>
               </div>
             ) : (
               payments.map((payment) => {
                 const request = requestsMap[payment.request_id];
-                const estado = obtenerEstadoPago(payment);
+                const estado = obtenerEstadoPago(payment, language);
 
                 return (
                   <article
@@ -1032,12 +1037,12 @@ export default function PagosProfesionalPage() {
                           </span>
 
                           <span className="text-xs font-bold text-slate-400">
-                            Trabajo #{payment.request_id.slice(0, 8).toUpperCase()}
+                            {T("Trabajo", "Job")} #{payment.request_id.slice(0, 8).toUpperCase()}
                           </span>
                         </div>
 
                         <h3 className="mt-3 text-lg font-black text-slate-950">
-                          {request?.title || "Trabajo RELYDO"}
+                          {request?.title || T("Trabajo RELYDO", "RELYDO Job")}
                         </h3>
 
                         <p className="mt-1 text-sm text-slate-500">
@@ -1047,7 +1052,7 @@ export default function PagosProfesionalPage() {
 
                       <div className="text-left md:text-right">
                         <p className="text-xs font-black uppercase tracking-wide text-slate-400">
-                          Neto profesional
+                          {T("Neto profesional", "Professional net")}
                         </p>
 
                         <p className="mt-1 text-2xl font-black text-slate-950">
@@ -1058,19 +1063,19 @@ export default function PagosProfesionalPage() {
 
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <DatoPago
-                        titulo="Valor del trabajo"
+                        titulo={T("Valor del trabajo", "Job amount")}
                         valor={formatearDinero(dinero(payment.job_amount))}
                       />
                       <DatoPago
-                        titulo="Comisión RELYDO"
+                        titulo={T("Comisión RELYDO", "RELYDO commission")}
                         valor={formatearDinero(dinero(payment.provider_commission_amount))}
                       />
                       <DatoPago
-                        titulo="Pagado por cliente"
+                        titulo={T("Pagado por cliente", "Paid by customer")}
                         valor={formatearDinero(dinero(payment.customer_total_amount))}
                       />
                       <DatoPago
-                        titulo="Moneda"
+                        titulo={T("Moneda", "Currency")}
                         valor={(payment.currency || "USD").toUpperCase()}
                       />
                     </div>
@@ -1078,10 +1083,12 @@ export default function PagosProfesionalPage() {
                     {payment.release_due_at && payment.status === "ready_for_payout" && (
                       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
                         <p className="text-sm font-black text-amber-900">
-                          ⏳ Pago retenido
+                          ⏳ {T("Pago retenido", "Payment held")}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-amber-800">
-                          Liberación programada para {formatearFecha(payment.release_due_at)}. Si existe un reclamo activo, el pago permanecerá retenido hasta que RELYDO lo resuelva.
+                          {language === "es"
+                            ? `Liberación programada para ${formatearFecha(payment.release_due_at, language)}. Si existe un reclamo activo, el pago permanecerá retenido hasta que RELYDO lo resuelva.`
+                            : `Scheduled for release on ${formatearFecha(payment.release_due_at, language)}. If there is an active claim, the payment will remain held until RELYDO resolves it.`}
                         </p>
                       </div>
                     )}
@@ -1089,7 +1096,7 @@ export default function PagosProfesionalPage() {
                     {payment.status === "paid_out" && (
                       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                         <p className="text-sm font-black text-emerald-900">
-                          ✓ Pago enviado
+                          ✓ {T("Pago enviado", "Payment sent")}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-emerald-800">
                           {payment.released_at
@@ -1098,7 +1105,7 @@ export default function PagosProfesionalPage() {
                         </p>
                         {payment.stripe_transfer_id && (
                           <p className="mt-2 break-all text-[11px] font-bold text-emerald-700">
-                            Transferencia Stripe: {payment.stripe_transfer_id}
+                            {T("Transferencia Stripe", "Stripe transfer")}: {payment.stripe_transfer_id}
                           </p>
                         )}
                       </div>
@@ -1107,10 +1114,10 @@ export default function PagosProfesionalPage() {
                     {(payment.status === "refunded" || payment.status === "partially_refunded") && (
                       <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
                         <p className="text-sm font-black text-blue-900">
-                          ↩ Resolución con reembolso
+                          ↩ {T("Resolución con reembolso", "Refund resolution")}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-blue-800">
-                          Reembolsado al cliente: {formatearDinero(dinero(payment.refunded_amount))}
+                          {T("Reembolsado al cliente", "Refunded to customer")}: {formatearDinero(dinero(payment.refunded_amount))}
                         </p>
                       </div>
                     )}
@@ -1120,7 +1127,7 @@ export default function PagosProfesionalPage() {
                       onClick={() => router.push(`/trabajos/${payment.request_id}`)}
                       className="mt-4 rounded-xl border-2 border-blue-700 bg-white px-4 py-2.5 text-sm font-black text-blue-700 hover:bg-blue-50"
                     >
-                      Ver trabajo
+                      {T("Ver trabajo", "View job")}
                     </button>
                   </article>
                 );
@@ -1225,58 +1232,77 @@ function DatoPago({
   );
 }
 
-function obtenerEstadoPago(payment: PaymentRow) {
+function obtenerEstadoPago(
+  payment: PaymentRow,
+  language: "es" | "en"
+) {
+  const es = language === "es";
+
   if (payment.status === "paid_out") {
     return {
-      label: "Pagado",
-      descripcion: "RELYDO ya liberó este pago al profesional.",
+      label: es ? "Pagado" : "Paid",
+      descripcion: es
+        ? "RELYDO ya liberó este pago al profesional."
+        : "RELYDO has released this payment to the professional.",
       badgeClass: "bg-emerald-100 text-emerald-800",
     };
   }
 
   if (payment.status === "ready_for_payout") {
     return {
-      label: "Retenido",
-      descripcion: "El pago está protegido por RELYDO hasta que venza el período de seguridad.",
+      label: es ? "Retenido" : "Held",
+      descripcion: es
+        ? "El pago está protegido por RELYDO hasta que venza el período de seguridad."
+        : "The payment is protected by RELYDO until the security period ends.",
       badgeClass: "bg-amber-100 text-amber-800",
     };
   }
 
   if (payment.status === "partially_refunded") {
     return {
-      label: "Resolución parcial",
-      descripcion: "RELYDO resolvió este pago parcialmente.",
+      label: es ? "Resolución parcial" : "Partial resolution",
+      descripcion: es
+        ? "RELYDO resolvió este pago parcialmente."
+        : "RELYDO partially resolved this payment.",
       badgeClass: "bg-violet-100 text-violet-800",
     };
   }
 
   if (payment.status === "refunded") {
     return {
-      label: "Reembolsado",
-      descripcion: "El pago fue reembolsado al cliente.",
+      label: es ? "Reembolsado" : "Refunded",
+      descripcion: es
+        ? "El pago fue reembolsado al cliente."
+        : "The payment was refunded to the customer.",
       badgeClass: "bg-blue-100 text-blue-800",
     };
   }
 
   if (payment.status === "cancelled") {
     return {
-      label: "Cancelado",
-      descripcion: "Este pago corresponde a un trabajo cancelado.",
+      label: es ? "Cancelado" : "Cancelled",
+      descripcion: es
+        ? "Este pago corresponde a un trabajo cancelado."
+        : "This payment belongs to a cancelled job.",
       badgeClass: "bg-red-100 text-red-800",
     };
   }
 
   if (payment.status === "paid") {
     return {
-      label: "Pago recibido",
-      descripcion: "El pago del cliente fue confirmado.",
+      label: es ? "Pago recibido" : "Payment received",
+      descripcion: es
+        ? "El pago del cliente fue confirmado."
+        : "The customer's payment was confirmed.",
       badgeClass: "bg-sky-100 text-sky-800",
     };
   }
 
   return {
-    label: payment.status || "Pendiente",
-    descripcion: "Movimiento registrado en RELYDO.",
+    label: payment.status || (es ? "Pendiente" : "Pending"),
+    descripcion: es
+      ? "Movimiento registrado en RELYDO."
+      : "Transaction recorded in RELYDO.",
     badgeClass: "bg-slate-100 text-slate-700",
   };
 }
@@ -1293,78 +1319,67 @@ function formatearDinero(valor: number) {
   }).format(valor);
 }
 
-function formatearFecha(valor: string) {
+function formatearFecha(valor: string, language: "es" | "en") {
   const fecha = new Date(valor);
 
   if (Number.isNaN(fecha.getTime())) {
     return valor;
   }
 
-  return fecha.toLocaleString("es-US", {
+  return fecha.toLocaleString(language === "es" ? "es-US" : "en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   });
 }
 
 function formatearRequisito(
-  requisito: string
+  requisito: string,
+  language: "es" | "en"
 ) {
-  const traducciones:
-    Record<string, string> = {
-      "individual.first_name":
-        "Nombre legal",
+  const traduccionesEs: Record<string, string> = {
+    "individual.first_name": "Nombre legal",
+    "individual.last_name": "Apellido legal",
+    "individual.dob.day": "Día de nacimiento",
+    "individual.dob.month": "Mes de nacimiento",
+    "individual.dob.year": "Año de nacimiento",
+    "individual.address.line1": "Dirección",
+    "individual.address.city": "Ciudad",
+    "individual.address.state": "Estado",
+    "individual.address.postal_code": "Código postal",
+    "individual.ssn_last_4": "Últimos 4 dígitos del SSN",
+    "individual.id_number": "Identificación fiscal",
+    "individual.verification.document": "Documento de identidad",
+    "external_account": "Cuenta bancaria o método de depósito",
+    "business_profile.url": "Sitio web del negocio",
+    "business_profile.mcc": "Tipo de actividad del negocio",
+    "business_profile.product_description": "Descripción de los servicios",
+    "tos_acceptance.date": "Aceptar los términos de Stripe",
+    "tos_acceptance.ip": "Aceptar los términos de Stripe",
+  };
 
-      "individual.last_name":
-        "Apellido legal",
+  const traduccionesEn: Record<string, string> = {
+    "individual.first_name": "Legal first name",
+    "individual.last_name": "Legal last name",
+    "individual.dob.day": "Day of birth",
+    "individual.dob.month": "Month of birth",
+    "individual.dob.year": "Year of birth",
+    "individual.address.line1": "Address",
+    "individual.address.city": "City",
+    "individual.address.state": "State",
+    "individual.address.postal_code": "ZIP / postal code",
+    "individual.ssn_last_4": "Last 4 digits of SSN",
+    "individual.id_number": "Tax identification",
+    "individual.verification.document": "Identity document",
+    "external_account": "Bank account or payout method",
+    "business_profile.url": "Business website",
+    "business_profile.mcc": "Business activity type",
+    "business_profile.product_description": "Service description",
+    "tos_acceptance.date": "Accept Stripe terms",
+    "tos_acceptance.ip": "Accept Stripe terms",
+  };
 
-      "individual.dob.day":
-        "Día de nacimiento",
-
-      "individual.dob.month":
-        "Mes de nacimiento",
-
-      "individual.dob.year":
-        "Año de nacimiento",
-
-      "individual.address.line1":
-        "Dirección",
-
-      "individual.address.city":
-        "Ciudad",
-
-      "individual.address.state":
-        "Estado",
-
-      "individual.address.postal_code":
-        "Código postal",
-
-      "individual.ssn_last_4":
-        "Últimos 4 dígitos del SSN",
-
-      "individual.id_number":
-        "Identificación fiscal",
-
-      "individual.verification.document":
-        "Documento de identidad",
-
-      "external_account":
-        "Cuenta bancaria o método de depósito",
-
-      "business_profile.url":
-        "Sitio web del negocio",
-
-      "business_profile.mcc":
-        "Tipo de actividad del negocio",
-
-      "business_profile.product_description":
-        "Descripción de los servicios",
-
-      "tos_acceptance.date":
-        "Aceptar los términos de Stripe",
-
-      "tos_acceptance.ip":
-        "Aceptar los términos de Stripe",
-    };
+  const traducciones =
+    language === "es" ? traduccionesEs : traduccionesEn;
 
   return (
     traducciones[requisito] ||

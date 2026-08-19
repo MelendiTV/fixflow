@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +12,86 @@ const supabase = createClient(
 
 export default function CompletarPerfilProfesional() {
   const router = useRouter();
+  const { language } = useLanguage();
+
+  const text =
+    language === "es"
+      ? {
+          cuentaSinRegistro:
+            text.cuentaSinRegistro,
+          faltanDatos:
+            text.faltanDatos,
+          crearCuenta:
+            "No se pudo crear tu cuenta profesional",
+          comprobarPerfil:
+            "No se pudo comprobar tu perfil profesional",
+          crearPerfil:
+            "No se pudo crear tu perfil profesional",
+          identificarEspecialidad:
+            "No se pudo identificar tu especialidad",
+          servicioNoExiste:
+            "No existe un servicio activo para la especialidad",
+          comprobarServicio:
+            "No se pudo comprobar tu servicio profesional",
+          asignarEspecialidad:
+            "Tu perfil fue creado, pero no se pudo asignar la especialidad",
+          perfilCreado:
+            "Perfil profesional creado correctamente. Especialidad asignada",
+          errorInesperado:
+            text.errorInesperado,
+          preparandoTitulo:
+            "{text.preparandoTitulo}",
+          preparandoDescripcion:
+            "{text.preparandoDescripcion}",
+          errorTitulo:
+            "{text.errorTitulo}",
+          reintentar:
+            "{text.reintentar}",
+          cerrarSesion:
+            "{text.cerrarSesion}",
+          exitoTitulo:
+            "{text.exitoTitulo}",
+          siguientePaso:
+            "{text.siguientePaso}",
+        }
+      : {
+          cuentaSinRegistro:
+            "This account does not contain professional registration information.",
+          faltanDatos:
+            "Professional registration information is missing. Register again or contact RELYDO.",
+          crearCuenta:
+            "We could not create your professional account",
+          comprobarPerfil:
+            "We could not check your professional profile",
+          crearPerfil:
+            "We could not create your professional profile",
+          identificarEspecialidad:
+            "We could not identify your specialty",
+          servicioNoExiste:
+            "There is no active service for the specialty",
+          comprobarServicio:
+            "We could not check your professional service",
+          asignarEspecialidad:
+            "Your profile was created, but the specialty could not be assigned",
+          perfilCreado:
+            "Professional profile created successfully. Specialty assigned",
+          errorInesperado:
+            "An unexpected error occurred.",
+          preparandoTitulo:
+            "Preparing your profile",
+          preparandoDescripcion:
+            "We are creating your professional profile and assigning your specialty.",
+          errorTitulo:
+            "We couldn't complete your profile",
+          reintentar:
+            "Try again",
+          cerrarSesion:
+            "Sign out",
+          exitoTitulo:
+            "Profile created",
+          siguientePaso:
+            "Next, we'll continue with document verification.",
+        };
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -52,7 +133,7 @@ export default function CompletarPerfilProfesional() {
         metadata.signup_type !== "provider"
       ) {
         throw new Error(
-          "Esta cuenta no contiene información de registro profesional."
+          text.cuentaSinRegistro
         );
       }
 
@@ -157,7 +238,7 @@ export default function CompletarPerfilProfesional() {
         !trade
       ) {
         throw new Error(
-          "Faltan datos del registro profesional. Vuelve a registrarte o contacta con RELYDO."
+          text.faltanDatos
         );
       }
 
@@ -186,7 +267,7 @@ export default function CompletarPerfilProfesional() {
 
       if (profileError) {
         throw new Error(
-          `No se pudo crear tu cuenta profesional: ${profileError.message}`
+          `${text.crearCuenta}: ${profileError.message}`
         );
       }
 
@@ -206,7 +287,7 @@ export default function CompletarPerfilProfesional() {
 
       if (existingProviderError) {
         throw new Error(
-          `No se pudo comprobar tu perfil profesional: ${existingProviderError.message}`
+          `${text.comprobarPerfil}: ${existingProviderError.message}`
         );
       }
 
@@ -281,7 +362,7 @@ export default function CompletarPerfilProfesional() {
           providerInsertError
         ) {
           throw new Error(
-            `No se pudo crear tu perfil profesional: ${providerInsertError.message}`
+            `${text.crearPerfil}: ${providerInsertError.message}`
           );
         }
       }
@@ -310,13 +391,13 @@ export default function CompletarPerfilProfesional() {
 
       if (servicioError) {
         throw new Error(
-          `No se pudo identificar tu especialidad: ${servicioError.message}`
+          `${text.identificarEspecialidad}: ${servicioError.message}`
         );
       }
 
       if (!servicio) {
         throw new Error(
-          `No existe un servicio activo para la especialidad "${trade}".`
+          `${text.servicioNoExiste} "${trade}".`
         );
       }
 
@@ -345,7 +426,7 @@ export default function CompletarPerfilProfesional() {
 
       if (relacionError) {
         throw new Error(
-          `No se pudo comprobar tu servicio profesional: ${relacionError.message}`
+          `${text.comprobarServicio}: ${relacionError.message}`
         );
       }
 
@@ -374,7 +455,7 @@ export default function CompletarPerfilProfesional() {
           relacionInsertError
         ) {
           throw new Error(
-            `Tu perfil fue creado, pero no se pudo asignar la especialidad: ${relacionInsertError.message}`
+            `${text.asignarEspecialidad}: ${relacionInsertError.message}`
           );
         }
       }
@@ -384,7 +465,7 @@ export default function CompletarPerfilProfesional() {
       */
 
       setMensaje(
-        `Perfil profesional creado correctamente. Especialidad asignada: ${servicio.name}.`
+        `${text.perfilCreado}: ${servicio.name}.`
       );
 
       /*
@@ -403,7 +484,7 @@ export default function CompletarPerfilProfesional() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error inesperado."
+          : text.errorInesperado
       );
     } finally {
       setCargando(false);
@@ -429,11 +510,11 @@ export default function CompletarPerfilProfesional() {
           </div>
 
           <h1 className="mt-5 text-2xl font-extrabold text-slate-900">
-            Preparando tu perfil
+            {text.preparandoTitulo}
           </h1>
 
           <p className="mt-3 text-slate-600">
-            Estamos creando tu perfil profesional y asignando tu especialidad.
+            {text.preparandoDescripcion}
           </p>
 
           <div className="mx-auto mt-6 h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-700" />
@@ -456,7 +537,7 @@ export default function CompletarPerfilProfesional() {
             </div>
 
             <h1 className="mt-5 text-2xl font-extrabold text-red-700">
-              No se pudo completar el perfil
+              {text.errorTitulo}
             </h1>
 
             <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-left text-red-700">
@@ -470,7 +551,7 @@ export default function CompletarPerfilProfesional() {
               }
               className="mt-6 w-full rounded-xl bg-blue-700 px-6 py-4 font-extrabold text-white hover:bg-blue-800"
             >
-              Intentar nuevamente
+              {text.reintentar}
             </button>
 
             <button
@@ -480,7 +561,7 @@ export default function CompletarPerfilProfesional() {
               }
               className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-6 py-3 font-bold text-slate-700 hover:bg-slate-50"
             >
-              Cerrar sesión
+              {text.cerrarSesion}
             </button>
           </>
         ) : (
@@ -490,7 +571,7 @@ export default function CompletarPerfilProfesional() {
             </div>
 
             <h1 className="mt-5 text-2xl font-extrabold text-green-800">
-              Perfil creado
+              {text.exitoTitulo}
             </h1>
 
             <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5 text-green-800">
@@ -498,7 +579,7 @@ export default function CompletarPerfilProfesional() {
             </div>
 
             <p className="mt-4 text-slate-600">
-              Ahora continuaremos con la verificación de documentos.
+              {text.siguientePaso}
             </p>
           </>
         )}

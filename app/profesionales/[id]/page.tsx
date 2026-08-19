@@ -8,6 +8,8 @@ import {
   useSearchParams,
 } from "next/navigation";
 
+import { useLanguage } from "@/app/components/LanguageProvider";
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
@@ -34,31 +36,28 @@ type Review = {
   created_at: string;
 };
 
-function nombreOficio(trade: string | null) {
-  const oficios: Record<string, string> = {
-    plumbing: "Plomería",
-    electrical: "Electricidad",
-    hvac: "HVAC / Aire acondicionado",
-    carpentry: "Carpintería",
-    painting: "Pintura",
-    landscaping: "Jardinería",
-    cleaning: "Limpieza",
-    moving: "Mudanzas",
+function nombreOficio(trade: string | null, language: "es" | "en") {
+  const es: Record<string, string> = {
+    plumbing: "Plomería", electrical: "Electricidad",
+    hvac: "HVAC / Aire acondicionado", carpentry: "Carpintería",
+    painting: "Pintura", landscaping: "Jardinería",
+    cleaning: "Limpieza", moving: "Mudanzas",
     other: "Otros servicios",
   };
-
-  if (!trade) {
-    return "Profesional";
-  }
-
-  return oficios[trade] || trade;
+  const en: Record<string, string> = {
+    plumbing: "Plumbing", electrical: "Electrical",
+    hvac: "HVAC / Air conditioning", carpentry: "Carpentry",
+    painting: "Painting", landscaping: "Landscaping",
+    cleaning: "Cleaning", moving: "Moving",
+    other: "Other services",
+  };
+  if (!trade) return language === "es" ? "Profesional" : "Professional";
+  return (language === "es" ? es : en)[trade] || trade;
 }
 
-function formatearFecha(fecha: string) {
-  return new Intl.DateTimeFormat("es-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+function formatearFecha(fecha: string, language: "es" | "en") {
+  return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
+    year: "numeric", month: "long", day: "numeric",
   }).format(new Date(fecha));
 }
 
@@ -66,6 +65,8 @@ export default function PerfilProfesional() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { language } = useLanguage();
+  const T = (es: string, en: string) => language === "es" ? es : en;
 
   const id = params.id;
 
@@ -141,7 +142,7 @@ export default function PerfilProfesional() {
 
     if (profesionalError) {
       setError(
-        `No se pudo cargar el profesional: ${profesionalError.message}`
+        `${T("No se pudo cargar el profesional", "We could not load the professional")}: ${profesionalError.message}`
       );
 
       setLoading(false);
@@ -150,7 +151,7 @@ export default function PerfilProfesional() {
 
     if (!data) {
       setError(
-        "Este profesional no existe, no está disponible o todavía no está verificado."
+        T("Este profesional no existe, no está disponible o todavía no está verificado.", "This professional does not exist, is unavailable, or is not yet verified.")
       );
 
       setLoading(false);
@@ -202,7 +203,7 @@ export default function PerfilProfesional() {
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
           <p className="font-bold text-slate-700">
-            Cargando profesional...
+            {T("Cargando profesional...", "Loading professional...")}
           </p>
         </div>
       </main>
@@ -220,7 +221,7 @@ export default function PerfilProfesional() {
           </div>
 
           <h1 className="mt-5 text-3xl font-extrabold text-slate-900">
-            Profesional no disponible
+            {T("Profesional no disponible", "Professional unavailable")}
           </h1>
 
           <p className="mt-3 text-slate-600">
@@ -233,8 +234,8 @@ export default function PerfilProfesional() {
             className="mt-7 rounded-xl bg-blue-700 px-6 py-3 font-extrabold text-white hover:bg-blue-800"
           >
             {returnTo
-              ? "Volver a la oferta"
-              : "Volver a profesionales"}
+              ? T("Volver a la oferta", "Back to offer")
+              : T("Volver a profesionales", "Back to professionals")}
           </button>
 
         </div>
@@ -257,8 +258,8 @@ export default function PerfilProfesional() {
         >
           ←{" "}
           {returnTo
-            ? "Volver a la oferta"
-            : "Volver a profesionales"}
+            ? T("Volver a la oferta", "Back to offer")
+            : T("Volver a profesionales", "Back to professionals")}
         </button>
 
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
@@ -277,18 +278,19 @@ export default function PerfilProfesional() {
 
                 <div className="mb-3">
                   <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-extrabold text-green-800">
-                    ✓ Profesional verificado
+                    ✓ {T("Profesional verificado", "Verified professional")}
                   </span>
                 </div>
 
                 <h1 className="text-3xl font-extrabold md:text-4xl">
                   {profesional.business_name ||
-                    "Profesional RELYDO"}
+                    T("Profesional RELYDO", "RELYDO Professional")}
                 </h1>
 
                 <p className="mt-2 text-xl font-semibold text-blue-100">
                   {nombreOficio(
-                    profesional.trade
+                    profesional.trade,
+                    language
                   )}
                 </p>
 
@@ -309,7 +311,7 @@ export default function PerfilProfesional() {
               <div className="rounded-2xl bg-slate-50 p-5">
 
                 <p className="text-sm text-slate-500">
-                  Calificación
+                  {T("Calificación", "Rating")}
                 </p>
 
                 <p className="mt-1 text-2xl font-extrabold text-slate-900">
@@ -323,8 +325,8 @@ export default function PerfilProfesional() {
                 <p className="mt-1 text-sm text-slate-500">
                   {reviews.length}{" "}
                   {reviews.length === 1
-                    ? "reseña"
-                    : "reseñas"}
+                    ? T("reseña", "review")
+                    : T("reseñas", "reviews")}
                 </p>
 
               </div>
@@ -332,7 +334,7 @@ export default function PerfilProfesional() {
               <div className="rounded-2xl bg-slate-50 p-5">
 
                 <p className="text-sm text-slate-500">
-                  Trabajos realizados
+                  {T("Trabajos realizados", "Completed jobs")}
                 </p>
 
                 <p className="mt-1 text-2xl font-extrabold text-slate-900">
@@ -345,13 +347,13 @@ export default function PerfilProfesional() {
               <div className="rounded-2xl bg-slate-50 p-5">
 
                 <p className="text-sm text-slate-500">
-                  Experiencia
+                  {T("Experiencia", "Experience")}
                 </p>
 
                 <p className="mt-1 text-2xl font-extrabold text-slate-900">
                   {profesional.years_experience ??
                     0}{" "}
-                  años
+                  {T("años", "years")}
                 </p>
 
               </div>
@@ -363,12 +365,12 @@ export default function PerfilProfesional() {
             <section className="mt-9">
 
               <h2 className="text-2xl font-extrabold text-slate-900">
-                Sobre este profesional
+                {T("Sobre este profesional", "About this professional")}
               </h2>
 
               <p className="mt-3 whitespace-pre-wrap leading-7 text-slate-600">
                 {profesional.bio ||
-                  "Este profesional todavía no ha añadido una descripción."}
+                  T("Este profesional todavía no ha añadido una descripción.", "This professional has not added a description yet.")}
               </p>
 
             </section>
@@ -378,7 +380,7 @@ export default function PerfilProfesional() {
             <section className="mt-9">
 
               <h2 className="text-2xl font-extrabold text-slate-900">
-                Información profesional
+                {T("Información profesional", "Professional information")}
               </h2>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -386,12 +388,13 @@ export default function PerfilProfesional() {
                 <div className="rounded-2xl border border-slate-200 p-5">
 
                   <p className="text-sm text-slate-500">
-                    Especialidad
+                    {T("Especialidad", "Specialty")}
                   </p>
 
                   <p className="mt-1 font-extrabold text-slate-900">
                     {nombreOficio(
-                      profesional.trade
+                      profesional.trade,
+                      language
                     )}
                   </p>
 
@@ -400,7 +403,7 @@ export default function PerfilProfesional() {
                 <div className="rounded-2xl border border-slate-200 p-5">
 
                   <p className="text-sm text-slate-500">
-                    Radio de servicio
+                    {T("Radio de servicio", "Service radius")}
                   </p>
 
                   <p className="mt-1 font-extrabold text-slate-900">
@@ -414,11 +417,11 @@ export default function PerfilProfesional() {
                 <div className="rounded-2xl border border-slate-200 p-5">
 
                   <p className="text-sm text-slate-500">
-                    Estado
+                    {T("Estado", "Status")}
                   </p>
 
                   <p className="mt-1 font-extrabold text-green-700">
-                    Verificado por RELYDO
+                    {T("Verificado por RELYDO", "Verified by RELYDO")}
                   </p>
 
                 </div>
@@ -426,11 +429,11 @@ export default function PerfilProfesional() {
                 <div className="rounded-2xl border border-slate-200 p-5">
 
                   <p className="text-sm text-slate-500">
-                    Cuenta
+                    {T("Cuenta", "Account")}
                   </p>
 
                   <p className="mt-1 font-extrabold text-green-700">
-                    Activa
+                    {T("Activa", "Active")}
                   </p>
 
                 </div>
@@ -448,11 +451,11 @@ export default function PerfilProfesional() {
                 <div>
 
                   <h2 className="text-2xl font-extrabold text-slate-900">
-                    Reseñas de clientes
+                    {T("Reseñas de clientes", "Customer reviews")}
                   </h2>
 
                   <p className="mt-2 text-slate-600">
-                    Opiniones de clientes que contrataron a este profesional.
+                    {T("Opiniones de clientes que contrataron a este profesional.", "Reviews from customers who hired this professional.")}
                   </p>
 
                 </div>
@@ -461,7 +464,7 @@ export default function PerfilProfesional() {
                   <div className="w-fit rounded-2xl bg-yellow-50 px-5 py-3">
 
                     <p className="text-sm font-bold text-yellow-700">
-                      Promedio
+                      {T("Promedio", "Average")}
                     </p>
 
                     <p className="text-xl font-extrabold text-yellow-900">
@@ -485,11 +488,11 @@ export default function PerfilProfesional() {
                   </div>
 
                   <h3 className="mt-3 text-xl font-extrabold text-slate-900">
-                    Todavía no hay reseñas
+                    {T("Todavía no hay reseñas", "There are no reviews yet")}
                   </h3>
 
                   <p className="mt-2 text-slate-600">
-                    Las reseñas aparecerán después de trabajos completados.
+                    {T("Las reseñas aparecerán después de trabajos completados.", "Reviews will appear after completed jobs.")}
                   </p>
 
                 </div>
@@ -529,7 +532,8 @@ export default function PerfilProfesional() {
 
                           <p className="text-sm text-slate-500">
                             {formatearFecha(
-                              review.created_at
+                              review.created_at,
+                              language
                             )}
                           </p>
 
@@ -541,14 +545,14 @@ export default function PerfilProfesional() {
                           </p>
                         ) : (
                           <p className="mt-4 italic text-slate-500">
-                            El cliente no dejó comentario.
+                            {T("El cliente no dejó comentario.", "The customer did not leave a comment.")}
                           </p>
                         )}
 
                         <div className="mt-4 border-t border-slate-100 pt-4">
 
                           <span className="text-sm font-bold text-green-700">
-                            ✓ Servicio realizado mediante RELYDO
+                            ✓ {T("Servicio realizado mediante RELYDO", "Service completed through RELYDO")}
                           </span>
 
                         </div>
@@ -567,11 +571,11 @@ export default function PerfilProfesional() {
             <div className="mt-9 rounded-2xl border border-green-200 bg-green-50 p-5">
 
               <h3 className="font-extrabold text-green-900">
-                ✓ Cuenta verificada por RELYDO
+                ✓ {T("Cuenta", "Account")} verificada por RELYDO
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-green-800">
-                Este profesional completó el proceso de verificación requerido por RELYDO.
+                {T("Este profesional completó el proceso de verificación requerido por RELYDO.", "This professional completed RELYDO’s required verification process.")}
               </p>
 
             </div>
@@ -581,11 +585,11 @@ export default function PerfilProfesional() {
             <section className="mt-10 border-t border-slate-200 pt-8">
 
               <h2 className="text-2xl font-extrabold text-slate-900">
-                ¿Necesitas este servicio?
+                {T("¿Necesitas este servicio?", "Need this service?")}
               </h2>
 
               <p className="mt-2 text-slate-600">
-                Describe el trabajo que necesitas para iniciar una solicitud.
+                {T("Describe el trabajo que necesitas para iniciar una solicitud.", "Describe the work you need to start a request.")}
               </p>
 
               <button
@@ -597,7 +601,7 @@ export default function PerfilProfesional() {
                 }
                 className="mt-6 w-full rounded-xl bg-blue-700 py-4 text-lg font-extrabold text-white transition hover:bg-blue-800"
               >
-                Solicitar trabajo
+                {T("Solicitar trabajo", "Request job")}
               </button>
 
             </section>

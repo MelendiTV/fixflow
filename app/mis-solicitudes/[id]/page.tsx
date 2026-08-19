@@ -352,7 +352,70 @@ const DETAIL_TRANSLATIONS_EN: Record<string, string> = {
   "✕ Cambio de presupuesto rechazado": "✕ Budget change rejected",
   "Cambio de presupuesto cancelado": "Budget change cancelled",
   "Abriendo pago seguro...": "Opening secure payment...",
-  "Evidencia del trabajo terminado": "Completed job evidence"
+  "Evidencia del trabajo terminado": "Completed job evidence",
+  "El pago adicional fue cancelado. Tu aprobación sigue registrada y puedes intentar pagarlo nuevamente.": "The additional payment was cancelled. Your approval is still recorded and you can try paying again.",
+  "Confirmando tu pago adicional con Stripe...": "Confirming your additional payment with Stripe...",
+  "No pudimos confirmar el pago adicional.": "We could not confirm the additional payment.",
+  "No encontramos esta solicitud o no tienes permiso para verla.": "We could not find this request or you do not have permission to view it.",
+  "No pudimos cargar las tarifas de RELYDO": "We could not load RELYDO's fees",
+  "No pudimos cargar los presupuestos": "We could not load the offers",
+  "Ocurrió un error inesperado.": "An unexpected error occurred.",
+  "Esta solicitud ya tiene un profesional contratado.": "This request already has a hired professional.",
+  "Este presupuesto ya no está disponible.": "This offer is no longer available.",
+  "No pudimos cargar la configuración de pagos de RELYDO. Actualiza la página e inténtalo nuevamente.": "We could not load RELYDO's payment settings. Refresh the page and try again.",
+  "Debes aceptar el cambio de presupuesto antes de pagarlo.": "You must accept the budget change before paying it.",
+  "No pudimos verificar tu sesión de cliente.": "We could not verify your customer session.",
+  "No pudimos iniciar el pago adicional.": "We could not start the additional payment.",
+  "Stripe no devolvió la dirección del checkout adicional.": "Stripe did not return the additional checkout URL.",
+  "Este cambio de presupuesto ya fue respondido.": "This budget change has already been answered.",
+  "Este cambio de presupuesto ya fue respondido o cambió de estado.": "This budget change has already been answered or its status changed.",
+  "Cambio de presupuesto rechazado. El precio anterior permanece sin cambios.": "Budget change rejected. The previous price remains unchanged.",
+  "No se pudo registrar tu decisión.": "We could not save your decision.",
+  "El trabajo ya fue iniciado. No puede cancelarse automáticamente; cualquier problema debe gestionarse mediante el sistema de reclamos.": "The job has already started. It cannot be cancelled automatically; any issue must be handled through the claims system.",
+  "Esta solicitud ya no puede cancelarse automáticamente.": "This request can no longer be cancelled automatically.",
+  "Selecciona un motivo para cancelar la solicitud.": "Select a reason for cancelling the request.",
+  "¿Confirmas que deseas cancelar esta solicitud? Esta acción no se puede deshacer.": "Are you sure you want to cancel this request? This action cannot be undone.",
+  "No se pudo cancelar la solicitud.": "We could not cancel the request.",
+  "La solicitud fue cancelada correctamente.": "The request was cancelled successfully.",
+  "Este trabajo todavía no puede ser calificado.": "This job cannot be rated yet.",
+  "No pudimos identificar al profesional contratado.": "We could not identify the hired professional.",
+  "Debes iniciar sesión para enviar una reseña.": "You must sign in to submit a review.",
+  "Ya enviaste una reseña para este trabajo.": "You already submitted a review for this job.",
+  "Gracias. Tu calificación fue enviada correctamente.": "Thank you. Your rating was submitted successfully.",
+  "No se pudo enviar la reseña.": "We could not submit the review.",
+  "Puedes adjuntar un máximo de 10 fotos por reclamo.": "You can attach up to 10 photos per claim.",
+  "Puedes adjuntar un máximo de 2 videos por reclamo.": "You can attach up to 2 videos per claim.",
+  "Este trabajo todavía no puede reportarse.": "This job cannot be reported yet.",
+  "Ya reportaste un problema para este trabajo.": "You already reported a problem for this job.",
+  "Selecciona el motivo del reclamo.": "Select the reason for the claim.",
+  "Explica brevemente qué ocurrió con el trabajo.": "Briefly explain what happened with the job.",
+  "Debes iniciar sesión para reportar un problema.": "You must sign in to report a problem.",
+  "Ya existe un reclamo para este trabajo.": "A claim already exists for this job.",
+  "Tu reporte fue registrado correctamente.": "Your report was submitted successfully.",
+  "No se pudo enviar el reclamo.": "We could not submit the claim.",
+  "Chat bloqueado porque existe un reclamo activo. A partir de este momento RELYDO Admin gestiona el caso.": "Chat is locked because there is an active claim. From this point on, RELYDO Admin manages the case.",
+  "El trabajo está completado y el chat ya está cerrado.": "The job is completed and the chat is now closed.",
+  "El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.": "The 12-hour period after job completion has ended. The chat history remains available.",
+  "Este trabajo fue cancelado. El chat está cerrado.": "This job was cancelled. The chat is closed.",
+  "El chat estará disponible cuando el trabajo esté contratado.": "Chat will be available once a professional is hired.",
+  "No se pudo enviar el mensaje.": "We could not send the message.",
+  "Trabajo cancelado por resolución de RELYDO": "Job cancelled by RELYDO resolution",
+  "RELYDO cerró este trabajo después de resolver el reclamo. El servicio ya no continuará.": "RELYDO closed this job after resolving the claim. The service will not continue.",
+  "Esta solicitud ya no está activa.": "This request is no longer active.",
+  "Cancelando solicitud...": "Cancelling request...",
+  "Confirmar cancelación": "Confirm cancellation",
+  "Este resumen incluye": "This summary includes",
+  "cambio": "change",
+  "cambios": "changes",
+  "de presupuesto pagado": "paid budget change",
+  "de presupuesto pagados": "paid budget changes",
+  "por un total adicional de": "for an additional total of",
+  "el profesional": "the professional",
+  "este profesional": "this professional",
+  "Ejemplo: Estas fotos muestran la parte del trabajo que quedó incompleta y el daño que encontré después del servicio...": "Example: These photos show the part of the job that was left incomplete and the damage I found after the service...",
+  "presupuesto disponible": "offer available",
+  "presupuestos disponibles": "offers available",
+  "Profesional": "Professional"
 };
 
 function detailText(language: "es" | "en", spanish: string) {
@@ -1264,7 +1327,7 @@ export default function MisSolicitudDetallePage() {
         "cancelled"
     ) {
       setMensaje(
-        "El pago adicional fue cancelado. Tu aprobación sigue registrada y puedes intentar pagarlo nuevamente."
+        T("El pago adicional fue cancelado. Tu aprobación sigue registrada y puedes intentar pagarlo nuevamente.")
       );
 
       window.history.replaceState(
@@ -1292,7 +1355,7 @@ export default function MisSolicitudDetallePage() {
       );
       setError("");
       setMensaje(
-        "Confirmando tu pago adicional con Stripe..."
+        T("Confirmando tu pago adicional con Stripe...")
       );
 
       try {
@@ -1317,7 +1380,7 @@ export default function MisSolicitudDetallePage() {
         if (!response.ok) {
           throw new Error(
             data?.error ||
-              "No pudimos confirmar el pago adicional."
+              T("No pudimos confirmar el pago adicional.")
           );
         }
 
@@ -1355,7 +1418,7 @@ export default function MisSolicitudDetallePage() {
         setError(
           err instanceof Error
             ? err.message
-            : "No pudimos confirmar el pago adicional."
+            : T("No pudimos confirmar el pago adicional.")
         );
       } finally {
         if (activo) {
@@ -1473,7 +1536,7 @@ export default function MisSolicitudDetallePage() {
         !solicitudData
       ) {
         throw new Error(
-          "No encontramos esta solicitud o no tienes permiso para verla."
+          T("No encontramos esta solicitud o no tienes permiso para verla.")
         );
       }
 
@@ -1502,7 +1565,7 @@ export default function MisSolicitudDetallePage() {
         .maybeSingle();
 
       if (paymentSettingsError) {
-        throw new Error(`No pudimos cargar las tarifas de RELYDO: ${paymentSettingsError.message}`);
+        throw new Error(`${T("No pudimos cargar las tarifas de RELYDO")}: ${paymentSettingsError.message}`);
       }
 
       setPaymentSettings(paymentSettingsData ? paymentSettingsData as PaymentSettings : null);
@@ -1692,7 +1755,7 @@ export default function MisSolicitudDetallePage() {
         ofertasError
       ) {
         throw new Error(
-          `No pudimos cargar los presupuestos: ${ofertasError.message}`
+          `${T("No pudimos cargar los presupuestos")}: ${ofertasError.message}`
         );
       }
 
@@ -1891,7 +1954,7 @@ export default function MisSolicitudDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error inesperado."
+          : T("Ocurrió un error inesperado.")
       );
     } finally {
       if (mostrarCarga) {
@@ -1912,18 +1975,18 @@ export default function MisSolicitudDetallePage() {
     if (!solicitud) return;
 
     if (solicitud.status !== "open") {
-      setError("Esta solicitud ya tiene un profesional contratado.");
+      setError(T("Esta solicitud ya tiene un profesional contratado."));
       return;
     }
 
     if (oferta.status !== "pending") {
-      setError("Este presupuesto ya no está disponible.");
+      setError(T("Este presupuesto ya no está disponible."));
       return;
     }
 
     if (!paymentSettings) {
       setError(
-        "No pudimos cargar la configuración de pagos de RELYDO. Actualiza la página e inténtalo nuevamente."
+        T("No pudimos cargar la configuración de pagos de RELYDO. Actualiza la página e inténtalo nuevamente.")
       );
       return;
     }
@@ -1955,7 +2018,7 @@ export default function MisSolicitudDetallePage() {
 
     if (changeOrder.status !== "accepted") {
       setError(
-        "Debes aceptar el cambio de presupuesto antes de pagarlo."
+        T("Debes aceptar el cambio de presupuesto antes de pagarlo.")
       );
       return;
     }
@@ -1978,7 +2041,7 @@ export default function MisSolicitudDetallePage() {
         !sessionData.session
       ) {
         throw new Error(
-          "No pudimos verificar tu sesión de cliente."
+          T("No pudimos verificar tu sesión de cliente.")
         );
       }
 
@@ -2006,13 +2069,13 @@ export default function MisSolicitudDetallePage() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "No pudimos iniciar el pago adicional."
+            T("No pudimos iniciar el pago adicional.")
         );
       }
 
       if (!data?.url) {
         throw new Error(
-          "Stripe no devolvió la dirección del checkout adicional."
+          T("Stripe no devolvió la dirección del checkout adicional.")
         );
       }
 
@@ -2027,7 +2090,7 @@ export default function MisSolicitudDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No pudimos iniciar el pago adicional."
+          : T("No pudimos iniciar el pago adicional.")
       );
 
       setPagandoChangeOrderId(
@@ -2053,7 +2116,7 @@ export default function MisSolicitudDetallePage() {
 
     if (changeOrder.status !== "pending") {
       setError(
-        "Este cambio de presupuesto ya fue respondido."
+        T("Este cambio de presupuesto ya fue respondido.")
       );
       return;
     }
@@ -2159,7 +2222,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
       if (!actualizado) {
         throw new Error(
-          "Este cambio de presupuesto ya fue respondido o cambió de estado."
+          T("Este cambio de presupuesto ya fue respondido o cambió de estado.")
         );
       }
 
@@ -2189,7 +2252,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       }
 
       setMensaje(
-        "Cambio de presupuesto rechazado. El precio anterior permanece sin cambios."
+        T("Cambio de presupuesto rechazado. El precio anterior permanece sin cambios.")
       );
     } catch (err) {
       console.error(
@@ -2200,7 +2263,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo registrar tu decisión."
+          : T("No se pudo registrar tu decisión.")
       );
 
       await cargarDetalle(
@@ -2232,15 +2295,15 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
     if (!puedeCancelar) {
       setError(
         solicitud.job_stage === "working"
-          ? "El trabajo ya fue iniciado. No puede cancelarse automáticamente; cualquier problema debe gestionarse mediante el sistema de reclamos."
-          : "Esta solicitud ya no puede cancelarse automáticamente."
+          ? T("El trabajo ya fue iniciado. No puede cancelarse automáticamente; cualquier problema debe gestionarse mediante el sistema de reclamos.")
+          : T("Esta solicitud ya no puede cancelarse automáticamente.")
       );
       return;
     }
 
     if (!motivoCancelacion.trim()) {
       setError(
-        "Selecciona un motivo para cancelar la solicitud."
+        T("Selecciona un motivo para cancelar la solicitud.")
       );
       return;
     }
@@ -2253,7 +2316,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       );
 
     let textoConfirmacion =
-      "¿Confirmas que deseas cancelar esta solicitud? Esta acción no se puede deshacer.";
+      T("¿Confirmas que deseas cancelar esta solicitud? Esta acción no se puede deshacer.");
 
     if (
       solicitud.status === "in_progress" &&
@@ -2293,7 +2356,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         !sessionData.session
       ) {
         throw new Error(
-          "No pudimos verificar tu sesión de cliente."
+          T("No pudimos verificar tu sesión de cliente.")
         );
       }
 
@@ -2323,7 +2386,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "No se pudo cancelar la solicitud."
+            T("No se pudo cancelar la solicitud.")
         );
       }
 
@@ -2341,7 +2404,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         );
       } else {
         setMensaje(
-          "La solicitud fue cancelada correctamente."
+          T("La solicitud fue cancelada correctamente.")
         );
       }
 
@@ -2355,7 +2418,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       setError(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error inesperado."
+          : T("Ocurrió un error inesperado.")
       );
     } finally {
       setCancelando(false);
@@ -2377,7 +2440,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         "completed"
     ) {
       setError(
-        "Este trabajo todavía no puede ser calificado."
+        T("Este trabajo todavía no puede ser calificado.")
       );
 
       return;
@@ -2402,7 +2465,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       !ofertaSeleccionada
     ) {
       setError(
-        "No pudimos identificar al profesional contratado."
+        T("No pudimos identificar al profesional contratado.")
       );
 
       return;
@@ -2441,7 +2504,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         !user
       ) {
         throw new Error(
-          "Debes iniciar sesión para enviar una reseña."
+          T("Debes iniciar sesión para enviar una reseña.")
         );
       }
 
@@ -2475,7 +2538,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         existingReview
       ) {
         setError(
-          "Ya enviaste una reseña para este trabajo."
+          T("Ya enviaste una reseña para este trabajo.")
         );
 
         await cargarDetalle(
@@ -2532,7 +2595,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       );
 
       setMensaje(
-        "Gracias. Tu calificación fue enviada correctamente."
+        T("Gracias. Tu calificación fue enviada correctamente.")
       );
     } catch (err) {
       console.error(
@@ -2542,7 +2605,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo enviar la reseña."
+          : T("No se pudo enviar la reseña.")
       );
     } finally {
       setEnviandoReview(
@@ -2638,7 +2701,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       imagenes.length > 10
     ) {
       setError(
-        "Puedes adjuntar un máximo de 10 fotos por reclamo."
+        T("Puedes adjuntar un máximo de 10 fotos por reclamo.")
       );
       event.target.value = "";
       return;
@@ -2648,7 +2711,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       videos.length > 2
     ) {
       setError(
-        "Puedes adjuntar un máximo de 2 videos por reclamo."
+        T("Puedes adjuntar un máximo de 2 videos por reclamo.")
       );
       event.target.value = "";
       return;
@@ -2813,13 +2876,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
     if (!puedeReportar) {
       setError(
-        "Este trabajo todavía no puede reportarse."
+        T("Este trabajo todavía no puede reportarse.")
       );
       return;
     }
 
     if (claim) {
-      setError("Ya reportaste un problema para este trabajo.");
+      setError(T("Ya reportaste un problema para este trabajo."));
       return;
     }
 
@@ -2828,17 +2891,17 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
     );
 
     if (!ofertaSeleccionada) {
-      setError("No pudimos identificar al profesional contratado.");
+      setError(T("No pudimos identificar al profesional contratado."));
       return;
     }
 
     if (!motivoReclamo.trim()) {
-      setError("Selecciona el motivo del reclamo.");
+      setError(T("Selecciona el motivo del reclamo."));
       return;
     }
 
     if (descripcionReclamo.trim().length < 5) {
-      setError("Explica brevemente qué ocurrió con el trabajo.");
+      setError(T("Explica brevemente qué ocurrió con el trabajo."));
       return;
     }
 
@@ -2861,7 +2924,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         await supabase.auth.getUser();
 
       if (userError || !user) {
-        throw new Error("Debes iniciar sesión para reportar un problema.");
+        throw new Error(T("Debes iniciar sesión para reportar un problema."));
       }
 
       const { data: existingClaim, error: existingClaimError } =
@@ -2878,7 +2941,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       }
 
       if (existingClaim) {
-        setError("Ya existe un reclamo para este trabajo.");
+        setError(T("Ya existe un reclamo para este trabajo."));
         setEvidenciasReclamo([]);
         await cargarDetalle(false);
         return;
@@ -2935,14 +2998,14 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 ? ""
                 : "s"
             } de evidencia.`
-          : "Tu reporte fue registrado correctamente."
+          : T("Tu reporte fue registrado correctamente.")
       );
     } catch (err) {
       console.error("Error enviando reclamo:", err);
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo enviar el reclamo."
+          : T("No se pudo enviar el reclamo.")
       );
     } finally {
       setEnviandoReclamo(false);
@@ -2984,7 +3047,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
   function motivoChatBloqueado() {
     if (reclamoActivoChat) {
-      return "Chat bloqueado porque existe un reclamo activo. A partir de este momento RELYDO Admin gestiona el caso.";
+      return T("Chat bloqueado porque existe un reclamo activo. A partir de este momento RELYDO Admin gestiona el caso.");
     }
 
     if (
@@ -2992,20 +3055,20 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         "completed"
     ) {
       if (!solicitud.completed_at) {
-        return "El trabajo está completado y el chat ya está cerrado.";
+        return T("El trabajo está completado y el chat ya está cerrado.");
       }
 
-      return "El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.";
+      return T("El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.");
     }
 
     if (
       solicitud?.status ===
         "cancelled"
     ) {
-      return "Este trabajo fue cancelado. El chat está cerrado.";
+      return T("Este trabajo fue cancelado. El chat está cerrado.");
     }
 
-    return "El chat estará disponible cuando el trabajo esté contratado.";
+    return T("El chat estará disponible cuando el trabajo esté contratado.");
   }
 
   async function enviarMensajeChat() {
@@ -3080,7 +3143,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo enviar el mensaje."
+          : T("No se pudo enviar el mensaje.")
       );
     } finally {
       setEnviandoMensajeChat(false);
@@ -3360,9 +3423,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           <div className="bg-blue-700 p-8 text-white">
 
             <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-800">
-              {nombreEstadoSolicitud(
-                solicitud.status
-              )}
+              {T(nombreEstadoSolicitud(\n                solicitud.status\n              ))}
             </span>
 
             <h1 className="mt-4 text-3xl font-extrabold md:text-4xl">
@@ -3474,17 +3535,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  {tituloEtapa(
-                    solicitud.status,
-                    solicitud.job_stage
-                  )}
+                  {T(tituloEtapa(\n                    solicitud.status,\n                    solicitud.job_stage\n                  ))}
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  {textoEtapa(
-                    solicitud.status,
-                    solicitud.job_stage
-                  )}
+                  {T(textoEtapa(\n                    solicitud.status,\n                    solicitud.job_stage\n                  ))}
                 </p>
               </div>
 
@@ -3633,8 +3688,8 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 <p className="mt-2 text-red-800">
                   {canceladoPorRelydo
-                    ? "RELYDO cerró este trabajo después de resolver el reclamo. El servicio ya no continuará."
-                    : "Esta solicitud ya no está activa."}
+                    ? T("RELYDO cerró este trabajo después de resolver el reclamo. El servicio ya no continuará.")
+                    : T("Esta solicitud ya no está activa.")}
                 </p>
 
                 {solicitud.cancellation_reason && (
@@ -4260,7 +4315,9 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 {changeOrdersPagados.length > 0 && (
                   <div className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold leading-6 text-emerald-800">
-                    Este resumen incluye {changeOrdersPagados.length} cambio{changeOrdersPagados.length === 1 ? "" : "s"} de presupuesto pagado{changeOrdersPagados.length === 1 ? "" : "s"} por un total adicional de ${totalesAdicionalesPagados.toFixed(2)}.
+                    {language === "en"
+                      ? `This summary includes ${changeOrdersPagados.length} paid budget change${changeOrdersPagados.length === 1 ? "" : "s"} for an additional total of $${totalesAdicionalesPagados.toFixed(2)}.`
+                      : `Este resumen incluye ${changeOrdersPagados.length} cambio${changeOrdersPagados.length === 1 ? "" : "s"} de presupuesto pagado${changeOrdersPagados.length === 1 ? "" : "s"} por un total adicional de $${totalesAdicionalesPagados.toFixed(2)}.`}
                   </div>
                 )}
 
@@ -4422,7 +4479,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       Chat con{" "}
                       {ofertaSeleccionada.profesional
                         ?.business_name ||
-                        "el profesional"}
+                        T("el profesional")}
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-300">
@@ -4789,7 +4846,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     <strong>
                       {ofertaSeleccionada.profesional
                         ?.business_name ||
-                        "este profesional"}
+                        T("este profesional")}
                     </strong>
                     ?
                   </p>
@@ -5201,7 +5258,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       rows={5}
                       maxLength={1500}
                       disabled={enviandoReclamo}
-                      placeholder="Ejemplo: Estas fotos muestran la parte del trabajo que quedó incompleta y el daño que encontré después del servicio..."
+                      placeholder={T("Ejemplo: Estas fotos muestran la parte del trabajo que quedó incompleta y el daño que encontré después del servicio...")}
                       className="w-full resize-none rounded-xl border border-slate-300 bg-white p-4 text-slate-900 outline-none focus:border-blue-500 disabled:bg-slate-100"
                     />
 

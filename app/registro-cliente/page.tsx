@@ -492,6 +492,9 @@ function RegistroClienteContenido() {
           password,
 
           options: {
+            emailRedirectTo:
+              `${window.location.origin}/verificar-email`,
+
             data: {
               full_name:
                 nombreLimpio,

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -77,9 +78,12 @@ function calcularMontos(precio: number, settings: PaymentSettings) {
   };
 }
 
-function mostrarMinutos(minutos: number | null) {
+function mostrarMinutos(
+  minutos: number | null,
+  language: "es" | "en"
+) {
   if (minutos === null || minutos === undefined) {
-    return "No indicado";
+    return language === "es" ? "No indicado" : "Not specified";
   }
 
   if (minutos < 60) {
@@ -90,34 +94,232 @@ function mostrarMinutos(minutos: number | null) {
   const restantes = minutos % 60;
 
   if (restantes === 0) {
-    return `${horas} ${horas === 1 ? "hora" : "horas"}`;
+    if (language === "es") {
+      return `${horas} ${horas === 1 ? "hora" : "horas"}`;
+    }
+
+    return `${horas} ${horas === 1 ? "hour" : "hours"}`;
   }
 
   return `${horas} h ${restantes} min`;
 }
 
-function nombreOficio(trade: string | null) {
-  const nombres: Record<string, string> = {
-    plumbing: "Plomería",
-    electrical: "Electricidad",
-    hvac: "HVAC / Aire acondicionado",
-    carpentry: "Carpintería",
-    painting: "Pintura",
-    landscaping: "Jardinería",
-    cleaning: "Limpieza",
-    moving: "Mudanzas",
-    other: "Otros servicios",
-  };
+function nombreOficio(
+  trade: string | null,
+  language: "es" | "en"
+) {
+  const nombres =
+    language === "es"
+      ? {
+          plumbing: "Plomería",
+          electrical: "Electricidad",
+          hvac: "HVAC / Aire acondicionado",
+          carpentry: "Carpintería",
+          painting: "Pintura",
+          landscaping: "Jardinería",
+          cleaning: "Limpieza",
+          moving: "Mudanzas",
+          other: "Otros servicios",
+        }
+      : {
+          plumbing: "Plumbing",
+          electrical: "Electrical",
+          hvac: "HVAC / Air conditioning",
+          carpentry: "Carpentry",
+          painting: "Painting",
+          landscaping: "Landscaping",
+          cleaning: "Cleaning",
+          moving: "Moving",
+          other: "Other services",
+        };
 
-  if (!trade) return "Profesional";
+  if (!trade) {
+    return language === "es" ? "Profesional" : "Professional";
+  }
 
-  return nombres[trade] || trade;
+  return nombres[trade as keyof typeof nombres] || trade;
 }
 
 export default function CheckoutPage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { language } = useLanguage();
+
+  const text =
+    language === "es"
+      ? {
+          pagoVerificacionInesperada:
+            "La verificación del pago devolvió una respuesta inesperada.",
+          pagoNoVerificado:
+            text.pagoNoVerificado,
+          noVerificarPago:
+            text.noVerificarPago,
+          faltaCheckout:
+            text.faltaCheckout,
+          solicitudNoDisponible:
+            text.solicitudNoDisponible,
+          solicitudNoAbierta:
+            text.solicitudNoAbierta,
+          ofertaNoEncontrada:
+            text.ofertaNoEncontrada,
+          ofertaNoDisponible:
+            text.ofertaNoDisponible,
+          configuracionPago:
+            text.configuracionPago,
+          errorInesperado:
+            text.errorInesperado,
+          profesionalRelydo:
+            text.profesionalRelydo,
+          noIniciarPago:
+            text.noIniciarPago,
+          stripeSinUrl:
+            text.stripeSinUrl,
+          errorIniciarPago:
+            text.errorIniciarPago,
+          confirmandoPago:
+            "Confirmando tu pago con Stripe...",
+          preparandoCheckout:
+            "Preparando checkout...",
+          noAbrirCheckout:
+            "{text.noAbrirCheckout}",
+          volverPresupuesto:
+            "{text.volverPresupuesto}",
+          checkoutSeguro:
+            "{text.checkoutSeguro}",
+          confirmarPagar:
+            "{text.confirmarPagar}",
+          revisarServicio:
+            "{text.revisarServicio}",
+          servicio:
+            "Servicio",
+          profesionalSeleccionado:
+            "{text.profesionalSeleccionado}",
+          verificado:
+            "Verificado",
+          llegadaEstimada:
+            "{text.llegadaEstimada}",
+          duracionEstimada:
+            "{text.duracionEstimada}",
+          ubicacion:
+            "{text.ubicacion}",
+          fechaHora:
+            "{text.fechaHora}",
+          flexible:
+            text.flexible,
+          resumen:
+            "{text.resumen}",
+          totalServicio:
+            "{text.totalServicio}",
+          incluyeTarifa:
+            "{text.incluyeTarifa}",
+          ocultarDesglose:
+            text.ocultarDesglose,
+          verDesglose:
+            text.verDesglose,
+          servicioProfesional:
+            "{text.servicioProfesional}",
+          tarifaRelydo:
+            "{text.tarifaRelydo}",
+          total:
+            "Total",
+          pagoProtegido:
+            "Pago protegido",
+          stripeSeguro:
+            "{text.stripeSeguro}",
+          abriendoPago:
+            "Abriendo pago seguro...",
+          continuarPago:
+            "Continuar al pago",
+          modoPrueba:
+            "{text.modoPrueba}",
+        }
+      : {
+          pagoVerificacionInesperada:
+            "Payment verification returned an unexpected response.",
+          pagoNoVerificado:
+            "Stripe confirmed the return, but RELYDO could not verify the payment.",
+          noVerificarPago:
+            "We could not verify the payment.",
+          faltaCheckout:
+            "Information required to open checkout is missing.",
+          solicitudNoDisponible:
+            "We could not find this request or you do not have permission to pay for it.",
+          solicitudNoAbierta:
+            "This request is no longer available for a new checkout.",
+          ofertaNoEncontrada:
+            "We could not find the selected quote.",
+          ofertaNoDisponible:
+            "This quote is no longer available.",
+          configuracionPago:
+            "We could not load RELYDO payment settings.",
+          errorInesperado:
+            "An unexpected error occurred.",
+          profesionalRelydo:
+            "RELYDO Professional",
+          noIniciarPago:
+            "We could not start the payment.",
+          stripeSinUrl:
+            "Stripe did not return a checkout URL.",
+          errorIniciarPago:
+            "An error occurred while starting the payment.",
+          confirmandoPago:
+            "Confirming your payment with Stripe...",
+          preparandoCheckout:
+            "Preparing checkout...",
+          noAbrirCheckout:
+            "We couldn't open checkout",
+          volverPresupuesto:
+            "Back to quote",
+          checkoutSeguro:
+            "Secure checkout",
+          confirmarPagar:
+            "Confirm and pay",
+          revisarServicio:
+            "Review the service before continuing to payment.",
+          servicio:
+            "Service",
+          profesionalSeleccionado:
+            "Selected professional",
+          verificado:
+            "Verified",
+          llegadaEstimada:
+            "Estimated arrival",
+          duracionEstimada:
+            "Estimated duration",
+          ubicacion:
+            "Location",
+          fechaHora:
+            "Date / time",
+          flexible:
+            text.flexible,
+          resumen:
+            "Summary",
+          totalServicio:
+            "Service total",
+          incluyeTarifa:
+            "Includes the RELYDO service fee.",
+          ocultarDesglose:
+            "Hide breakdown",
+          verDesglose:
+            "View breakdown",
+          servicioProfesional:
+            "Professional service",
+          tarifaRelydo:
+            "RELYDO service fee",
+          total:
+            "Total",
+          pagoProtegido:
+            "Protected payment",
+          stripeSeguro:
+            "You will be sent to Stripe's secure checkout to complete payment.",
+          abriendoPago:
+            "Opening secure payment...",
+          continuarPago:
+            "Continue to payment",
+          modoPrueba:
+            "You are using Stripe in test mode. No real money will be moved.",
+        };
 
   const requestId = params.id;
   const offerId = searchParams.get("offer");
@@ -182,7 +384,7 @@ export default function CheckoutPage() {
         const texto = await response.text();
 
         throw new Error(
-          `La verificación del pago devolvió una respuesta inesperada (${response.status}). ${texto.slice(
+          `${text.pagoVerificacionInesperada} (${response.status}). ${texto.slice(
             0,
             120
           )}`
@@ -194,7 +396,7 @@ export default function CheckoutPage() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "Stripe confirmó el regreso, pero RELYDO no pudo verificar el pago."
+            text.pagoNoVerificado
         );
       }
 
@@ -210,7 +412,7 @@ export default function CheckoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No pudimos verificar el pago."
+          : text.noVerificarPago
       );
 
       setCargando(false);
@@ -225,7 +427,7 @@ export default function CheckoutPage() {
     try {
       if (!requestId || !offerId) {
         throw new Error(
-          "Falta información para abrir el checkout."
+          text.faltaCheckout
         );
       }
 
@@ -267,13 +469,13 @@ export default function CheckoutPage() {
 
       if (solicitudError || !solicitudData) {
         throw new Error(
-          "No encontramos esta solicitud o no tienes permiso para pagarla."
+          text.solicitudNoDisponible
         );
       }
 
       if (solicitudData.status !== "open") {
         throw new Error(
-          "Esta solicitud ya no está disponible para iniciar un nuevo checkout."
+          text.solicitudNoAbierta
         );
       }
 
@@ -298,13 +500,13 @@ export default function CheckoutPage() {
 
       if (ofertaError || !ofertaData) {
         throw new Error(
-          "No encontramos el presupuesto seleccionado."
+          text.ofertaNoEncontrada
         );
       }
 
       if (ofertaData.status !== "pending") {
         throw new Error(
-          "Este presupuesto ya no está disponible."
+          text.ofertaNoDisponible
         );
       }
 
@@ -355,7 +557,7 @@ export default function CheckoutPage() {
 
       if (settingsError || !settingsData) {
         throw new Error(
-          "No pudimos cargar la configuración de pagos de RELYDO."
+          text.configuracionPago
         );
       }
 
@@ -385,7 +587,7 @@ export default function CheckoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error inesperado."
+          : text.errorInesperado
       );
     } finally {
       setCargando(false);
@@ -430,7 +632,7 @@ export default function CheckoutPage() {
 
             professionalName:
               profesional?.business_name ||
-              "Profesional RELYDO",
+              text.profesionalRelydo,
 
             professionalPrice:
               montos.jobAmount,
@@ -449,13 +651,13 @@ export default function CheckoutPage() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "No pudimos iniciar el pago."
+            text.noIniciarPago
         );
       }
 
       if (!data?.url) {
         throw new Error(
-          "Stripe no devolvió la dirección del checkout."
+          text.stripeSinUrl
         );
       }
 
@@ -469,7 +671,7 @@ export default function CheckoutPage() {
       setMensaje(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error al iniciar el pago."
+          : text.errorIniciarPago
       );
 
       setProcesandoPago(false);
@@ -482,8 +684,8 @@ export default function CheckoutPage() {
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
           <p className="font-bold text-slate-700">
             {paymentStatus === "success"
-              ? "Confirmando tu pago con Stripe..."
-              : "Preparando checkout..."}
+              ? text.confirmandoPago
+              : text.preparandoCheckout}
           </p>
         </div>
       </main>
@@ -504,7 +706,7 @@ export default function CheckoutPage() {
           </div>
 
           <h1 className="mt-4 text-2xl font-black text-slate-950">
-            No pudimos abrir el checkout
+            {text.noAbrirCheckout}
           </h1>
 
           <p className="mt-3 text-slate-600">
@@ -520,7 +722,7 @@ export default function CheckoutPage() {
             }
             className="mt-6 w-full rounded-xl bg-blue-700 px-5 py-3 font-black text-white hover:bg-blue-800"
           >
-            Volver al presupuesto
+            {text.volverPresupuesto}
           </button>
         </div>
       </main>
@@ -545,7 +747,7 @@ export default function CheckoutPage() {
           }
           className="font-bold text-blue-700 hover:underline"
         >
-          ← Volver al presupuesto
+          ← {text.volverPresupuesto}
         </button>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -555,15 +757,15 @@ export default function CheckoutPage() {
             <div className="bg-gradient-to-br from-blue-700 to-indigo-700 p-7 text-white md:p-9">
 
               <div className="inline-flex rounded-full bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-100">
-                Checkout seguro
+                {text.checkoutSeguro}
               </div>
 
               <h1 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">
-                Confirmar y pagar
+                {text.confirmarPagar}
               </h1>
 
               <p className="mt-2 text-blue-100">
-                Revisa el servicio antes de continuar al pago.
+                {text.revisarServicio}
               </p>
 
             </div>
@@ -573,7 +775,7 @@ export default function CheckoutPage() {
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
 
                 <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                  Servicio
+                  {text.servicio}
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
@@ -589,7 +791,7 @@ export default function CheckoutPage() {
               <div className="mt-5 rounded-2xl border border-slate-200 p-5">
 
                 <p className="text-xs font-black uppercase tracking-wide text-blue-700">
-                  Profesional seleccionado
+                  {text.profesionalSeleccionado}
                 </p>
 
                 <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -597,7 +799,7 @@ export default function CheckoutPage() {
                   <div>
                     <p className="text-xl font-black text-slate-950">
                       {profesional?.business_name ||
-                        "Profesional RELYDO"}
+                        text.profesionalRelydo}
                     </p>
 
                     <p className="mt-1 font-semibold text-slate-500">
@@ -610,7 +812,7 @@ export default function CheckoutPage() {
 
                   {profesional?.verified && (
                     <span className="w-fit rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-black text-emerald-800">
-                      ✓ Verificado
+                      ✓ {text.verificado}
                     </span>
                   )}
 
@@ -621,7 +823,7 @@ export default function CheckoutPage() {
                   <div className="rounded-xl bg-slate-50 p-4">
 
                     <p className="text-xs font-bold uppercase text-slate-400">
-                      Llegada estimada
+                      {text.llegadaEstimada}
                     </p>
 
                     <p className="mt-1 font-black text-slate-900">
@@ -635,7 +837,7 @@ export default function CheckoutPage() {
                   <div className="rounded-xl bg-slate-50 p-4">
 
                     <p className="text-xs font-bold uppercase text-slate-400">
-                      Duración estimada
+                      {text.duracionEstimada}
                     </p>
 
                     <p className="mt-1 font-black text-slate-900">
@@ -654,7 +856,7 @@ export default function CheckoutPage() {
                 <div className="rounded-2xl border border-slate-200 p-5">
 
                   <p className="text-xs font-bold uppercase text-slate-400">
-                    Ubicación
+                    {text.ubicacion}
                   </p>
 
                   <p className="mt-1 font-black text-slate-900">
@@ -668,12 +870,12 @@ export default function CheckoutPage() {
                 <div className="rounded-2xl border border-slate-200 p-5">
 
                   <p className="text-xs font-bold uppercase text-slate-400">
-                    Fecha / hora
+                    {text.fechaHora}
                   </p>
 
                   <p className="mt-1 font-black text-slate-900">
                     {solicitud.preferred_date ||
-                      "Flexible"}
+                      text.flexible}
 
                     {solicitud.preferred_time
                       ? ` · ${solicitud.preferred_time}`
@@ -689,11 +891,11 @@ export default function CheckoutPage() {
           <aside className="h-fit rounded-[30px] border border-slate-200 bg-white p-7 shadow-xl lg:sticky lg:top-8">
 
             <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
-              Resumen
+              {text.resumen}
             </p>
 
             <p className="mt-3 text-sm font-bold text-slate-500">
-              Total del servicio
+              {text.totalServicio}
             </p>
 
             <p className="mt-1 text-5xl font-black tracking-tight text-slate-950">
@@ -704,7 +906,7 @@ export default function CheckoutPage() {
             </p>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Incluye la tarifa de servicio de RELYDO.
+              {text.incluyeTarifa}
             </p>
 
             <button
@@ -717,8 +919,8 @@ export default function CheckoutPage() {
               className="mt-4 font-black text-blue-700 hover:underline"
             >
               {mostrarDesglose
-                ? "Ocultar desglose"
-                : "Ver desglose"}
+                ? text.ocultarDesglose
+                : text.verDesglose}
             </button>
 
             {mostrarDesglose && (
@@ -727,7 +929,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between gap-4">
 
                   <span className="text-slate-600">
-                    Servicio profesional
+                    {text.servicioProfesional}
                   </span>
 
                   <strong className="text-slate-900">
@@ -742,7 +944,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between gap-4">
 
                   <span className="text-slate-600">
-                    Tarifa de servicio RELYDO
+                    {text.tarifaRelydo}
                   </span>
 
                   <strong className="text-slate-900">
@@ -759,7 +961,7 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between gap-4">
 
                     <span className="font-black text-slate-950">
-                      Total
+                      {text.total}
                     </span>
 
                     <strong className="text-lg text-slate-950">
@@ -778,11 +980,11 @@ export default function CheckoutPage() {
             <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
 
               <p className="font-black text-emerald-900">
-                🔒 Pago protegido
+                🔒 {text.pagoProtegido}
               </p>
 
               <p className="mt-1 text-sm leading-6 text-emerald-800">
-                Serás enviado al checkout seguro de Stripe para completar el pago.
+                {text.stripeSeguro}
               </p>
 
             </div>
@@ -800,14 +1002,14 @@ export default function CheckoutPage() {
               className="mt-6 w-full rounded-2xl bg-emerald-600 px-6 py-4 text-lg font-black text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {procesandoPago
-                ? "Abriendo pago seguro..."
-                : `Continuar al pago · $${montos.customerTotalAmount.toFixed(
+                ? text.abriendoPago
+                : `${text.continuarPago} · $${montos.customerTotalAmount.toFixed(
                     2
                   )}`}
             </button>
 
             <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-              Estás usando Stripe en modo de prueba. No se moverá dinero real.
+              {text.modoPrueba}
             </p>
 
           </aside>

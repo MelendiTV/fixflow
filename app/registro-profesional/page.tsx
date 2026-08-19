@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +12,8 @@ const supabase = createClient(
 
 export default function RegistroProfesional() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const T = (es: string, en: string) => (language === "es" ? es : en);
 
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -117,7 +120,7 @@ export default function RegistroProfesional() {
 
     if (password.length < 8) {
       setError(
-        "La contraseña debe tener al menos 8 caracteres."
+        T("La contraseña debe tener al menos 8 caracteres.", "Password must be at least 8 characters.")
       );
       setEnviando(false);
       return;
@@ -135,7 +138,7 @@ export default function RegistroProfesional() {
       !zipCode
     ) {
       setError(
-        "Completa todos los campos obligatorios."
+        T("Completa todos los campos obligatorios.", "Complete all required fields.")
       );
       setEnviando(false);
       return;
@@ -146,7 +149,7 @@ export default function RegistroProfesional() {
       !Number.isFinite(yearsExperience)
     ) {
       setError(
-        "Los años de experiencia no son válidos."
+        T("Los años de experiencia no son válidos.", "Years of experience are not valid.")
       );
       setEnviando(false);
       return;
@@ -157,7 +160,7 @@ export default function RegistroProfesional() {
       !Number.isFinite(serviceRadiusMiles)
     ) {
       setError(
-        "El radio de servicio debe ser de al menos 1 milla."
+        T("El radio de servicio debe ser de al menos 1 milla.", "Service radius must be at least 1 mile.")
       );
       setEnviando(false);
       return;
@@ -169,7 +172,7 @@ export default function RegistroProfesional() {
         !licenseState)
     ) {
       setError(
-        "Si tu trabajo requiere licencia, debes indicar el número y el estado que la emitió."
+        T("Si tu trabajo requiere licencia, debes indicar el número y el estado que la emitió.", "If your work requires a license, enter the license number and issuing state.")
       );
       setEnviando(false);
       return;
@@ -180,7 +183,7 @@ export default function RegistroProfesional() {
       !insuranceCompany
     ) {
       setError(
-        "Si indicas que tienes seguro, escribe el nombre de la compañía aseguradora."
+        T("Si indicas que tienes seguro, escribe el nombre de la compañía aseguradora.", "If you indicate that you have insurance, enter the insurance company name.")
       );
       setEnviando(false);
       return;
@@ -275,7 +278,7 @@ export default function RegistroProfesional() {
 
       if (!authData.user) {
         throw new Error(
-          "No se pudo crear la cuenta."
+          T("No se pudo crear la cuenta.", "The account could not be created.")
         );
       }
 
@@ -290,7 +293,7 @@ export default function RegistroProfesional() {
 
       if (!authData.session) {
         setMensaje(
-          "Cuenta creada correctamente. Revisa tu correo y confirma tu email. Después inicia sesión para completar tu perfil y subir los documentos de verificación."
+          T("Cuenta creada correctamente. Revisa tu correo y confirma tu email. Después inicia sesión para completar tu perfil y subir los documentos de verificación.", "Account created successfully. Check your email and confirm your address. Then sign in to complete your profile and upload verification documents.")
         );
 
         return;
@@ -304,7 +307,7 @@ export default function RegistroProfesional() {
       */
 
       setMensaje(
-        "Cuenta creada correctamente. Continúa para completar tu perfil profesional."
+        T("Cuenta creada correctamente. Continúa para completar tu perfil profesional.", "Account created successfully. Continue to complete your professional profile.")
       );
 
       setTimeout(() => {
@@ -319,7 +322,7 @@ export default function RegistroProfesional() {
         setError(err.message);
       } else {
         setError(
-          "Ocurrió un error inesperado."
+          T("Ocurrió un error inesperado.", "An unexpected error occurred.")
         );
       }
     } finally {
@@ -354,11 +357,11 @@ export default function RegistroProfesional() {
               </div>
 
               <h1 className="text-3xl font-extrabold md:text-4xl">
-                Registrarse como profesional
+                {T("Registrarse como profesional", "Register as a professional")}
               </h1>
 
               <p className="text-base text-blue-100">
-                Crea tu cuenta. Después de confirmar tu correo podrás completar la verificación.
+                {T("Crea tu cuenta. Después de confirmar tu correo podrás completar la verificación.", "Create your account. After confirming your email, you can complete verification.")}
               </p>
 
             </div>
@@ -382,14 +385,14 @@ export default function RegistroProfesional() {
 
                   <h2 className={sectionTitleClass}>
                     <span>👤</span>
-                    Información de la cuenta
+                    {T("Información de la cuenta", "Account information")}
                   </h2>
 
                   <div className="space-y-5">
 
                     <div>
                       <label className={labelClass}>
-                        Nombre legal completo *
+                        {T("Nombre legal completo *", "Full legal name *")}
                       </label>
 
                       <input
@@ -397,21 +400,21 @@ export default function RegistroProfesional() {
                         required
                         type="text"
                         autoComplete="name"
-                        placeholder="Ej: Carlos Rodríguez"
+                        placeholder={T("Ej: Carlos Rodríguez", "Example: Carlos Rodriguez")}
                         className={inputClass}
                       />
                     </div>
 
                     <div>
                       <label className={labelClass}>
-                        Nombre del negocio *
+                        {T("Nombre del negocio *", "Business name *")}
                       </label>
 
                       <input
                         name="business_name"
                         required
                         type="text"
-                        placeholder="Ej: Carlos Plumbing LLC"
+                        placeholder={T("Ej: Carlos Plumbing LLC", "Example: Carlos Plumbing LLC")}
                         className={inputClass}
                       />
                     </div>
@@ -438,7 +441,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Teléfono *
+                          {T("Teléfono *", "Phone *")}
                         </label>
 
                         <input
@@ -457,7 +460,7 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        Contraseña *
+                        {T("Contraseña *", "Password *")}
                       </label>
 
                       <input
@@ -466,7 +469,7 @@ export default function RegistroProfesional() {
                         type="password"
                         minLength={8}
                         autoComplete="new-password"
-                        placeholder="Mínimo 8 caracteres"
+                        placeholder={T("Mínimo 8 caracteres", "Minimum 8 characters")}
                         className={inputClass}
                       />
 
@@ -484,7 +487,7 @@ export default function RegistroProfesional() {
 
                   <h2 className={sectionTitleClass}>
                     <span>🪪</span>
-                    Licencia profesional
+                    {T("Licencia profesional", "Professional license")}
                   </h2>
 
                   <div className="space-y-5">
@@ -492,7 +495,7 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        ¿Tu trabajo requiere licencia? *
+                        {T("¿Tu trabajo requiere licencia? *", "Does your work require a license? *")}
                       </label>
 
                       <select
@@ -501,15 +504,15 @@ export default function RegistroProfesional() {
                         className={inputClass}
                       >
                         <option value="">
-                          Selecciona
+                          {T("Selecciona", "Select")}
                         </option>
 
                         <option value="yes">
-                          Sí
+                          {T("Sí", "Yes")}
                         </option>
 
                         <option value="no">
-                          No
+                          {T("No", "No")}
                         </option>
                       </select>
 
@@ -520,7 +523,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Número de licencia
+                          {T("Número de licencia", "License number")}
                         </label>
 
                         <input
@@ -535,7 +538,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Estado que emitió la licencia
+                          {T("Estado que emitió la licencia", "License issuing state")}
                         </label>
 
                         <input
@@ -553,7 +556,7 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        Vencimiento de la licencia
+                        {T("Vencimiento de la licencia", "License expiration")}
                       </label>
 
                       <input
@@ -565,7 +568,7 @@ export default function RegistroProfesional() {
                     </div>
 
                     <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
-                      La copia de tu licencia se solicitará después de confirmar tu correo e iniciar sesión.
+                      {T("La copia de tu licencia se solicitará después de confirmar tu correo e iniciar sesión.", "A copy of your license will be requested after you confirm your email and sign in.")}
                     </div>
 
                   </div>
@@ -580,13 +583,13 @@ export default function RegistroProfesional() {
 
                   <h2 className={sectionTitleClass}>
                     <span>🛡️</span>
-                    Bond / Fianza
+                    {T("Bond / Fianza", "Bond")}
                   </h2>
 
                   <div>
 
                     <label className={labelClass}>
-                      ¿Tienes bond o fianza comercial? *
+                      {T("¿Tienes bond o fianza comercial? *", "Do you have a commercial bond? *")}
                     </label>
 
                     <select
@@ -595,15 +598,15 @@ export default function RegistroProfesional() {
                       className={inputClass}
                     >
                       <option value="">
-                        Selecciona
+                        {T("Selecciona", "Select")}
                       </option>
 
                       <option value="yes">
-                        Sí
+                        {T("Sí", "Yes")}
                       </option>
 
                       <option value="no">
-                        No
+                        {T("No", "No")}
                       </option>
                     </select>
 
@@ -623,7 +626,7 @@ export default function RegistroProfesional() {
 
                   <h2 className={sectionTitleClass}>
                     <span>💼</span>
-                    Información profesional
+                    {T("Información profesional", "Professional information")}
                   </h2>
 
                   <div className="space-y-5">
@@ -631,7 +634,7 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        Profesión / especialidad *
+                        {T("Profesión / especialidad *", "Profession / specialty *")}
                       </label>
 
                       <select
@@ -641,43 +644,43 @@ export default function RegistroProfesional() {
                       >
 
                         <option value="">
-                          Selecciona una especialidad
+                          {T("Selecciona una especialidad", "Select a specialty")}
                         </option>
 
                         <option value="plumbing">
-                          Plomería
+                          {T("Plomería", "Plumbing")}
                         </option>
 
                         <option value="electrical">
-                          Electricidad
+                          {T("Electricidad", "Electrical")}
                         </option>
 
                         <option value="hvac">
-                          HVAC / Aire acondicionado
+                          {T("HVAC / Aire acondicionado", "HVAC / Air conditioning")}
                         </option>
 
                         <option value="carpentry">
-                          Carpintería
+                          {T("Carpintería", "Carpentry")}
                         </option>
 
                         <option value="painting">
-                          Pintura
+                          {T("Pintura", "Painting")}
                         </option>
 
                         <option value="landscaping">
-                          Jardinería
+                          {T("Jardinería", "Landscaping")}
                         </option>
 
                         <option value="cleaning">
-                          Limpieza
+                          {T("Limpieza", "Cleaning")}
                         </option>
 
                         <option value="moving">
-                          Mudanzas
+                          {T("Mudanzas", "Moving")}
                         </option>
 
                         <option value="other">
-                          Otro
+                          {T("Otro", "Other")}
                         </option>
 
                       </select>
@@ -687,14 +690,14 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        Sobre ti o tu negocio *
+                        {T("Sobre ti o tu negocio *", "About you or your business *")}
                       </label>
 
                       <textarea
                         name="bio"
                         required
                         rows={4}
-                        placeholder="Describe tu experiencia, especialidades y trabajos que realizas."
+                        placeholder={T("Describe tu experiencia, especialidades y trabajos que realizas.", "Describe your experience, specialties, and the work you perform.")}
                         className={inputClass}
                       />
 
@@ -705,7 +708,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Años de experiencia *
+                          {T("Años de experiencia *", "Years of experience *")}
                         </label>
 
                         <input
@@ -722,7 +725,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Radio de servicio (millas) *
+                          {T("Radio de servicio (millas) *", "Service radius (miles) *")}
                         </label>
 
                         <input
@@ -743,7 +746,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Ciudad *
+                          {T("Ciudad *", "City *")}
                         </label>
 
                         <input
@@ -758,7 +761,7 @@ export default function RegistroProfesional() {
                       <div>
 
                         <label className={labelClass}>
-                          Estado *
+                          {T("Estado *", "State *")}
                         </label>
 
                         <input
@@ -800,7 +803,7 @@ export default function RegistroProfesional() {
 
                   <h2 className={sectionTitleClass}>
                     <span>🛡️</span>
-                    Seguro
+                    {T("Seguro", "Insurance")}
                   </h2>
 
                   <div className="space-y-5">
@@ -808,7 +811,7 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        ¿Tienes seguro de responsabilidad? *
+                        {T("¿Tienes seguro de responsabilidad? *", "Do you have liability insurance? *")}
                       </label>
 
                       <select
@@ -818,15 +821,15 @@ export default function RegistroProfesional() {
                       >
 
                         <option value="">
-                          Selecciona
+                          {T("Selecciona", "Select")}
                         </option>
 
                         <option value="yes">
-                          Sí
+                          {T("Sí", "Yes")}
                         </option>
 
                         <option value="no">
-                          No
+                          {T("No", "No")}
                         </option>
 
                       </select>
@@ -836,13 +839,13 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        Compañía de seguros
+                        {T("Compañía de seguros", "Insurance company")}
                       </label>
 
                       <input
                         name="insurance_company"
                         type="text"
-                        placeholder="Nombre de la aseguradora"
+                        placeholder={T("Nombre de la aseguradora", "Insurance company name")}
                         className={inputClass}
                       />
 
@@ -851,7 +854,7 @@ export default function RegistroProfesional() {
                     <div>
 
                       <label className={labelClass}>
-                        Vencimiento del seguro
+                        {T("Vencimiento del seguro", "Insurance expiration")}
                       </label>
 
                       <input
@@ -863,7 +866,7 @@ export default function RegistroProfesional() {
                     </div>
 
                     <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
-                      Los comprobantes de seguro y bond se subirán después de confirmar tu email.
+                      {T("Los comprobantes de seguro y bond se subirán después de confirmar tu email.", "Insurance and bond documents will be uploaded after you confirm your email.")}
                     </div>
 
                   </div>
@@ -883,11 +886,11 @@ export default function RegistroProfesional() {
                     <div>
 
                       <h3 className="font-extrabold text-amber-900">
-                        Verificación requerida
+                        {T("Verificación requerida", "Verification required")}
                       </h3>
 
                       <p className="mt-1 text-sm leading-6 text-amber-800">
-                        Crear una cuenta no significa que RELYDO haya verificado al profesional. Después de confirmar tu correo deberás subir los documentos necesarios.
+                        {T("Crear una cuenta no significa que RELYDO haya verificado al profesional. Después de confirmar tu correo deberás subir los documentos necesarios.", "Creating an account does not mean RELYDO has verified the professional. After confirming your email, you must upload the required documents.")}
                       </p>
 
                     </div>
@@ -913,7 +916,7 @@ export default function RegistroProfesional() {
                 )}
 
                 <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-slate-700">
-                  Al registrarte, confirmas que la información suministrada es correcta y aceptas el proceso de verificación de RELYDO.
+                  {T("Al registrarte, confirmas que la información suministrada es correcta y aceptas el proceso de verificación de RELYDO.", "By registering, you confirm that the information provided is accurate and agree to RELYDO’s verification process.")}
                 </div>
 
                 <button
@@ -922,18 +925,18 @@ export default function RegistroProfesional() {
                   className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {enviando
-                    ? "Creando cuenta..."
-                    : "Crear cuenta profesional"}
+                    ? T("Creando cuenta...", "Creating account...")
+                    : T("Crear cuenta profesional", "Create professional account")}
                 </button>
 
                 <p className="text-center text-sm text-slate-600">
-                  ¿Ya tienes cuenta?{" "}
+                  {T("¿Ya tienes cuenta?", "Already have an account?")}{" "}
 
                   <a
                     href="/login-profesional"
                     className="font-bold text-blue-700 hover:underline"
                   >
-                    Inicia sesión
+                    {T("Inicia sesión", "Sign in")}
                   </a>
                 </p>
 

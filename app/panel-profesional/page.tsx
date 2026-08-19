@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import NotificationsBell from "@/app/components/NotificationsBell";
 import { AccountModeSwitcher } from "@/app/components/AccountModeSwitcher";
 import { useAccountMode } from "@/app/components/AccountModeProvider";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -88,8 +89,8 @@ type ReclamoProfesional = {
   created_at: string;
 };
 
-function nombreOficio(trade: string | null) {
-  const nombres: Record<string, string> = {
+function nombreOficio(trade: string | null, language: "es" | "en") {
+  const nombresEs: Record<string, string> = {
     plumbing: "Plomería",
     electrical: "Electricidad",
     hvac: "HVAC / Aire acondicionado",
@@ -101,17 +102,33 @@ function nombreOficio(trade: string | null) {
     other: "Otros servicios",
   };
 
-  if (!trade) return "No indicada";
-  return nombres[trade] || trade;
+  const nombresEn: Record<string, string> = {
+    plumbing: "Plumbing",
+    electrical: "Electrical",
+    hvac: "HVAC / Air conditioning",
+    carpentry: "Carpentry",
+    painting: "Painting",
+    landscaping: "Landscaping",
+    cleaning: "Cleaning",
+    moving: "Moving",
+    other: "Other services",
+  };
+
+  if (!trade) return language === "es" ? "No indicada" : "Not specified";
+  return (language === "es" ? nombresEs : nombresEn)[trade] || trade;
 }
 
-function nombreEtapa(etapa: string | null, status: string) {
-  if (status === "completed") return "Completado";
-  if (status === "cancelled") return "Cancelado";
-  if (etapa === "on_the_way") return "En camino";
-  if (etapa === "arrived") return "Ya llegó";
-  if (etapa === "working") return "Trabajo iniciado";
-  return "Contratado";
+function nombreEtapa(
+  etapa: string | null,
+  status: string,
+  language: "es" | "en"
+) {
+  if (status === "completed") return language === "es" ? "Completado" : "Completed";
+  if (status === "cancelled") return language === "es" ? "Cancelado" : "Cancelled";
+  if (etapa === "on_the_way") return language === "es" ? "En camino" : "On the way";
+  if (etapa === "arrived") return language === "es" ? "Ya llegó" : "Arrived";
+  if (etapa === "working") return language === "es" ? "Trabajo iniciado" : "Work started";
+  return language === "es" ? "Contratado" : "Hired";
 }
 
 function estiloEtapa(etapa: string | null, status: string) {
@@ -123,24 +140,27 @@ function estiloEtapa(etapa: string | null, status: string) {
   return "bg-green-100 text-green-800";
 }
 
-function mostrarMinutos(minutos: number | null) {
-  if (minutos === null || minutos === undefined) return "No indicado";
+function mostrarMinutos(minutos: number | null, language: "es" | "en") {
+  if (minutos === null || minutos === undefined)
+    return language === "es" ? "No indicado" : "Not specified";
   if (minutos < 60) return `${minutos} min`;
 
   const horas = Math.floor(minutos / 60);
   const restantes = minutos % 60;
 
   if (restantes === 0) {
-    return `${horas} ${horas === 1 ? "hora" : "horas"}`;
+    return language === "es"
+      ? `${horas} ${horas === 1 ? "hora" : "horas"}`
+      : `${horas} ${horas === 1 ? "hour" : "hours"}`;
   }
 
   return `${horas} h ${restantes} min`;
 }
 
-function formatearFecha(fecha: string | null) {
-  if (!fecha) return "No disponible";
+function formatearFecha(fecha: string | null, language: "es" | "en") {
+  if (!fecha) return language === "es" ? "No disponible" : "Not available";
 
-  return new Intl.DateTimeFormat("es-US", {
+  return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -152,6 +172,8 @@ function formatearFecha(fecha: string | null) {
 export default function PanelProfesional() {
   const router = useRouter();
   const { setAccountRole } = useAccountMode();
+  const { language } = useLanguage();
+  const T = (es: string, en: string) => (language === "es" ? es : en);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [profile, setProfile] = useState<ProviderProfile | null>(null);
@@ -254,7 +276,7 @@ export default function PanelProfesional() {
         .maybeSingle();
 
       if (baseProfileError || !baseProfile) {
-        throw new Error("No se encontró tu cuenta en RELYDO.");
+        throw new Error(T("No se encontró tu cuenta en RELYDO.", "We could not find your RELYDO account."));
       }
 
       if (baseProfile.role === "admin") {
@@ -278,7 +300,7 @@ export default function PanelProfesional() {
 
       if (profileError) {
         throw new Error(
-          `No se pudo cargar tu perfil profesional: ${profileError.message}`
+          `${T("No se pudo cargar tu perfil profesional", "We could not load your professional profile")}: ${profileError.message}`
         );
       }
 
@@ -346,7 +368,7 @@ export default function PanelProfesional() {
 
       if (trabajosError) {
         throw new Error(
-          `No se pudieron cargar tus trabajos: ${trabajosError.message}`
+          `${T("No se pudieron cargar tus trabajos", "We could not load your jobs")}: ${trabajosError.message}`
         );
       }
 
@@ -412,7 +434,7 @@ export default function PanelProfesional() {
       console.error("Error cargando panel:", err);
 
       setError(
-        err instanceof Error ? err.message : "Ocurrió un error inesperado."
+        err instanceof Error ? err.message : T("Ocurrió un error inesperado.", "An unexpected error occurred.")
       );
     } finally {
       if (mostrarCarga) {
@@ -433,13 +455,13 @@ export default function PanelProfesional() {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
 
     if (!tiposPermitidos.includes(file.type)) {
-      setError("El logo debe ser JPG, PNG o WEBP.");
+      setError(T("El logo debe ser JPG, PNG o WEBP.", "The logo must be JPG, PNG, or WEBP."));
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("El logo no puede superar 5 MB.");
+      setError(T("El logo no puede superar 5 MB.", "The logo cannot exceed 5 MB."));
       event.target.value = "";
       return;
     }
@@ -453,7 +475,7 @@ export default function PanelProfesional() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        throw new Error("Tu sesión ya no está disponible.");
+        throw new Error(T("Tu sesión ya no está disponible.", "Your session is no longer available."));
       }
 
       const extension = file.name.split(".").pop()?.toLowerCase() || "png";
@@ -467,7 +489,7 @@ export default function PanelProfesional() {
         });
 
       if (uploadError) {
-        throw new Error(`No se pudo subir el logo: ${uploadError.message}`);
+        throw new Error(`${T("No se pudo subir el logo", "We could not upload the logo")}: ${uploadError.message}`);
       }
 
       const {
@@ -483,7 +505,7 @@ export default function PanelProfesional() {
 
       if (updateError) {
         throw new Error(
-          `El logo subió, pero no se pudo guardar en el perfil: ${updateError.message}`
+          `${T("El logo subió, pero no se pudo guardar en el perfil", "The logo was uploaded, but it could not be saved to your profile")}: ${updateError.message}`
         );
       }
 
@@ -498,7 +520,7 @@ export default function PanelProfesional() {
     } catch (err) {
       console.error("Error subiendo logo:", err);
       setError(
-        err instanceof Error ? err.message : "No se pudo subir el logo."
+        err instanceof Error ? err.message : T("No se pudo subir el logo.", "We could not upload the logo.")
       );
     } finally {
       setSubiendoLogo(false);
@@ -525,7 +547,7 @@ export default function PanelProfesional() {
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
           <p className="font-bold text-slate-700">
-            Cargando panel profesional...
+            {T("Cargando panel profesional...", "Loading professional dashboard...")}
           </p>
         </div>
       </main>
@@ -537,7 +559,7 @@ export default function PanelProfesional() {
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-xl">
           <h1 className="text-2xl font-extrabold text-red-700">
-            No se pudo cargar el panel
+            {T("No se pudo cargar el panel", "Could not load dashboard")}
           </h1>
 
           <p className="mt-4 text-slate-700">{error}</p>
@@ -547,7 +569,7 @@ export default function PanelProfesional() {
             onClick={cerrarSesion}
             className="mt-6 w-full rounded-xl bg-slate-900 px-5 py-3 font-bold text-white hover:bg-slate-700"
           >
-            Cerrar sesión
+            {T("Cerrar sesión", "Sign out")}
           </button>
         </div>
       </main>
@@ -572,42 +594,52 @@ export default function PanelProfesional() {
   function obtenerEstado() {
     if (estaRechazado) {
       return {
-        titulo: "Verificación rechazada",
-        descripcion:
+        titulo: T("Verificación rechazada", "Verification rejected"),
+        descripcion: T(
           "Tu verificación necesita correcciones. Revisa o vuelve a enviar tus documentos.",
+          "Your verification needs corrections. Review or resubmit your documents."
+        ),
         estilo: "border-red-300 bg-red-50 text-red-900",
         badge: "bg-red-100 text-red-800",
-        textoBadge: "Rechazado",
+        textoBadge: T("Rechazado", "Rejected"),
       };
     }
 
     if (estaSuspendido) {
       return {
-        titulo: "Cuenta suspendida",
-        descripcion:
+        titulo: T("Cuenta suspendida", "Account suspended"),
+        descripcion: T(
           "Tu cuenta profesional está temporalmente suspendida. No puedes acceder a nuevos trabajos mientras permanezca suspendida.",
+          "Your professional account is temporarily suspended. You cannot access new jobs while it remains suspended."
+        ),
         estilo: "border-red-300 bg-red-50 text-red-900",
         badge: "bg-red-100 text-red-800",
-        textoBadge: "Suspendido",
+        textoBadge: T("Suspendido", "Suspended"),
       };
     }
 
     if (estaVerificado) {
       return {
-        titulo: "Verificado ✅",
-        descripcion: "Tu cuenta ha sido revisada y aprobada por RELYDO.",
+        titulo: T("Verificado ✅", "Verified ✅"),
+        descripcion: T(
+          "Tu cuenta ha sido revisada y aprobada por RELYDO.",
+          "Your account has been reviewed and approved by RELYDO."
+        ),
         estilo: "border-green-300 bg-green-50 text-green-900",
         badge: "bg-green-100 text-green-800",
-        textoBadge: "Verificado",
+        textoBadge: T("Verificado", "Verified"),
       };
     }
 
     return {
-      titulo: "Pendiente de verificación",
-      descripcion: "Tu cuenta todavía está pendiente de revisión.",
+      titulo: T("Pendiente de verificación", "Verification pending"),
+      descripcion: T(
+        "Tu cuenta todavía está pendiente de revisión.",
+        "Your account is still pending review."
+      ),
       estilo: "border-amber-300 bg-amber-50 text-amber-900",
       badge: "bg-amber-100 text-amber-800",
-      textoBadge: "Pendiente",
+      textoBadge: T("Pendiente", "Pending"),
     };
   }
 
@@ -652,7 +684,7 @@ export default function PanelProfesional() {
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-300" />
-                  Panel profesional
+                  {T("Panel profesional", "Professional dashboard")}
                 </div>
 
                 <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -675,7 +707,7 @@ export default function PanelProfesional() {
                       onClick={() => logoInputRef.current?.click()}
                       className="absolute inset-x-0 bottom-0 bg-slate-950/75 px-2 py-1.5 text-[10px] font-black uppercase tracking-wide text-white opacity-0 transition group-hover:opacity-100 disabled:cursor-not-allowed"
                     >
-                      {subiendoLogo ? "Subiendo..." : "Cambiar logo"}
+                      {subiendoLogo ? T("Subiendo...", "Uploading...") : T("Cambiar logo", "Change logo")}
                     </button>
                   </div>
 
@@ -689,7 +721,7 @@ export default function PanelProfesional() {
 
                   <div>
                     <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-                      {profile.business_name || "Profesional RELYDO"}
+                      {profile.business_name || T("Profesional RELYDO", "RELYDO Professional")}
                     </h1>
 
                     <button
@@ -708,12 +740,12 @@ export default function PanelProfesional() {
                 </div>
 
                 <p className="mt-4 max-w-xl text-base leading-7 text-blue-100 md:text-lg">
-                  Administra tus oportunidades, trabajos activos, reputación y estado de cuenta desde un solo lugar.
+                  {T("Administra tus oportunidades, trabajos activos, reputación y estado de cuenta desde un solo lugar.", "Manage your opportunities, active jobs, reputation, and account status from one place.")}
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold text-white">
-                    {nombreOficio(profile.trade)}
+                    {nombreOficio(profile.trade, language)}
                   </span>
 
                   <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold text-white">
@@ -721,7 +753,7 @@ export default function PanelProfesional() {
                   </span>
 
                   <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold text-white">
-                    {profile.completed_jobs ?? 0} trabajos completados
+                    {profile.completed_jobs ?? 0} {T("trabajos completados", "completed jobs")}
                   </span>
                 </div>
               </div>
@@ -733,7 +765,7 @@ export default function PanelProfesional() {
 
                 <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
                   <p className="text-xs font-black uppercase tracking-wide text-blue-200">
-                    Cuenta
+                    {T("Cuenta", "Account")}
                   </p>
                   <p className="mt-1 max-w-[220px] truncate text-sm font-bold text-white">
                     {email}
@@ -748,7 +780,7 @@ export default function PanelProfesional() {
                     onClick={cerrarSesion}
                     className="mt-3 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/20"
                   >
-                    Cerrar sesión
+                    {T("Cerrar sesión", "Sign out")}
                   </button>
                 </div>
               </div>
@@ -762,15 +794,15 @@ export default function PanelProfesional() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
-                Resumen
+                {T("Resumen", "Summary")}
               </p>
 
               <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                Tu actividad en RELYDO
+                {T("Tu actividad en RELYDO", "Your RELYDO activity")}
               </h2>
 
               <p className="mt-2 text-slate-600">
-                Una vista rápida de tus trabajos y reputación.
+                {T("Una vista rápida de tus trabajos y reputación.", "A quick view of your jobs and reputation.")}
               </p>
             </div>
 
@@ -780,13 +812,13 @@ export default function PanelProfesional() {
               disabled={actualizando}
               className="w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 font-black text-slate-800 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {actualizando ? "Actualizando..." : "↻ Actualizar"}
+              {actualizando ? T("Actualizando...", "Updating...") : T("↻ Actualizar", "↻ Refresh")}
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             <ResumenCard
-              titulo="Activos"
+              titulo={T("Activos", "Active")}
               valor={String(trabajosActivos.length)}
               clase="text-blue-700"
               icono="⚡"
@@ -795,7 +827,7 @@ export default function PanelProfesional() {
             />
 
             <ResumenCard
-              titulo="Completados"
+              titulo={T("Completados", "Completed")}
               valor={String(profile.completed_jobs ?? trabajosCompletados.length)}
               clase="text-emerald-700"
               icono="✓"
@@ -804,7 +836,7 @@ export default function PanelProfesional() {
             />
 
             <ResumenCard
-              titulo="Cancelados"
+              titulo={T("Cancelados", "Cancelled")}
               valor={String(trabajosCancelados.length)}
               clase="text-red-700"
               icono="×"
@@ -813,7 +845,7 @@ export default function PanelProfesional() {
             />
 
             <ResumenCard
-              titulo="Reclamos"
+              titulo={T("Reclamos", "Claims")}
               valor={String(reclamosActivos.length)}
               clase="text-rose-700"
               icono="⚠"
@@ -822,7 +854,7 @@ export default function PanelProfesional() {
             />
 
             <ResumenCard
-              titulo="Calificación"
+              titulo={T("Calificación", "Rating")}
               valor={Number(profile.average_rating || 0).toFixed(1)}
               clase="text-amber-700"
               icono="★"
@@ -831,7 +863,7 @@ export default function PanelProfesional() {
             />
 
             <ResumenCard
-              titulo="Historial"
+              titulo={T("Historial", "History")}
               valor={String(totalHistorial)}
               clase="text-violet-700"
               icono="↺"
@@ -848,7 +880,7 @@ export default function PanelProfesional() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-black uppercase tracking-wide text-blue-700">
-                  Atención
+                  {T("Atención", "Attention")}
                 </p>
 
                 <h2 className="mt-1 text-xl font-extrabold text-blue-950">
@@ -858,7 +890,7 @@ export default function PanelProfesional() {
                 </h2>
 
                 <p className="mt-1 text-blue-800">
-                  Revisa el estado y mantenlo actualizado para que el cliente pueda seguir el servicio en vivo.
+                  {T("Revisa el estado y mantenlo actualizado para que el cliente pueda seguir el servicio en vivo.", "Review the status and keep it updated so the customer can follow the service live.")}
                 </p>
               </div>
 
@@ -881,7 +913,7 @@ export default function PanelProfesional() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide">
-                Estado de la cuenta
+                {T("Estado de la cuenta", "Account status")}
               </p>
 
               <h2 className="mt-2 text-2xl font-extrabold">{estado.titulo}</h2>
@@ -899,7 +931,7 @@ export default function PanelProfesional() {
         {!estaVerificado && !estaSuspendido && (
           <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow">
             <h2 className="text-xl font-extrabold text-slate-900">
-              Verificación profesional
+              {T("Verificación profesional", "Professional verification")}
             </h2>
 
             <p className="mt-2 text-slate-600">
@@ -935,11 +967,11 @@ export default function PanelProfesional() {
 
               <div>
                 <h2 className="text-xl font-extrabold text-red-900">
-                  Acceso a trabajos suspendido
+                  {T("Acceso a trabajos suspendido", "Job access suspended")}
                 </h2>
 
                 <p className="mt-2 leading-6 text-slate-600">
-                  Tu perfil continúa existiendo, pero mientras la cuenta esté suspendida no podrás recibir ni aceptar nuevos trabajos.
+                  {T("Tu perfil continúa existiendo, pero mientras la cuenta esté suspendida no podrás recibir ni aceptar nuevos trabajos.", "Your profile still exists, but while your account is suspended you cannot receive or accept new jobs.")}
                 </p>
               </div>
             </div>
@@ -962,27 +994,27 @@ export default function PanelProfesional() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-rose-700">
-                  Protección
+                  {T("Protección", "Protection")}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Mis reclamos
+                  {T("Mis reclamos", "My claims")}
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  Revisa los reclamos relacionados con tus trabajos y entra al detalle para adjuntar fotos o videos.
+                  {T("Revisa los reclamos relacionados con tus trabajos y entra al detalle para adjuntar fotos o videos.", "Review claims related to your jobs and open the details to attach photos or videos.")}
                 </p>
               </div>
 
               <span className="w-fit rounded-full bg-rose-100 px-4 py-2 font-extrabold text-rose-800">
-                {reclamosActivos.length} activos
+                {reclamosActivos.length} {T("activos", "active")}
               </span>
             </div>
 
             {reclamos.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="font-bold text-slate-700">
-                  No tienes reclamos registrados.
+                  {T("No tienes reclamos registrados.", "You have no registered claims.")}
                 </p>
               </div>
             ) : (
@@ -1007,7 +1039,7 @@ export default function PanelProfesional() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-black text-slate-900">
-                            {trabajoRelacionado?.title || "Trabajo con reclamo"}
+                            {trabajoRelacionado?.title || T("Trabajo con reclamo", "Job with claim")}
                           </p>
 
                           <span
@@ -1018,16 +1050,16 @@ export default function PanelProfesional() {
                             }`}
                           >
                             {reclamo.status === "open"
-                              ? "Abierto"
+                              ? T("Abierto", "Open")
                               : reclamo.status === "reviewing" ||
                                 reclamo.status === "in_review"
-                              ? "En revisión"
-                              : "Resuelto"}
+                              ? T("En revisión", "Under review")
+                              : T("Resuelto", "Resolved")}
                           </span>
                         </div>
 
                         <p className="mt-2 font-bold text-slate-700">
-                          {reclamo.reason || "Reclamo del cliente"}
+                          {reclamo.reason || T("Reclamo del cliente", "Customer claim")}
                         </p>
 
                         {reclamo.description && (
@@ -1039,11 +1071,11 @@ export default function PanelProfesional() {
 
                       <div className="shrink-0 text-right">
                         <p className="text-sm font-black text-blue-700">
-                          Ver reclamo →
+                          {T("Ver reclamo →", "View claim →")}
                         </p>
 
                         <p className="mt-1 text-xs text-slate-400">
-                          {formatearFecha(reclamo.created_at)}
+                          {formatearFecha(reclamo.created_at, language)}
                         </p>
                       </div>
                     </button>
@@ -1079,15 +1111,15 @@ export default function PanelProfesional() {
 
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.15em] text-blue-700">
-                    Perfil profesional
+                    {T("Perfil profesional", "Professional profile")}
                   </p>
 
                   <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                    {profile.business_name || "Profesional RELYDO"}
+                    {profile.business_name || T("Profesional RELYDO", "RELYDO Professional")}
                   </h2>
 
                   <p className="mt-1 font-bold text-slate-500">
-                    {nombreOficio(profile.trade)}
+                    {nombreOficio(profile.trade, language)}
                   </p>
                 </div>
               </div>
@@ -1097,7 +1129,7 @@ export default function PanelProfesional() {
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[11px] text-white">
                     ✓
                   </span>
-                  Profesional verificado
+                  {T("Profesional verificado", "Verified professional")}
                 </span>
               )}
             </div>
@@ -1107,7 +1139,7 @@ export default function PanelProfesional() {
             {profile.bio && (
               <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
                 <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                  Sobre tu negocio
+                  {T("Sobre tu negocio", "About your business")}
                 </p>
 
                 <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">
@@ -1118,38 +1150,38 @@ export default function PanelProfesional() {
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <DatoPerfil
-                titulo="Especialidad"
-                valor={nombreOficio(profile.trade)}
+                titulo={T("Especialidad", "Specialty")}
+                valor={nombreOficio(profile.trade, language)}
                 icono="🛠️"
               />
 
               <DatoPerfil
-                titulo="Experiencia"
-                valor={`${profile.years_experience ?? 0} años`}
+                titulo={T("Experiencia", "Experience")}
+                valor={`${profile.years_experience ?? 0} ${T("años", "years")}`}
                 icono="🏅"
               />
 
               <DatoPerfil
-                titulo="Radio de servicio"
-                valor={`${profile.service_radius_miles ?? 0} millas`}
+                titulo={T("Radio de servicio", "Service radius")}
+                valor={`${profile.service_radius_miles ?? 0} ${T("millas", "miles")}`}
                 icono="📍"
               />
 
               <DatoPerfil
-                titulo="Trabajos completados"
+                titulo={T("Trabajos completados", "Completed jobs")}
                 valor={String(profile.completed_jobs ?? 0)}
                 icono="✅"
               />
 
               <DatoPerfil
-                titulo="Calificación"
+                titulo={T("Calificación", "Rating")}
                 valor={`⭐ ${Number(profile.average_rating || 0).toFixed(1)}`}
                 icono="⭐"
               />
 
               <DatoPerfil
-                titulo="Cuenta"
-                valor={profile.active ? "Activa" : "Suspendida"}
+                titulo={T("Cuenta", "Account")}
+                valor={profile.active ? T("Activa", "Active") : T("Suspendida", "Suspended")}
                 icono="🛡️"
               />
             </div>
@@ -1162,15 +1194,15 @@ export default function PanelProfesional() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-blue-700">
-                Oportunidades
+                {T("Oportunidades", "Opportunities")}
               </p>
 
               <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                Nuevos trabajos
+                {T("Nuevos trabajos", "New jobs")}
               </h2>
 
               <p className="mt-2 text-slate-600">
-                Revisa nuevas solicitudes disponibles y envía tus presupuestos.
+                {T("Revisa nuevas solicitudes disponibles y envía tus presupuestos.", "Review available requests and send your quotes.")}
               </p>
             </div>
 
@@ -1185,7 +1217,7 @@ export default function PanelProfesional() {
               onClick={() => router.push("/trabajos")}
               className="mt-5 w-full rounded-2xl bg-blue-700 px-6 py-4 text-lg font-black text-white shadow-lg shadow-blue-700/15 transition hover:-translate-y-0.5 hover:bg-blue-800"
             >
-              Ver trabajos disponibles →
+              {T("Ver trabajos disponibles →", "View available jobs →")}
             </button>
           ) : (
             <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
@@ -1206,15 +1238,15 @@ export default function PanelProfesional() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-green-700">
-                  Trabajo activo
+                  {T("Trabajo activo", "Active job")}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Trabajos en progreso
+                  {T("Trabajos en progreso", "Jobs in progress")}
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  Controla desde aquí todos los trabajos que ya fueron contratados.
+                  {T("Controla desde aquí todos los trabajos que ya fueron contratados.", "Manage all jobs that have already been hired from here.")}
                 </p>
               </div>
 
@@ -1228,7 +1260,7 @@ export default function PanelProfesional() {
             {trabajosActivos.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="font-bold text-slate-700">
-                  No tienes trabajos en progreso.
+                  {T("No tienes trabajos en progreso.", "You have no jobs in progress.")}
                 </p>
               </div>
             ) : (
@@ -1242,7 +1274,7 @@ export default function PanelProfesional() {
                       <div>
                         <div className="flex flex-wrap gap-2">
                           <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-extrabold text-green-800">
-                            En progreso
+                            {T("En progreso", "In progress")}
                           </span>
 
                           <span
@@ -1251,7 +1283,7 @@ export default function PanelProfesional() {
                               trabajo.status
                             )}`}
                           >
-                            {nombreEtapa(trabajo.job_stage, trabajo.status)}
+                            {nombreEtapa(trabajo.job_stage, trabajo.status, language)}
                           </span>
                         </div>
 
@@ -1267,7 +1299,7 @@ export default function PanelProfesional() {
                       {trabajo.pago ? (
                         <div className="min-w-[230px] rounded-2xl border border-emerald-200 bg-white px-6 py-4 shadow-sm">
                           <p className="text-center text-sm font-bold text-emerald-700">
-                            Recibirás
+                            {T("Recibirás", "You’ll receive")}
                           </p>
 
                           <p className="mt-1 text-center text-3xl font-extrabold text-emerald-900">
@@ -1276,7 +1308,7 @@ export default function PanelProfesional() {
 
                           <div className="mt-3 border-t border-slate-100 pt-3 text-xs">
                             <div className="flex items-center justify-between gap-4 text-slate-600">
-                              <span>Valor del servicio</span>
+                              <span>{T("Valor del servicio", "Service value")}</span>
                               <span className="font-bold text-slate-900">
                                 ${Number(trabajo.pago.job_amount).toFixed(2)}
                               </span>
@@ -1284,7 +1316,7 @@ export default function PanelProfesional() {
 
                             <div className="mt-1.5 flex items-center justify-between gap-4 text-slate-600">
                               <span>
-                                Tarifa RELYDO ({Number(
+                                {T("Tarifa RELYDO", "RELYDO fee")} ({Number(
                                   trabajo.pago.provider_commission_percent
                                 ).toFixed(2)}%)
                               </span>
@@ -1299,7 +1331,7 @@ export default function PanelProfesional() {
                       ) : trabajo.oferta ? (
                         <div className="rounded-2xl bg-white px-6 py-4 text-center shadow-sm">
                           <p className="text-sm font-bold text-slate-500">
-                            Precio acordado
+                            {T("Precio acordado", "Agreed price")}
                           </p>
 
                           <p className="mt-1 text-3xl font-extrabold text-slate-900">
@@ -1307,7 +1339,7 @@ export default function PanelProfesional() {
                           </p>
 
                           <p className="mt-2 text-xs font-semibold text-amber-700">
-                            Cálculo de tarifa pendiente
+                            {T("Cálculo de tarifa pendiente", "Fee calculation pending")}
                           </p>
                         </div>
                       ) : null}
@@ -1315,38 +1347,38 @@ export default function PanelProfesional() {
 
                     <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                       <InfoBox
-                        titulo="Cliente"
+                        titulo={T("Cliente", "Customer")}
                         valor={trabajo.customer_name || "Cliente RELYDO"}
                       />
 
                       <InfoBox
-                        titulo="Ubicación"
+                        titulo={T("Ubicación", "Location")}
                         valor={`${trabajo.city}, ${trabajo.state} ${trabajo.zip_code}`}
                       />
 
                       <InfoBox
-                        titulo="Fecha"
-                        valor={trabajo.preferred_date || "Flexible"}
+                        titulo={T("Fecha", "Date")}
+                        valor={trabajo.preferred_date || T("Flexible", "Flexible")}
                       />
 
                       <InfoBox
-                        titulo="Hora"
-                        valor={trabajo.preferred_time || "Flexible"}
+                        titulo={T("Hora", "Time")}
+                        valor={trabajo.preferred_time || T("Flexible", "Flexible")}
                       />
                     </div>
 
                     {trabajo.oferta && (
                       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <InfoBox
-                          titulo="Tiempo estimado de llegada"
-                          valor={mostrarMinutos(trabajo.oferta.arrival_minutes)}
+                          titulo={T("Tiempo estimado de llegada", "Estimated arrival time")}
+                          valor={mostrarMinutos(trabajo.oferta.arrival_minutes, language)}
                           borde
                         />
 
                         <InfoBox
-                          titulo="Duración estimada"
+                          titulo={T("Duración estimada", "Estimated duration")}
                           valor={mostrarMinutos(
-                            trabajo.oferta.estimated_job_minutes
+                            trabajo.oferta.estimated_job_minutes, language
                           )}
                           borde
                         />
@@ -1358,11 +1390,11 @@ export default function PanelProfesional() {
                       onClick={() => router.push(`/trabajos/${trabajo.id}`)}
                       className="mt-5 w-full rounded-2xl bg-blue-700 px-6 py-4 text-lg font-black text-white shadow-lg shadow-blue-700/15 transition hover:-translate-y-0.5 hover:bg-blue-800"
                     >
-                      Ver trabajo y actualizar estado →
+                      {T("Ver trabajo y actualizar estado →", "View job and update status →")}
                     </button>
 
                     <p className="mt-3 text-center text-sm text-slate-500">
-                      Cambia el estado a En camino, Llegué, Trabajo iniciado o Completado.
+                      {T("Cambia el estado a En camino, Llegué, Trabajo iniciado o Completado.", "Change the status to On the way, Arrived, Work started, or Completed.")}
                     </p>
                   </article>
                 ))}
@@ -1385,7 +1417,7 @@ export default function PanelProfesional() {
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Trabajos completados
+                  {T("Trabajos completados", "Completed jobs")}
                 </h2>
               </div>
 
@@ -1403,7 +1435,7 @@ export default function PanelProfesional() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-extrabold text-green-800">
-                        ✓ Completado
+                        ✓ {T("Completado", "Completed")}
                       </span>
 
                       <h3 className="mt-3 text-xl font-extrabold text-slate-900">
@@ -1422,7 +1454,7 @@ export default function PanelProfesional() {
                     {trabajo.pago ? (
                       <div className="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-right">
                         <p className="text-xs font-bold text-emerald-700">
-                          Tu ingreso neto
+                          {T("Tu ingreso neto", "Your net earnings")}
                         </p>
 
                         <p className="mt-1 text-xl font-black text-emerald-800">
@@ -1440,7 +1472,7 @@ export default function PanelProfesional() {
                     ) : trabajo.oferta ? (
                       <div className="rounded-xl bg-white px-4 py-3 text-right">
                         <p className="text-xs font-bold text-slate-500">
-                          Precio acordado
+                          {T("Precio acordado", "Agreed price")}
                         </p>
 
                         <p className="mt-1 text-xl font-black text-green-800">
@@ -1455,7 +1487,7 @@ export default function PanelProfesional() {
                     onClick={() => router.push(`/trabajos/${trabajo.id}`)}
                     className="mt-5 rounded-xl border-2 border-blue-700 px-5 py-3 font-extrabold text-blue-700 hover:bg-blue-50"
                   >
-                    Ver detalles
+                    {T("Ver detalles", "View details")}
                   </button>
                 </article>
               ))}
@@ -1477,7 +1509,7 @@ export default function PanelProfesional() {
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Trabajos cancelados
+                  {T("Trabajos cancelados", "Cancelled jobs")}
                 </h2>
               </div>
 
@@ -1493,7 +1525,7 @@ export default function PanelProfesional() {
                   className="rounded-2xl border border-red-200 bg-red-50/40 p-6"
                 >
                   <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-extrabold text-red-800">
-                    ✕ Cancelado
+                    ✕ {T("Cancelado", "Cancelled")}
                   </span>
 
                   <h3 className="mt-3 text-xl font-extrabold text-slate-900">
@@ -1505,7 +1537,7 @@ export default function PanelProfesional() {
                   {trabajo.cancellation_reason && (
                     <div className="mt-4 rounded-xl border border-red-200 bg-white p-4">
                       <p className="text-sm font-bold text-red-700">
-                        Motivo de cancelación
+                        {T("Motivo de cancelación", "Cancellation reason")}
                       </p>
 
                       <p className="mt-1 font-semibold text-slate-800">
@@ -1514,7 +1546,7 @@ export default function PanelProfesional() {
 
                       {trabajo.cancelled_at && (
                         <p className="mt-2 text-xs text-slate-500">
-                          {formatearFecha(trabajo.cancelled_at)}
+                          {formatearFecha(trabajo.cancelled_at, language)}
                         </p>
                       )}
                     </div>
@@ -1523,18 +1555,18 @@ export default function PanelProfesional() {
                   {trabajo.pago ? (
                     <div className="mt-3 rounded-xl border border-red-200 bg-white p-4">
                       <p className="text-sm font-bold text-red-800">
-                        Precio acordado: ${Number(
+                        {T("Precio acordado", "Agreed price")}: ${Number(
                           trabajo.pago.job_amount
                         ).toFixed(2)}
                       </p>
 
                       <p className="mt-1 text-xs text-slate-500">
-                        El trabajo fue cancelado. El tratamiento de reembolsos y comisiones se definirá en la fase de cancelaciones del sistema de pagos.
+                        {T("El trabajo fue cancelado. El tratamiento de reembolsos y comisiones se definirá en la fase de cancelaciones del sistema de pagos.", "The job was cancelled. Refund and fee handling will be defined in the cancellation phase of the payment system.")}
                       </p>
                     </div>
                   ) : trabajo.oferta ? (
                     <p className="mt-3 font-bold text-red-800">
-                      Precio acordado: ${Number(trabajo.oferta.price).toFixed(2)}
+                      {T("Precio acordado", "Agreed price")}: ${Number(trabajo.oferta.price).toFixed(2)}
                     </p>
                   ) : null}
 
@@ -1543,7 +1575,7 @@ export default function PanelProfesional() {
                     onClick={() => router.push(`/trabajos/${trabajo.id}`)}
                     className="mt-5 rounded-xl border-2 border-red-600 px-5 py-3 font-extrabold text-red-700 hover:bg-red-50"
                   >
-                    Ver detalles
+                    {T("Ver detalles", "View details")}
                   </button>
                 </article>
               ))}
@@ -1561,15 +1593,15 @@ export default function PanelProfesional() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-violet-700">
-                  Historial completo
+                  {T("Historial completo", "Full history")}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Todos tus trabajos
+                  {T("Todos tus trabajos", "All your jobs")}
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  Activos, completados y cancelados en una sola vista.
+                  {T("Activos, completados y cancelados en una sola vista.", "Active, completed, and cancelled jobs in one view.")}
                 </p>
               </div>
 
@@ -1581,7 +1613,7 @@ export default function PanelProfesional() {
             {trabajosContratados.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="font-bold text-slate-700">
-                  Todavía no tienes trabajos en el historial.
+                  {T("Todavía no tienes trabajos en el historial.", "You don’t have any jobs in your history yet.")}
                 </p>
               </div>
             ) : (
@@ -1598,7 +1630,7 @@ export default function PanelProfesional() {
                         {trabajo.title}
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        {trabajo.city}, {trabajo.state} · {formatearFecha(trabajo.created_at)}
+                        {trabajo.city}, {trabajo.state} · {formatearFecha(trabajo.created_at, language)}
                       </p>
                     </div>
 
@@ -1608,7 +1640,7 @@ export default function PanelProfesional() {
                         trabajo.status
                       )}`}
                     >
-                      {nombreEtapa(trabajo.job_stage, trabajo.status)}
+                      {nombreEtapa(trabajo.job_stage, trabajo.status, language)}
                     </span>
                   </button>
                 ))}

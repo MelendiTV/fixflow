@@ -6,6 +6,7 @@ import {
   useRouter,
 } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -146,13 +147,16 @@ type JobMessage = {
 };
 
 function mostrarMinutos(
-  minutos: number | null
+  minutos: number | null,
+  language: "es" | "en"
 ) {
   if (
     minutos === null ||
     minutos === undefined
   ) {
-    return "No indicado";
+    return language === "es"
+      ? "No indicado"
+      : "Not specified";
   }
 
   if (minutos < 60) {
@@ -168,21 +172,22 @@ function mostrarMinutos(
     minutos % 60;
 
   if (restantes === 0) {
-    return `${horas} ${
-      horas === 1
-        ? "hora"
-        : "horas"
-    }`;
+    return language === "es"
+      ? `${horas} ${horas === 1 ? "hora" : "horas"}`
+      : `${horas} ${horas === 1 ? "hour" : "hours"}`;
   }
 
   return `${horas} h ${restantes} min`;
 }
 
 function formatearFecha(
-  fecha: string | null
+  fecha: string | null,
+  language: "es" | "en"
 ) {
   if (!fecha) {
-    return "Flexible";
+    return language === "es"
+      ? "Flexible"
+      : "Flexible";
   }
 
   const date =
@@ -191,7 +196,9 @@ function formatearFecha(
     );
 
   return new Intl.DateTimeFormat(
-    "es-US",
+    language === "es"
+      ? "es-US"
+      : "en-US",
     {
       day: "numeric",
       month: "short",
@@ -201,10 +208,13 @@ function formatearFecha(
 }
 
 function formatearFechaHora(
-  fecha: string
+  fecha: string,
+  language: "es" | "en"
 ) {
   return new Intl.DateTimeFormat(
-    "es-US",
+    language === "es"
+      ? "es-US"
+      : "en-US",
     {
       day: "numeric",
       month: "short",
@@ -218,12 +228,16 @@ function formatearFechaHora(
 }
 
 function calcularTiempoRestante(
-  deadline: string | null
+  deadline: string | null,
+  language: "es" | "en"
 ) {
   if (!deadline) {
     return {
       vencido: false,
-      texto: "24 horas",
+      texto:
+        language === "es"
+          ? "24 horas"
+          : "24 hours",
     };
   }
 
@@ -234,7 +248,10 @@ function calcularTiempoRestante(
   if (diferencia <= 0) {
     return {
       vencido: true,
-      texto: "Plazo vencido",
+      texto:
+        language === "es"
+          ? "Plazo vencido"
+          : "Deadline expired",
     };
   }
 
@@ -262,10 +279,13 @@ function calcularTiempoRestante(
 
 
 function formatearHoraChat(
-  fecha: string
+  fecha: string,
+  language: "es" | "en"
 ) {
   return new Intl.DateTimeFormat(
-    "es-US",
+    language === "es"
+      ? "es-US"
+      : "en-US",
     {
       hour: "numeric",
       minute: "2-digit",
@@ -285,6 +305,17 @@ export default function TrabajoDetallePage() {
 
   const router =
     useRouter();
+
+  const { language } =
+    useLanguage();
+
+  const T = (
+    es: string,
+    en: string
+  ) =>
+    language === "es"
+      ? es
+      : en;
 
   const id =
     params.id;
@@ -814,7 +845,7 @@ export default function TrabajoDetallePage() {
         !provider
       ) {
         throw new Error(
-          "No se encontró tu perfil profesional."
+          T("No se encontró tu perfil profesional.", "We could not find your professional profile.")
         );
       }
 
@@ -827,7 +858,7 @@ export default function TrabajoDetallePage() {
           true
       ) {
         throw new Error(
-          "Tu cuenta debe estar verificada y activa para acceder a trabajos."
+          T("Tu cuenta debe estar verificada y activa para acceder a trabajos.", "Your account must be verified and active to access jobs.")
         );
       }
 
@@ -877,7 +908,7 @@ export default function TrabajoDetallePage() {
         !trabajoData
       ) {
         throw new Error(
-          "Este trabajo no existe o no tienes permiso para verlo."
+          T("Este trabajo no existe o no tienes permiso para verlo.", "This job does not exist or you do not have permission to view it.")
         );
       }
 
@@ -893,7 +924,7 @@ export default function TrabajoDetallePage() {
           user.id
       ) {
         throw new Error(
-          "Este trabajo fue asignado a otro profesional."
+          T("Este trabajo fue asignado a otro profesional.", "This job was assigned to another professional.")
         );
       }
 
@@ -905,7 +936,7 @@ export default function TrabajoDetallePage() {
           user.id
       ) {
         throw new Error(
-          "Esta solicitud está dirigida a otro profesional."
+          T("Esta solicitud está dirigida a otro profesional.", "This request is directed to another professional.")
         );
       }
 
@@ -1290,7 +1321,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ocurrió un error inesperado."
+          : T("Ocurrió un error inesperado.", "An unexpected error occurred.")
       );
     } finally {
       setCargando(
@@ -1366,7 +1397,7 @@ export default function TrabajoDetallePage() {
         price <= 0
       ) {
         throw new Error(
-          "Introduce un precio válido."
+          T("Introduce un precio válido.", "Enter a valid price.")
         );
       }
 
@@ -1377,7 +1408,7 @@ export default function TrabajoDetallePage() {
         arrivalMinutes < 0
       ) {
         throw new Error(
-          "Introduce un tiempo de llegada válido."
+          T("Introduce un tiempo de llegada válido.", "Enter a valid arrival time.")
         );
       }
 
@@ -1389,13 +1420,13 @@ export default function TrabajoDetallePage() {
           0
       ) {
         throw new Error(
-          "Introduce una duración estimada válida."
+          T("Introduce una duración estimada válida.", "Enter a valid estimated duration.")
         );
       }
 
       if (!message) {
         throw new Error(
-          "Escribe un mensaje para el cliente."
+          T("Escribe un mensaje para el cliente.", "Write a message for the customer.")
         );
       }
 
@@ -1526,7 +1557,7 @@ export default function TrabajoDetallePage() {
       form.reset();
 
       setMensaje(
-        "Presupuesto enviado correctamente."
+        T("Presupuesto enviado correctamente.", "Quote sent successfully.")
       );
     } catch (err) {
       console.error(
@@ -1536,7 +1567,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo enviar el presupuesto."
+          : T("No se pudo enviar el presupuesto.", "The quote could not be sent.")
       );
     } finally {
       setEnviando(
@@ -1568,7 +1599,7 @@ export default function TrabajoDetallePage() {
       "cancelled"
     ) {
       setError(
-        "Este trabajo fue cancelado. Ya no puedes actualizar su estado."
+        T("Este trabajo fue cancelado. Ya no puedes actualizar su estado.", "This job was cancelled. You can no longer update its status.")
       );
 
       return;
@@ -1581,7 +1612,7 @@ export default function TrabajoDetallePage() {
         providerId
     ) {
       setError(
-        "No puedes cambiar el estado de este trabajo."
+        T("No puedes cambiar el estado de este trabajo.", "You cannot change the status of this job.")
       );
 
       return;
@@ -1642,7 +1673,7 @@ export default function TrabajoDetallePage() {
         );
 
         throw new Error(
-          "Este trabajo fue cancelado. Ya no puedes continuar."
+          T("Este trabajo fue cancelado. Ya no puedes continuar.", "This job was cancelled. You can no longer continue.")
         );
       }
 
@@ -1653,7 +1684,7 @@ export default function TrabajoDetallePage() {
           providerId
       ) {
         throw new Error(
-          "Este trabajo ya no está disponible para actualizar."
+          T("Este trabajo ya no está disponible para actualizar.", "This job is no longer available to update.")
         );
       }
 
@@ -1701,18 +1732,18 @@ export default function TrabajoDetallePage() {
           string
         > = {
         on_the_way:
-          "El cliente ya puede ver que vas en camino.",
+          T("El cliente ya puede ver que vas en camino.", "The customer can now see that you are on the way."),
         arrived:
-          "El cliente ya puede ver que llegaste.",
+          T("El cliente ya puede ver que llegaste.", "The customer can now see that you arrived."),
         working:
-          "El trabajo aparece ahora como iniciado.",
+          T("El trabajo aparece ahora como iniciado.", "The job now appears as started."),
       };
 
       setMensaje(
         textos[
           nuevaEtapa
         ] ||
-          "Estado actualizado."
+          T("Estado actualizado.", "Status updated.")
       );
     } catch (err) {
       console.error(
@@ -1722,7 +1753,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo actualizar el trabajo."
+          : T("No se pudo actualizar el trabajo.", "The job could not be updated.")
       );
     } finally {
       setCambiandoEstado(
@@ -1761,7 +1792,7 @@ export default function TrabajoDetallePage() {
       )
     ) {
       setError(
-        "Solo puedes subir fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV."
+        T("Solo puedes subir fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV.", "You can only upload JPG, PNG, or WEBP photos and MP4, WEBM, or MOV videos.")
       );
       event.target.value = "";
       return;
@@ -1773,7 +1804,7 @@ export default function TrabajoDetallePage() {
       )
     ) {
       setError(
-        "Cada foto o video debe pesar 50 MB o menos."
+        T("Cada foto o video debe pesar 50 MB o menos.", "Each photo or video must be 50 MB or less.")
       );
       event.target.value = "";
       return;
@@ -1808,7 +1839,7 @@ export default function TrabajoDetallePage() {
       fotosGuardadas + fotosSeleccionadas > 10
     ) {
       setError(
-        "Puedes guardar un máximo de 10 fotos como evidencia final."
+        T("Puedes guardar un máximo de 10 fotos como evidencia final.", "You can save a maximum of 10 photos as final evidence.")
       );
       event.target.value = "";
       return;
@@ -1818,7 +1849,7 @@ export default function TrabajoDetallePage() {
       videosGuardados + videosSeleccionados > 2
     ) {
       setError(
-        "Puedes guardar un máximo de 2 videos como evidencia final."
+        T("Puedes guardar un máximo de 2 videos como evidencia final.", "You can save a maximum of 2 videos as final evidence.")
       );
       event.target.value = "";
       return;
@@ -1849,14 +1880,14 @@ export default function TrabajoDetallePage() {
       trabajo.preferred_provider_id !== providerId
     ) {
       setError(
-        "Solo puedes subir evidencia final mientras el trabajo está iniciado y asignado a tu cuenta."
+        T("Solo puedes subir evidencia final mientras el trabajo está iniciado y asignado a tu cuenta.", "You can only upload final evidence while the job is started and assigned to your account.")
       );
       return false;
     }
 
     if (archivosEvidenciaFinal.length === 0) {
       setError(
-        "Selecciona al menos una foto del trabajo terminado."
+        T("Selecciona al menos una foto del trabajo terminado.", "Select at least one photo of the completed work.")
       );
       return false;
     }
@@ -1871,7 +1902,7 @@ export default function TrabajoDetallePage() {
 
     if (totalFotos < 1) {
       setError(
-        "Para completar el trabajo debes guardar al menos 1 foto. Los videos son opcionales."
+        T("Para completar el trabajo debes guardar al menos 1 foto. Los videos son opcionales.", "To complete the job, you must save at least 1 photo. Videos are optional.")
       );
       return false;
     }
@@ -1905,7 +1936,7 @@ export default function TrabajoDetallePage() {
 
         if (uploadError) {
           throw new Error(
-            `No pudimos subir "${file.name}": ${uploadError.message}`
+            `${T("No pudimos subir", "We could not upload")} "${file.name}": ${uploadError.message}`
           );
         }
 
@@ -1943,7 +1974,7 @@ export default function TrabajoDetallePage() {
             .remove([ruta]);
 
           throw new Error(
-            `El archivo subió, pero no pudimos registrarlo: ${evidenciaError.message}`
+            `${T("El archivo subió, pero no pudimos registrarlo", "The file was uploaded, but we could not register it")}: ${evidenciaError.message}`
           );
         }
 
@@ -1960,8 +1991,10 @@ export default function TrabajoDetallePage() {
 
       setMensaje(
         guardadas.length === 1
-          ? "Evidencia final guardada. Ya puedes completar el trabajo."
-          : `${guardadas.length} archivos de evidencia final guardados. Ya puedes completar el trabajo.`
+          ? T("Evidencia final guardada. Ya puedes completar el trabajo.", "Final evidence saved. You can now complete the job.")
+          : language === "es"
+            ? `${guardadas.length} archivos de evidencia final guardados. Ya puedes completar el trabajo.`
+            : `${guardadas.length} final evidence files saved. You can now complete the job.`
       );
 
       return true;
@@ -1973,7 +2006,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo guardar la evidencia final."
+          : T("No se pudo guardar la evidencia final.", "The final evidence could not be saved.")
       );
       return false;
     } finally {
@@ -1999,14 +2032,14 @@ export default function TrabajoDetallePage() {
       )
     ) {
       setError(
-        "Este trabajo tiene un reclamo activo. No puede marcarse como completado hasta que RELYDO resuelva el reclamo."
+        T("Este trabajo tiene un reclamo activo. No puede marcarse como completado hasta que RELYDO resuelva el reclamo.", "This job has an active claim. It cannot be marked as completed until RELYDO resolves the claim.")
       );
       return;
     }
 
     if (trabajo.status === "cancelled") {
       setError(
-        "Este trabajo fue cancelado. No puede marcarse como completado."
+        T("Este trabajo fue cancelado. No puede marcarse como completado.", "This job was cancelled. It cannot be marked as completed.")
       );
       return;
     }
@@ -2016,14 +2049,14 @@ export default function TrabajoDetallePage() {
       trabajo.preferred_provider_id !== providerId
     ) {
       setError(
-        "Este trabajo no puede marcarse como completado."
+        T("Este trabajo no puede marcarse como completado.", "This job cannot be marked as completed.")
       );
       return;
     }
 
     if (trabajo.job_stage !== "working") {
       setError(
-        "Primero debes iniciar el trabajo."
+        T("Primero debes iniciar el trabajo.", "You must start the job first.")
       );
       return;
     }
@@ -2035,13 +2068,13 @@ export default function TrabajoDetallePage() {
 
     if (!tieneFotoFinal) {
       setError(
-        "Antes de completar el trabajo debes guardar al menos 1 foto como evidencia final."
+        T("Antes de completar el trabajo debes guardar al menos 1 foto como evidencia final.", "Before completing the job, you must save at least 1 photo as final evidence.")
       );
       return;
     }
 
     const confirmar = window.confirm(
-      "¿Confirmas que terminaste completamente este trabajo?"
+      T("¿Confirmas que terminaste completamente este trabajo?", "Do you confirm that you completely finished this job?")
     );
 
     if (!confirmar) {
@@ -2080,7 +2113,7 @@ export default function TrabajoDetallePage() {
         );
 
         throw new Error(
-          "Este trabajo fue cancelado. Ya no puedes completarlo."
+          T("Este trabajo fue cancelado. Ya no puedes completarlo.", "This job was cancelled. You can no longer complete it.")
         );
       }
 
@@ -2089,13 +2122,13 @@ export default function TrabajoDetallePage() {
         estadoActual.preferred_provider_id !== providerId
       ) {
         throw new Error(
-          "Este trabajo ya no está disponible para completar."
+          T("Este trabajo ya no está disponible para completar.", "This job is no longer available to complete.")
         );
       }
 
       if (estadoActual.job_stage !== "working") {
         throw new Error(
-          "El trabajo debe estar iniciado antes de completarlo."
+          T("El trabajo debe estar iniciado antes de completarlo.", "The job must be started before it can be completed.")
         );
       }
 
@@ -2127,7 +2160,7 @@ export default function TrabajoDetallePage() {
       await cargarTodo();
 
       setMensaje(
-        "Trabajo completado. El pago permanecerá protegido durante 36 horas."
+        T("Trabajo completado. El pago permanecerá protegido durante 36 horas.", "Job completed. The payment will remain protected for 36 hours.")
       );
     } catch (err) {
       console.error(
@@ -2138,7 +2171,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo completar el trabajo."
+          : T("No se pudo completar el trabajo.", "The job could not be completed.")
       );
 
       await cargarTodo();
@@ -2171,7 +2204,7 @@ export default function TrabajoDetallePage() {
         providerId
     ) {
       setError(
-        "Este trabajo ya no está asignado a tu cuenta."
+        T("Este trabajo ya no está asignado a tu cuenta.", "This job is no longer assigned to your account.")
       );
 
       return;
@@ -2182,7 +2215,7 @@ export default function TrabajoDetallePage() {
       "working"
     ) {
       setError(
-        "No puedes liberar el trabajo después de haberlo iniciado."
+        T("No puedes liberar el trabajo después de haberlo iniciado.", "You cannot release the job after it has been started.")
       );
 
       return;
@@ -2190,7 +2223,7 @@ export default function TrabajoDetallePage() {
 
     const confirmar =
       window.confirm(
-        "¿Seguro que no puedes realizar este trabajo?\n\nLa solicitud volverá a estar disponible para que otro profesional pueda atender al cliente."
+        T("¿Seguro que no puedes realizar este trabajo?\n\nLa solicitud volverá a estar disponible para que otro profesional pueda atender al cliente.", "Are you sure you cannot perform this job?\n\nThe request will become available again so another professional can help the customer.")
       );
 
     if (!confirmar) {
@@ -2254,7 +2287,7 @@ export default function TrabajoDetallePage() {
         );
 
         throw new Error(
-          "Este trabajo fue cancelado antes de que pudieras liberarlo."
+          T("Este trabajo fue cancelado antes de que pudieras liberarlo.", "This job was cancelled before you could release it.")
         );
       }
 
@@ -2265,7 +2298,7 @@ export default function TrabajoDetallePage() {
           providerId
       ) {
         throw new Error(
-          "Este trabajo ya no está asignado a tu cuenta."
+          T("Este trabajo ya no está asignado a tu cuenta.", "This job is no longer assigned to your account.")
         );
       }
 
@@ -2274,7 +2307,7 @@ export default function TrabajoDetallePage() {
         "working"
       ) {
         throw new Error(
-          "El trabajo ya fue iniciado y no puede liberarse de esta manera."
+          T("El trabajo ya fue iniciado y no puede liberarse de esta manera.", "The job has already started and cannot be released this way.")
         );
       }
 
@@ -2322,7 +2355,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo liberar el trabajo."
+          : T("No se pudo liberar el trabajo.", "The job could not be released.")
       );
     } finally {
       setLiberandoTrabajo(
@@ -2371,7 +2404,7 @@ export default function TrabajoDetallePage() {
       invalidos.length > 0
     ) {
       setError(
-        "Solo puedes adjuntar fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV."
+        T("Solo puedes adjuntar fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV.", "You can only attach JPG, PNG, or WEBP photos and MP4, WEBM, or MOV videos.")
       );
       event.target.value = "";
       return;
@@ -2388,7 +2421,7 @@ export default function TrabajoDetallePage() {
       grandes.length > 0
     ) {
       setError(
-        "Cada foto o video debe pesar 50 MB o menos."
+        T("Cada foto o video debe pesar 50 MB o menos.", "Each photo or video must be 50 MB or less.")
       );
       event.target.value = "";
       return;
@@ -2435,7 +2468,7 @@ export default function TrabajoDetallePage() {
       10
     ) {
       setError(
-        "Puedes adjuntar un máximo total de 10 fotos en este reclamo."
+        T("Puedes adjuntar un máximo total de 10 fotos en este reclamo.", "You can attach a maximum total of 10 photos to this claim.")
       );
       event.target.value = "";
       return;
@@ -2447,7 +2480,7 @@ export default function TrabajoDetallePage() {
       2
     ) {
       setError(
-        "Puedes adjuntar un máximo total de 2 videos en este reclamo."
+        T("Puedes adjuntar un máximo total de 2 videos en este reclamo.", "You can attach a maximum total of 2 videos to this claim.")
       );
       event.target.value = "";
       return;
@@ -2479,7 +2512,7 @@ export default function TrabajoDetallePage() {
       !providerId
     ) {
       setError(
-        "No encontramos un reclamo activo para este trabajo."
+        T("No encontramos un reclamo activo para este trabajo.", "We could not find an active claim for this job.")
       );
       return;
     }
@@ -2489,7 +2522,7 @@ export default function TrabajoDetallePage() {
       reclamo.status !== "reviewing"
     ) {
       setError(
-        "Este reclamo ya está cerrado y no admite nueva evidencia."
+        T("Este reclamo ya está cerrado y no admite nueva evidencia.", "This claim is already closed and does not accept new evidence.")
       );
       return;
     }
@@ -2500,21 +2533,22 @@ export default function TrabajoDetallePage() {
       evidenciasReclamo.length > 0
     ) {
       setError(
-        "Ya enviaste tu respuesta y evidencia para este reclamo. No se pueden hacer cambios después de enviarla."
+        T("Ya enviaste tu respuesta y evidencia para este reclamo. No se pueden hacer cambios después de enviarla.", "You already submitted your response and evidence for this claim. Changes cannot be made after submission.")
       );
       return;
     }
 
     const tiempoRespuesta =
       calcularTiempoRestante(
-        reclamo.provider_response_deadline
+        reclamo.provider_response_deadline,
+        language
       );
 
     if (
       tiempoRespuesta.vencido
     ) {
       setError(
-        "El plazo de 24 horas para responder este reclamo ya venció."
+        T("El plazo de 24 horas para responder este reclamo ya venció.", "The 24-hour deadline to respond to this claim has expired.")
       );
       return;
     }
@@ -2524,7 +2558,7 @@ export default function TrabajoDetallePage() {
       0
     ) {
       setError(
-        "Selecciona al menos una foto o video."
+        T("Selecciona al menos una foto o video.", "Select at least one photo or video.")
       );
       return;
     }
@@ -2533,7 +2567,7 @@ export default function TrabajoDetallePage() {
       !explicacionEvidencia.trim()
     ) {
       setError(
-        "Escribe una explicación de la evidencia antes de enviarla."
+        T("Escribe una explicación de la evidencia antes de enviarla.", "Write an explanation of the evidence before submitting it.")
       );
       return;
     }
@@ -2616,7 +2650,7 @@ export default function TrabajoDetallePage() {
         respuestaError
       ) {
         throw new Error(
-          `No pudimos guardar tu explicación: ${respuestaError.message}`
+          `${T("No pudimos guardar tu explicación", "We could not save your explanation")}: ${respuestaError.message}`
         );
       }
 
@@ -2668,7 +2702,7 @@ export default function TrabajoDetallePage() {
           uploadError
         ) {
           throw new Error(
-            `No pudimos subir "${file.name}": ${uploadError.message}`
+            `${T("No pudimos subir", "We could not upload")} "${file.name}": ${uploadError.message}`
           );
         }
 
@@ -2727,7 +2761,7 @@ export default function TrabajoDetallePage() {
             ]);
 
           throw new Error(
-            `El archivo subió, pero no pudimos registrarlo: ${evidenciaError.message}`
+            `${T("El archivo subió, pero no pudimos registrarlo", "The file was uploaded, but we could not register it")}: ${evidenciaError.message}`
           );
         }
 
@@ -2779,7 +2813,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo subir la evidencia."
+          : T("No se pudo subir la evidencia.", "The evidence could not be uploaded.")
       );
     } finally {
       setSubiendoEvidencia(
@@ -2823,7 +2857,7 @@ export default function TrabajoDetallePage() {
 
     if (invalidos.length > 0) {
       setError(
-        "Solo puedes adjuntar fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV."
+        T("Solo puedes adjuntar fotos JPG, PNG o WEBP y videos MP4, WEBM o MOV.", "You can only attach JPG, PNG, or WEBP photos and MP4, WEBM, or MOV videos.")
       );
       event.target.value = "";
       return;
@@ -2838,7 +2872,7 @@ export default function TrabajoDetallePage() {
 
     if (grandes.length > 0) {
       setError(
-        "Cada foto o video debe pesar 50 MB o menos."
+        T("Cada foto o video debe pesar 50 MB o menos.", "Each photo or video must be 50 MB or less.")
       );
       event.target.value = "";
       return;
@@ -3141,7 +3175,7 @@ export default function TrabajoDetallePage() {
 
         if (evidenciaError) {
           throw new Error(
-            `El archivo subió, pero no pudimos registrarlo: ${evidenciaError.message}`
+            `${T("El archivo subió, pero no pudimos registrarlo", "The file was uploaded, but we could not register it")}: ${evidenciaError.message}`
           );
         }
       }
@@ -3623,7 +3657,8 @@ export default function TrabajoDetallePage() {
   const tiempoRespuestaReclamo =
     reclamo
       ? calcularTiempoRestante(
-          reclamo.provider_response_deadline
+          reclamo.provider_response_deadline,
+          language
         )
       : {
           vencido: false,
@@ -3636,38 +3671,38 @@ export default function TrabajoDetallePage() {
     {
       numero: 1,
       icono: "🤝",
-      titulo: "Contratado",
+      titulo: T(T(T("Contratado", "Hired"), "Hired"), "Hired"),
       texto:
-        "Aceptaste el trabajo",
+        T("Aceptaste el trabajo", "You accepted the job"),
     },
     {
       numero: 2,
       icono: "🚗",
-      titulo: "En camino",
+      titulo: T("En camino", "On the way"),
       texto:
-        "Vas rumbo al lugar",
+        T("Vas rumbo al lugar", "You are heading to the location"),
     },
     {
       numero: 3,
       icono: "📍",
-      titulo: "Llegué",
+      titulo: T("Llegué", "Arrived"),
       texto:
-        "Has llegado al lugar",
+        T("Has llegado al lugar", "You arrived at the location"),
     },
     {
       numero: 4,
       icono: "🛠️",
       titulo:
-        "Trabajo iniciado",
+        T(T(T("Trabajo iniciado", "Work started"), "Work started"), "Work started"),
       texto:
-        "Comenzaste el trabajo",
+        T("Comenzaste el trabajo", "You started the job"),
     },
     {
       numero: 5,
       icono: "✅",
-      titulo: "Completado",
+      titulo: T(T(T("Completado", "Completed"), "Completed"), "Completed"),
       texto:
-        "Trabajo terminado",
+        T("Trabajo terminado", "Job finished"),
     },
   ];
 
@@ -3689,18 +3724,18 @@ export default function TrabajoDetallePage() {
               </p>
 
               <p className="text-xs font-semibold text-blue-200">
-                Panel profesional
+                {T("Panel profesional", "Professional dashboard")}
               </p>
             </div>
           </div>
 
           <div className="text-right">
             <p className="text-xs text-blue-200">
-              Profesional
+              {T("Profesional", "Professional")}
             </p>
 
             <p className="font-bold">
-              Mi cuenta
+              {T("Mi cuenta", "My account")}
             </p>
           </div>
         </div>
@@ -3736,19 +3771,19 @@ export default function TrabajoDetallePage() {
 
               <div>
                 <p className="text-sm font-black uppercase tracking-wider text-red-700">
-                  Trabajo cancelado
+                  {T("Trabajo cancelado", "Job cancelled")}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black text-red-950">
                   {canceladoPorRelydo
-                    ? "Trabajo cancelado por resolución de RELYDO"
-                    : "El cliente canceló este trabajo"}
+                    ? T("Trabajo cancelado por resolución de RELYDO", "Job cancelled by RELYDO resolution")
+                    : T("El cliente canceló este trabajo", "The customer cancelled this job")}
                 </h2>
 
                 <p className="mt-2 leading-6 text-red-800">
                   {canceladoPorRelydo
-                    ? "RELYDO resolvió el reclamo y cerró este trabajo. Ya no puedes continuar, actualizar el estado ni marcar el trabajo como completado."
-                    : "Esta solicitud ya no está activa. No puedes continuar, actualizar el estado ni marcar el trabajo como completado."}
+                    ? T("RELYDO resolvió el reclamo y cerró este trabajo. Ya no puedes continuar, actualizar el estado ni marcar el trabajo como completado.", "RELYDO resolved the claim and closed this job. You can no longer continue, update the status, or mark the job as completed.")
+                    : T("Esta solicitud ya no está activa. No puedes continuar, actualizar el estado ni marcar el trabajo como completado.", "This request is no longer active. You cannot continue, update the status, or mark the job as completed.")}
                 </p>
               </div>
             </div>
@@ -3786,8 +3821,8 @@ export default function TrabajoDetallePage() {
                     }`}
                   >
                     {profesionalYaRespondio
-                      ? "Respuesta enviada"
-                      : "Reclamo activo"}
+                      ? T("Respuesta enviada", "Response submitted")
+                      : T("Reclamo activo", "Active claim")}
                   </p>
 
                   <h2
@@ -3798,8 +3833,8 @@ export default function TrabajoDetallePage() {
                     }`}
                   >
                     {profesionalYaRespondio
-                      ? "Tu respuesta ya fue enviada a RELYDO"
-                      : "El cliente reportó un problema con este trabajo"}
+                      ? T("Tu respuesta ya fue enviada a RELYDO", "Your response was submitted to RELYDO")
+                      : T("El cliente reportó un problema con este trabajo", "The customer reported a problem with this job")}
                   </h2>
 
                   <p
@@ -3810,22 +3845,25 @@ export default function TrabajoDetallePage() {
                     }`}
                   >
                     {profesionalYaRespondio
-                      ? "Tu respuesta y evidencia quedaron registradas. El pago permanece retenido mientras RELYDO revisa el caso y toma una decisión."
-                      : "El pago permanece retenido mientras RELYDO revisa el caso. No puedes marcar el trabajo como completado hasta que el reclamo sea resuelto."}
+                      ? T("Tu respuesta y evidencia quedaron registradas. El pago permanece retenido mientras RELYDO revisa el caso y toma una decisión.", "Your response and evidence were recorded. The payment remains held while RELYDO reviews the case and makes a decision.")
+                      : T("El pago permanece retenido mientras RELYDO revisa el caso. No puedes marcar el trabajo como completado hasta que el reclamo sea resuelto.", "The payment remains held while RELYDO reviews the case. You cannot mark the job as completed until the claim is resolved.")}
                   </p>
 
                   {!profesionalYaRespondio && (
                     <p className="mt-3 font-bold text-amber-900">
-                      Tienes {tiempoRespuestaReclamo.texto} para responder y adjuntar tu evidencia.
+                      {language === "es"
+                        ? `Tienes ${tiempoRespuestaReclamo.texto} para responder y adjuntar tu evidencia.`
+                        : `You have ${tiempoRespuestaReclamo.texto} to respond and attach your evidence.`}
                     </p>
                   )}
 
                   {profesionalYaRespondio &&
                     reclamo?.provider_responded_at && (
                       <p className="mt-3 text-sm font-bold text-emerald-800">
-                        Respuesta enviada{" "}
+                        {T("Respuesta enviada", "Response submitted")}{" "}
                         {formatearFechaHora(
-                          reclamo.provider_responded_at
+                          reclamo.provider_responded_at,
+                          language
                         )}
                       </p>
                     )}
@@ -3854,8 +3892,8 @@ export default function TrabajoDetallePage() {
                 }`}
               >
                 {profesionalYaRespondio
-                  ? "Ver reclamo"
-                  : "Ver y responder reclamo"}
+                  ? T("Ver reclamo", "View claim")
+                  : T("Ver y responder reclamo", "View and respond to claim")}
               </button>
             </div>
           </section>
@@ -3888,14 +3926,14 @@ export default function TrabajoDetallePage() {
                   }`}
                 >
                   {cancelado
-                    ? "Cancelado"
+                    ? T(T("Cancelado", "Cancelled"), "Cancelled")
                     : trabajo.status ===
                       "completed"
-                    ? "Completado"
+                    ? T(T("Completado", "Completed"), "Completed")
                     : trabajo.status ===
                       "in_progress"
-                    ? "En progreso"
-                    : "Abierto"}
+                    ? T(T("En progreso", "In progress"), "In progress")
+                    : T(T("Abierto", "Open"), "Open")}
                 </span>
 
                 {contratado && (
@@ -3917,21 +3955,22 @@ export default function TrabajoDetallePage() {
 
                 <Info
                   icono="📍"
-                  titulo="Ubicación"
+                  titulo={T("Ubicación", "Location")}
                   valor={`${trabajo.city}, ${trabajo.state} ${trabajo.zip_code}`}
                 />
 
                 <Info
                   icono="📅"
-                  titulo="Fecha preferida"
+                  titulo={T("Fecha preferida", "Preferred date")}
                   valor={formatearFecha(
-                    trabajo.preferred_date
+                    trabajo.preferred_date,
+                    language
                   )}
                 />
 
                 <Info
                   icono="🕐"
-                  titulo="Hora preferida"
+                  titulo={T("Hora preferida", "Preferred time")}
                   valor={
                     trabajo.preferred_time ||
                     "Flexible"
@@ -3940,10 +3979,10 @@ export default function TrabajoDetallePage() {
 
                 <Info
                   icono="👤"
-                  titulo="Cliente"
+                  titulo={T("Cliente", "Customer")}
                   valor={
                     trabajo.customer_name ||
-                    "Cliente RELYDO"
+                    T("Cliente RELYDO", "RELYDO Customer")
                   }
                 />
               </div>
@@ -3951,7 +3990,7 @@ export default function TrabajoDetallePage() {
 
             <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:w-72">
               <p className="text-center text-sm text-slate-500">
-                ID del trabajo
+                {T("ID del trabajo", "Job ID")}
               </p>
 
               <p className="mt-2 text-center font-black text-slate-900">
@@ -3998,7 +4037,7 @@ export default function TrabajoDetallePage() {
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100">
                     📋
                   </span>
-                  Seguimiento del trabajo
+                  {T("Seguimiento del trabajo", "Job tracking")}
                 </h2>
 
                 {cancelado ? (
@@ -4008,13 +4047,13 @@ export default function TrabajoDetallePage() {
                     </div>
 
                     <h3 className="mt-4 text-2xl font-black text-red-900">
-                      Trabajo cancelado
+                      {T("Trabajo cancelado", "Job cancelled")}
                     </h3>
 
                     <p className="mt-2 text-red-700">
                       {canceladoPorRelydo
-                        ? "RELYDO canceló el trabajo como resultado de la resolución del reclamo. El seguimiento ha sido detenido."
-                        : "El cliente canceló la solicitud y el seguimiento ha sido detenido."}
+                        ? T("RELYDO canceló el trabajo como resultado de la resolución del reclamo. El seguimiento ha sido detenido.", "RELYDO cancelled the job as a result of the claim resolution. Tracking has been stopped.")
+                        : T("El cliente canceló la solicitud y el seguimiento ha sido detenido.", "The customer cancelled the request and tracking has been stopped.")}
                     </p>
                   </div>
                 ) : (
@@ -4092,18 +4131,18 @@ export default function TrabajoDetallePage() {
                             <h3 className="text-xl font-black text-blue-950">
                               {etapaActual ===
                               1
-                                ? "Trabajo contratado"
+                                ? T(T("Trabajo contratado", "Job hired"), "Job hired")
                                 : etapaActual ===
                                   2
-                                ? "Vas en camino"
+                                ? T(T("Vas en camino", "You are on the way"), "You are on the way")
                                 : etapaActual ===
                                   3
-                                ? "Ya llegaste"
-                                : "Trabajo iniciado"}
+                                ? T(T("Ya llegaste", "You arrived"), "You arrived")
+                                : T(T("Trabajo iniciado", "Work started"), "Work started")}
                             </h3>
 
                             <p className="mt-1 text-sm leading-6 text-blue-900">
-                              El cliente puede ver el avance del servicio en tiempo real.
+                              {T("El cliente puede ver el avance del servicio en tiempo real.", "The customer can see the service progress in real time.")}
                             </p>
                           </div>
                         </div>
@@ -4142,7 +4181,7 @@ export default function TrabajoDetallePage() {
                               }
                               className="rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800 disabled:opacity-50"
                             >
-                              📍 Ya llegué
+                              {T("📍 Ya llegué", "📍 I arrived")}
                             </button>
                           )}
 
@@ -4160,7 +4199,7 @@ export default function TrabajoDetallePage() {
                               }
                               className="rounded-xl bg-amber-500 px-5 py-3 font-extrabold text-white transition hover:bg-amber-600 disabled:opacity-50"
                             >
-                              🛠️ Iniciar trabajo
+                              {T("🛠️ Iniciar trabajo", "🛠️ Start job")}
                             </button>
                           )}
 
@@ -4175,26 +4214,28 @@ export default function TrabajoDetallePage() {
 
                                     <div className="min-w-0 flex-1">
                                       <h3 className="text-lg font-black text-slate-950">
-                                        Evidencia final (obligatoria)
+                                        {T("Evidencia final (obligatoria)", "Final evidence (required)")}
                                       </h3>
                                       <p className="mt-1 text-sm font-semibold text-slate-700">
-                                        Sube al menos 1 foto del trabajo terminado.
+                                        {T("Sube al menos 1 foto del trabajo terminado.", "Upload at least 1 photo of the completed work.")}
                                       </p>
                                       <p className="mt-1 text-sm text-slate-500">
-                                        1 foto obligatoria · hasta 10 fotos y 2 videos
+                                        {T("1 foto obligatoria · hasta 10 fotos y 2 videos", "1 photo required · up to 10 photos and 2 videos")}
                                       </p>
 
                                       {evidenciasFinales.length > 0 && (
                                         <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
                                           <p className="text-sm font-black text-emerald-800">
-                                            ✓ Evidencia guardada: {evidenciasFinales.filter((item) => item.file_type === "image").length} foto(s) · {evidenciasFinales.filter((item) => item.file_type === "video").length} video(s)
+                                            {language === "es"
+                                              ? `✓ Evidencia guardada: ${evidenciasFinales.filter((item) => item.file_type === "image").length} foto(s) · ${evidenciasFinales.filter((item) => item.file_type === "video").length} {T("video(s)", "video(s)")}`
+                                              : `✓ Evidence saved: ${evidenciasFinales.filter((item) => item.file_type === "image").length} photo(s) · ${evidenciasFinales.filter((item) => item.file_type === "video").length} {T("video(s)", "video(s)")}`}
                                           </p>
                                         </div>
                                       )}
 
                                       <div className="mt-5">
                                         <label className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-blue-300 bg-white px-4 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
-                                          📷 Abrir cámara
+                                          {T("📷 Abrir cámara", "📷 Open camera")}
                                           <input
                                             type="file"
                                             accept="image/*,video/*"
@@ -4205,7 +4246,7 @@ export default function TrabajoDetallePage() {
                                         </label>
 
                                         <p className="mt-2 text-xs leading-5 text-slate-500">
-                                          La evidencia final debe capturarse desde la cámara del dispositivo para reducir el uso de fotos o videos de otros trabajos.
+                                          {T("La evidencia final debe capturarse desde la cámara del dispositivo para reducir el uso de fotos o videos de otros trabajos.", "Final evidence must be captured with the device camera to reduce the use of photos or videos from other jobs.")}
                                         </p>
                                       </div>
                                     </div>
@@ -4237,7 +4278,7 @@ export default function TrabajoDetallePage() {
                                         onClick={guardarEvidenciaFinal}
                                         className="w-full rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
-                                        {subiendoEvidenciaFinal ? "Guardando evidencia..." : "Guardar evidencia"}
+                                        {subiendoEvidenciaFinal ? T(T("Guardando evidencia...", "Saving evidence..."), "Saving evidence...") : T(T("Guardar evidencia", "Save evidence"), "Save evidence")}
                                       </button>
                                     </div>
                                   )}
@@ -4249,7 +4290,7 @@ export default function TrabajoDetallePage() {
                                     <h3 className="font-black text-slate-950">Consejo RELYDO</h3>
                                   </div>
                                   <p className="mt-4 text-sm leading-7 text-slate-600">
-                                    La evidencia protege tanto al cliente como a ti. Asegúrate de mostrar claramente el resultado final.
+                                    {T("La evidencia protege tanto al cliente como a ti. Asegúrate de mostrar claramente el resultado final.", "The evidence protects both the customer and you. Make sure the final result is clearly shown.")}
                                   </p>
                                 </div>
                               </div>
@@ -4276,14 +4317,14 @@ export default function TrabajoDetallePage() {
                                 <span>
                                   <span className="block font-black">
                                     {cambioPresupuestoPendiente
-                                      ? "Cambio de presupuesto pendiente"
+                                      ? T(T("Cambio de presupuesto pendiente", "Budget change pending"), "Budget change pending")
                                       : reclamoActivo
-                                      ? "Cambio bloqueado por reclamo"
-                                      : "Solicitar cambio de presupuesto"}
+                                      ? T(T("Cambio bloqueado por reclamo", "Change blocked by claim"), "Change blocked by claim")
+                                      : T(T("Solicitar cambio de presupuesto", "Request budget change"), "Request budget change")}
                                   </span>
                                   {!cambioPresupuestoPendiente && !reclamoActivo && (
                                     <span className="mt-0.5 block text-sm font-medium text-slate-600">
-                                      Si el trabajo requiere algo adicional
+                                      {T("Si el trabajo requiere algo adicional", "If the job requires additional work")}
                                     </span>
                                   )}
                                 </span>
@@ -4308,12 +4349,12 @@ export default function TrabajoDetallePage() {
                               }`}
                             >
                               {reclamoActivo
-                                ? "🔒 Bloqueado por reclamo"
+                                ? T(T("🔒 Bloqueado por reclamo", "🔒 Blocked by claim"), "🔒 Blocked by claim")
                                 : !evidenciasFinales.some((item) => item.file_type === "image")
-                                ? "🔒 Completar trabajo\nSube y guarda al menos 1 foto para habilitar"
+                                ? T("🔒 Completar trabajo\nSube y guarda al menos 1 foto para habilitar", "🔒 Complete job\nUpload and save at least 1 photo to enable")
                                 : completando
                                 ? "Completando..."
-                                : "✓ Completar trabajo"}
+                                : T(T("✓ Completar trabajo", "✓ Complete job"), "✓ Complete job")}
                             </button>
                           )}
 
@@ -4333,7 +4374,7 @@ export default function TrabajoDetallePage() {
                             }
                             className="rounded-2xl border-2 border-blue-300 bg-white px-5 py-4 font-extrabold text-blue-700 transition hover:bg-blue-50"
                           >
-                            💬 Chat con el cliente
+                            {T("💬 Chat con el cliente", "💬 Chat with customer")}
                           </button>
 
                           <button
@@ -4341,7 +4382,7 @@ export default function TrabajoDetallePage() {
                             onClick={abrirDireccion}
                             className="sm:col-span-2 rounded-2xl border-2 border-blue-300 bg-white px-5 py-4 font-extrabold text-blue-700 transition hover:bg-blue-50"
                           >
-                            📍 Ver dirección en el mapa
+                            {T("📍 Ver dirección en el mapa", "📍 View address on map")}
                           </button>
 
                           {etapaActual <
@@ -4349,11 +4390,11 @@ export default function TrabajoDetallePage() {
                             <div className="sm:col-span-2 mt-2 rounded-2xl border border-red-200 bg-red-50 p-4">
 
                               <p className="text-sm font-bold text-red-900">
-                                ¿Tuviste un problema y ya no puedes realizar este trabajo?
+                                {T("¿Tuviste un problema y ya no puedes realizar este trabajo?", "Did you have a problem and can no longer perform this job?")}
                               </p>
 
                               <p className="mt-1 text-xs leading-5 text-red-700">
-                                Puedes liberarlo para que la solicitud vuelva a estar disponible para otro profesional.
+                                {T("Puedes liberarlo para que la solicitud vuelva a estar disponible para otro profesional.", "You can release it so the request becomes available to another professional.")}
                               </p>
 
                               <button
@@ -4369,8 +4410,8 @@ export default function TrabajoDetallePage() {
                                 className="mt-4 w-full rounded-xl border-2 border-red-600 bg-white px-5 py-3 font-extrabold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 {liberandoTrabajo
-                                  ? "Liberando trabajo..."
-                                  : "⚠️ No puedo realizar este trabajo"}
+                                  ? T(T("Liberando trabajo...", "Releasing job..."), "Releasing job...")
+                                  : T(T("⚠️ No puedo realizar este trabajo", "⚠️ I can’t perform this job"), "⚠️ I can’t perform this job")}
                               </button>
 
                             </div>
@@ -4380,7 +4421,7 @@ export default function TrabajoDetallePage() {
                         {cambioPresupuestoPendiente && (
                           <div className="mt-6 rounded-2xl border-2 border-violet-200 bg-violet-50 p-5">
                             <p className="text-sm font-black uppercase tracking-wide text-violet-700">
-                              ⏳ Cambio de presupuesto pendiente
+                              {T("⏳ Cambio de presupuesto pendiente", "⏳ Budget change pending")}
                             </p>
 
                             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -4397,7 +4438,7 @@ export default function TrabajoDetallePage() {
 
                               <div className="rounded-xl bg-white p-4">
                                 <p className="text-xs font-bold text-slate-500">
-                                  Adicional solicitado
+                                  {T("Adicional solicitado", "Additional amount requested")}
                                 </p>
                                 <p className="mt-1 text-xl font-black text-violet-700">
                                   +${Number(
@@ -4419,7 +4460,7 @@ export default function TrabajoDetallePage() {
                             </div>
 
                             <p className="mt-4 text-sm leading-6 text-violet-900">
-                              El cliente debe aceptar o rechazar este cambio antes de que puedas enviar otro.
+                              {T("El cliente debe aceptar o rechazar este cambio antes de que puedas enviar otro.", "The customer must accept or reject this change before you can send another one.")}
                             </p>
                           </div>
                         )}
@@ -4443,12 +4484,12 @@ export default function TrabajoDetallePage() {
                             }`}>
                               {ultimoCambioPresupuesto.status === "accepted" &&
                               ultimoCambioPresupuesto.payment_status === "paid"
-                                ? "✓ Último cambio aceptado y pagado"
+                                ? T("✓ Último cambio aceptado y pagado", "✓ Latest change accepted and paid")
                                 : ultimoCambioPresupuesto.status === "accepted"
-                                ? "⏳ Último cambio aceptado · pendiente de pago"
+                                ? T("⏳ Último cambio aceptado · pendiente de pago", "⏳ Latest change accepted · payment pending")
                                 : ultimoCambioPresupuesto.status === "rejected"
-                                ? "✕ Último cambio rechazado por el cliente"
-                                : "Último cambio de presupuesto cancelado"}
+                                ? T("✕ Último cambio rechazado por el cliente", "✕ Latest change rejected by the customer")
+                                : T("Último cambio de presupuesto cancelado", "Latest budget change cancelled")}
                             </p>
 
                             <p className="mt-2 text-sm text-slate-700">
@@ -4462,7 +4503,7 @@ export default function TrabajoDetallePage() {
                             {ultimoCambioPresupuesto.status === "accepted" &&
                               ultimoCambioPresupuesto.payment_status === "paid" && (
                               <p className="mt-2 text-sm font-bold text-emerald-800">
-                                Pago adicional confirmado por Stripe. Neto adicional para ti: $
+                                {T("Pago adicional confirmado por Stripe. Neto adicional para ti:", "Additional payment confirmed by Stripe. Additional net amount for you:")} $
                                 {Number(
                                   ultimoCambioPresupuesto.additional_provider_net_amount ||
                                     0
@@ -4473,7 +4514,7 @@ export default function TrabajoDetallePage() {
                             {ultimoCambioPresupuesto.status === "accepted" &&
                               ultimoCambioPresupuesto.payment_status !== "paid" && (
                               <p className="mt-2 text-sm font-bold text-amber-700">
-                                El cliente aceptó el cambio, pero el pago adicional todavía no está confirmado.
+                                {T("El cliente aceptó el cambio, pero el pago adicional todavía no está confirmado.", "The customer accepted the change, but the additional payment has not been confirmed yet.")}
                               </p>
                             )}
                           </div>
@@ -4491,15 +4532,15 @@ export default function TrabajoDetallePage() {
                             <div className="flex items-start justify-between gap-4">
                               <div>
                                 <p className="text-sm font-black uppercase tracking-wide text-violet-700">
-                                  💰 Cambio de presupuesto
+                                  {T("💰 Cambio de presupuesto", "💰 Budget change")}
                                 </p>
 
                                 <h3 className="mt-1 text-xl font-black text-slate-950">
-                                  Solicitar un monto adicional
+                                  {T("Solicitar un monto adicional", "Request an additional amount")}
                                 </h3>
 
                                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                                  Explica qué cambió. El cliente verá el total anterior, el adicional y el nuevo total antes de decidir.
+                                  {T("Explica qué cambió. El cliente verá el total anterior, el adicional y el nuevo total antes de decidir.", "Explain what changed. The customer will see the previous total, the additional amount, and the new total before deciding.")}
                                 </p>
                               </div>
 
@@ -4541,7 +4582,7 @@ export default function TrabajoDetallePage() {
                                     El problema es mayor de lo esperado
                                   </option>
                                   <option value="trabajo_adicional">
-                                    Se necesita trabajo adicional
+                                    {T("Se necesita trabajo adicional", "Additional work is needed")}
                                   </option>
                                   <option value="materiales_adicionales">
                                     Se necesitan materiales adicionales
@@ -4554,7 +4595,7 @@ export default function TrabajoDetallePage() {
 
                               <div>
                                 <label className="text-sm font-black text-slate-800">
-                                  Monto adicional
+                                  {T("Monto adicional", "Additional amount")}
                                 </label>
 
                                 <div className="mt-2 flex overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-violet-500">
@@ -4583,7 +4624,7 @@ export default function TrabajoDetallePage() {
 
                             <div className="mt-4">
                               <label className="text-sm font-black text-slate-800">
-                                Explicación
+                                {T("Explicación", "Explanation")}
                               </label>
 
                               <textarea
@@ -4596,7 +4637,7 @@ export default function TrabajoDetallePage() {
                                   )
                                 }
                                 rows={4}
-                                placeholder="Explica qué descubriste, qué trabajo adicional hace falta y por qué cambia el precio."
+                                placeholder={T("Explica qué descubriste, qué trabajo adicional hace falta y por qué cambia el precio.", "Explain what you discovered, what additional work is needed, and why the price changes.")}
                                 className="mt-2 w-full resize-none rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-violet-500"
                               />
                             </div>
@@ -4617,7 +4658,7 @@ export default function TrabajoDetallePage() {
                               />
 
                               <p className="mt-2 text-xs text-slate-500">
-                                Máximo 10 fotos y 2 videos. Cada archivo debe pesar 50 MB o menos.
+                                {T("Máximo 10 fotos y 2 videos. Cada archivo debe pesar 50 MB o menos.", "Maximum 10 photos and 2 videos. Each file must be 50 MB or less.")}
                               </p>
                             </div>
 
@@ -4658,7 +4699,7 @@ export default function TrabajoDetallePage() {
                             <div className="mt-5 rounded-2xl bg-violet-50 p-4">
                               <div className="flex items-center justify-between gap-4">
                                 <span className="font-bold text-violet-900">
-                                  Precio actual
+                                  {T("Precio actual", "Current price")}
                                 </span>
                                 <strong className="text-violet-950">
                                   ${Number(
@@ -4675,7 +4716,7 @@ export default function TrabajoDetallePage() {
 
                               <div className="mt-2 flex items-center justify-between gap-4">
                                 <span className="font-bold text-violet-900">
-                                  Adicional solicitado
+                                  {T("Adicional solicitado", "Additional amount requested")}
                                 </span>
                                 <strong className="text-violet-700">
                                   +${Number(
@@ -4717,12 +4758,12 @@ export default function TrabajoDetallePage() {
                               className="mt-5 w-full rounded-xl bg-violet-600 px-5 py-3.5 font-black text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {enviandoCambioPresupuesto
-                                ? "Enviando cambio..."
-                                : "Enviar cambio al cliente"}
+                                ? T(T("Enviando cambio...", "Sending change..."), "Sending change...")
+                                : T(T("Enviar cambio al cliente", "Send change to customer"), "Send change to customer")}
                             </button>
 
                             <p className="mt-3 text-center text-xs leading-5 text-slate-500">
-                              El precio no cambia automáticamente. El cliente debe aceptar la solicitud antes de que RELYDO pueda cobrar el monto adicional.
+                              {T("El precio no cambia automáticamente. El cliente debe aceptar la solicitud antes de que RELYDO pueda cobrar el monto adicional.", "The price does not change automatically. The customer must accept the request before RELYDO can charge the additional amount.")}
                             </p>
                           </form>
                         )}
@@ -4741,13 +4782,13 @@ export default function TrabajoDetallePage() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100">
                   📝
                 </span>
-                Información del trabajo
+                {T("Información del trabajo", "Job information")}
               </h2>
 
               <div className="mt-5 rounded-2xl border border-slate-200 p-5">
 
                 <p className="font-black text-slate-900">
-                  Descripción del problema
+                  {T("Descripción del problema", "Problem description")}
                 </p>
 
                 <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-600">
@@ -4759,7 +4800,7 @@ export default function TrabajoDetallePage() {
                     <div className="my-5 border-t border-slate-200" />
 
                     <p className="font-black text-slate-900">
-                      Dirección del servicio
+                      {T("Dirección del servicio", "Service address")}
                     </p>
 
                     <p className="mt-2 text-slate-600">
@@ -4799,7 +4840,7 @@ export default function TrabajoDetallePage() {
                     📷
                   </span>
 
-                  Fotos del problema
+                  {T("Fotos del problema", "Problem photos")}
 
                   <span className="text-slate-500">
                     ({fotos.length})
@@ -4832,7 +4873,7 @@ export default function TrabajoDetallePage() {
                             src={
                               foto.file_url
                             }
-                            alt={`Foto ${
+                            alt={`${T("Foto", "Photo")} ${
                               index +
                               1
                             }`}
@@ -4853,7 +4894,7 @@ export default function TrabajoDetallePage() {
                     rel="noopener noreferrer"
                     className="inline-block rounded-xl border border-slate-300 px-5 py-3 font-bold text-blue-700 transition hover:bg-blue-50"
                   >
-                    Ver fotos en tamaño completo
+                    {T("Ver fotos en tamaño completo", "View full-size photos")}
                   </a>
                 </div>
               </section>
@@ -4878,10 +4919,10 @@ export default function TrabajoDetallePage() {
                             {pago
                               ? cancelado
                                 ? canceladoPorRelydo
-                                  ? "Resolución financiera de RELYDO"
-                                  : "Compensación por cancelación"
-                                : "Comprobante del servicio"
-                              : "Resumen de tu presupuesto"}
+                                  ? T("Resolución financiera de RELYDO", "RELYDO financial resolution")
+                                  : T("Compensación por cancelación", "Cancellation compensation")
+                                : T("Comprobante del servicio", "Service receipt")
+                              : T("Resumen de tu presupuesto", "Your quote summary")}
                           </h2>
                         </div>
                       </div>
@@ -4889,13 +4930,13 @@ export default function TrabajoDetallePage() {
 
                     <div className="text-left sm:text-right">
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        Trabajo
+                        {T("Trabajo", "Job")}
                       </p>
                       <p className="mt-1 font-mono text-sm font-bold text-slate-700">
                         #{trabajo.id.slice(0, 8).toUpperCase()}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        {formatearFechaHora(oferta.created_at)}
+                        {formatearFechaHora(oferta.created_at, language)}
                       </p>
                     </div>
                   </div>
@@ -4908,21 +4949,21 @@ export default function TrabajoDetallePage() {
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
                           <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-700">
                             {canceladoPorRelydo
-                              ? "Trabajo cancelado por resolución de RELYDO"
-                              : "Trabajo cancelado por el cliente"}
+                              ? T("Trabajo cancelado por resolución de RELYDO", "Job cancelled by RELYDO resolution")
+                              : T("Trabajo cancelado por el cliente", "Job cancelled by the customer")}
                           </p>
 
                           <div className="mt-4 flex items-end justify-between gap-4 rounded-xl bg-white p-5 ring-1 ring-amber-200">
                             <div>
                               <p className="text-sm font-black uppercase tracking-wide text-slate-500">
                                 {canceladoPorRelydo
-                                  ? "Compensación definida por RELYDO"
-                                  : "Compensación por cancelación"}
+                                  ? T("Compensación definida por RELYDO", "Compensation determined by RELYDO")
+                                  : T("Compensación por cancelación", "Cancellation compensation")}
                               </p>
                               <p className="mt-1 text-xs leading-5 text-slate-500">
                                 {canceladoPorRelydo
-                                  ? "Importe asignado al profesional en la resolución final del reclamo."
-                                  : "Importe que te corresponde por la etapa alcanzada antes de la cancelación."}
+                                  ? T("Importe asignado al profesional en la resolución final del reclamo.", "Amount assigned to the professional in the final claim resolution.")
+                                  : T("Importe que te corresponde por la etapa alcanzada antes de la cancelación.", "Amount owed to you based on the stage reached before cancellation.")}
                               </p>
                             </div>
 
@@ -4935,13 +4976,13 @@ export default function TrabajoDetallePage() {
                             reclamoResuelto && (
                               <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
                                 <p className="text-xs font-black uppercase tracking-wide text-blue-700">
-                                  Resultado del reclamo
+                                  {T("Resultado del reclamo", "Claim result")}
                                 </p>
 
                                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                   <div className="rounded-lg bg-white p-3">
                                     <p className="text-xs font-bold text-slate-500">
-                                      Tu compensación
+                                      {T("Tu compensación", "Your compensation")}
                                     </p>
                                     <p className="mt-1 text-lg font-black text-emerald-700">
                                       ${compensacionPorReclamo.toFixed(2)}
@@ -4950,7 +4991,7 @@ export default function TrabajoDetallePage() {
 
                                   <div className="rounded-lg bg-white p-3">
                                     <p className="text-xs font-bold text-slate-500">
-                                      Reembolso al cliente
+                                      {T("Reembolso al cliente", "Customer refund")}
                                     </p>
                                     <p className="mt-1 text-lg font-black text-blue-800">
                                       ${reembolsoClientePorReclamo.toFixed(2)}
@@ -4961,7 +5002,7 @@ export default function TrabajoDetallePage() {
                                 {reclamo?.resolution_notes && (
                                   <div className="mt-3 rounded-lg bg-white p-3">
                                     <p className="text-xs font-bold text-slate-500">
-                                      Resolución de RELYDO
+                                      {T("Resolución de RELYDO", "RELYDO resolution")}
                                     </p>
                                     <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">
                                       {reclamo.resolution_notes}
@@ -4974,14 +5015,14 @@ export default function TrabajoDetallePage() {
                           {Number(pago.cancellation_penalty_percent || 0) > 0 && (
                             <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-white px-4 py-3">
                               <span className="text-sm font-semibold text-slate-600">
-                                Etapa de cancelación
+                                {T("Etapa de cancelación", "Cancellation stage")}
                               </span>
                               <span className="text-sm font-black text-slate-900">
                                 {pago.cancellation_stage === "on_the_way"
-                                  ? "En camino"
+                                  ? T("En camino", "On the way")
                                   : pago.cancellation_stage === "arrived"
                                   ? "Llegaste al lugar"
-                                  : "Antes de iniciar"}
+                                  : T("Antes de iniciar", "Before starting")}
                               </span>
                             </div>
                           )}
@@ -4990,10 +5031,12 @@ export default function TrabajoDetallePage() {
                         {cambiosPresupuestoPagados.length > 0 && (
                             <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3">
                               <p className="text-sm font-black text-violet-900">
-                                Cambio de presupuesto incluido
+                                {T("Cambio de presupuesto incluido", "Budget change included")}
                               </p>
                               <p className="mt-1 text-xs font-bold leading-5 text-violet-700">
-                                Este comprobante incluye {cambiosPresupuestoPagados.length} cambio{cambiosPresupuestoPagados.length === 1 ? "" : "s"} pagado{cambiosPresupuestoPagados.length === 1 ? "" : "s"} por ${adicionalServicioPagado.toFixed(2)} adicionales. Tu neto adicional es ${netoAdicionalProfesional.toFixed(2)}.
+                                {language === "es"
+                                  ? `Este comprobante incluye ${cambiosPresupuestoPagados.length} cambio${cambiosPresupuestoPagados.length === 1 ? "" : "s"} pagado${cambiosPresupuestoPagados.length === 1 ? "" : "s"}`
+                                  : `This receipt includes ${cambiosPresupuestoPagados.length} paid budget change${cambiosPresupuestoPagados.length === 1 ? "" : "s"}`} por ${adicionalServicioPagado.toFixed(2)} adicionales. Tu neto adicional es ${netoAdicionalProfesional.toFixed(2)}.
                               </p>
                             </div>
                           )}
@@ -5005,10 +5048,10 @@ export default function TrabajoDetallePage() {
                             </span>
                             <div>
                               <p className="text-sm font-black text-emerald-900">
-                                Compensación procesada
+                                {T("Compensación procesada", "Compensation processed")}
                               </p>
                               <p className="text-xs text-emerald-700">
-                                Este es el importe final correspondiente a esta cancelación.
+                                {T("Este es el importe final correspondiente a esta cancelación.", "This is the final amount for this cancellation.")}
                               </p>
                             </div>
                           </div>
@@ -5024,10 +5067,10 @@ export default function TrabajoDetallePage() {
                           <div className="flex items-center justify-between gap-4 border-b border-dashed border-slate-300 py-4">
                             <div>
                               <p className="text-sm font-semibold text-slate-600">
-                                Valor del servicio
+                                {T("Valor del servicio", "Service value")}
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
-                                Presupuesto aceptado por el cliente
+                                {T("Presupuesto aceptado por el cliente", "Quote accepted by the customer")}
                               </p>
                             </div>
                             <p className="text-lg font-black text-slate-950">
@@ -5038,7 +5081,7 @@ export default function TrabajoDetallePage() {
                           <div className="flex items-center justify-between gap-4 border-b border-dashed border-slate-300 py-4">
                             <div>
                               <p className="text-sm font-semibold text-slate-600">
-                                Tarifa de servicio RELYDO
+                                {T("Tarifa de servicio RELYDO", "RELYDO service fee")}
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
                                 {Number(pago.provider_commission_percent).toFixed(2)}% del valor del servicio
@@ -5055,7 +5098,7 @@ export default function TrabajoDetallePage() {
                                 Total a recibir
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
-                                Neto después de la tarifa RELYDO
+                                {T("Neto después de la tarifa RELYDO", "Net after RELYDO fee")}
                               </p>
                             </div>
                             <p className="text-3xl font-black tracking-tight text-slate-950">
@@ -5071,10 +5114,10 @@ export default function TrabajoDetallePage() {
                             </span>
                             <div>
                               <p className="text-sm font-black text-emerald-900">
-                                Pago del cliente registrado
+                                {T("Pago del cliente registrado", "Customer payment recorded")}
                               </p>
                               <p className="text-xs text-emerald-700">
-                                Tu importe neto ya está calculado.
+                                {T("Tu importe neto ya está calculado.", "Your net amount has already been calculated.")}
                               </p>
                             </div>
                           </div>
@@ -5090,10 +5133,10 @@ export default function TrabajoDetallePage() {
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <p className="text-sm font-semibold text-slate-600">
-                            Precio estimado
+                            {T("Precio estimado", "Estimated price")}
                           </p>
                           <p className="mt-1 text-xs text-slate-400">
-                            Pendiente de aceptación del cliente
+                            {T("Pendiente de aceptación del cliente", "Pending customer acceptance")}
                           </p>
                         </div>
                         <p className="text-2xl font-black text-slate-950">
@@ -5105,7 +5148,7 @@ export default function TrabajoDetallePage() {
 
                   <div className="mt-6">
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">
-                      Detalles del servicio
+                      {T("Detalles del servicio", "Service details")}
                     </p>
 
                     <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -5120,7 +5163,7 @@ export default function TrabajoDetallePage() {
 
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                         <p className="text-xs font-semibold text-slate-500">
-                          Duración estimada
+                          {T("Duración estimada", "Estimated duration")}
                         </p>
                         <p className="mt-1 font-black text-slate-900">
                           {mostrarMinutos(oferta.estimated_job_minutes)}
@@ -5131,10 +5174,10 @@ export default function TrabajoDetallePage() {
 
                   <div className="mt-5 rounded-2xl border border-slate-200 p-5">
                     <p className="text-sm font-black text-slate-800">
-                      Mensaje para el cliente
+                      {T("Mensaje para el cliente", "Message to customer")}
                     </p>
                     <div className="mt-3 rounded-xl bg-slate-50 p-4 leading-6 text-slate-700">
-                      {oferta.message || "Sin mensaje adicional."}
+                      {oferta.message || T("Sin mensaje adicional.", "No additional message.")}
                     </div>
                   </div>
 
@@ -5142,8 +5185,8 @@ export default function TrabajoDetallePage() {
                     <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
                       ❌{" "}
                       {canceladoPorRelydo
-                        ? "Trabajo cancelado por resolución de RELYDO."
-                        : "El cliente canceló este trabajo."}
+                        ? T("Trabajo cancelado por resolución de RELYDO.", "Job cancelled by RELYDO resolution.")
+                        : T("El cliente canceló este trabajo.", "The customer cancelled this job.")}
                     </div>
                   ) : !pago ? (
                     <div
@@ -5156,16 +5199,16 @@ export default function TrabajoDetallePage() {
                       }`}
                     >
                       {oferta.status === "selected"
-                        ? "✅ Presupuesto aceptado por el cliente."
+                        ? T("✅ Presupuesto aceptado por el cliente.", "✅ Quote accepted by the customer.")
                         : oferta.status === "rejected"
-                        ? "Este presupuesto no fue seleccionado."
-                        : "✓ Presupuesto enviado. Esperando decisión del cliente."}
+                        ? T("Este presupuesto no fue seleccionado.", "This quote was not selected.")
+                        : T("✓ Presupuesto enviado. Esperando decisión del cliente.", "✓ Quote sent. Waiting for the customer’s decision.")}
                     </div>
                   ) : null}
 
                   {pago && (
                     <p className="mt-5 text-center text-xs leading-5 text-slate-400">
-                      Este comprobante resume el valor del servicio y el importe neto correspondiente al profesional.
+                      {T("Este comprobante resume el valor del servicio y el importe neto correspondiente al profesional.", "This receipt summarizes the service value and the professional’s net amount.")}
                     </p>
                   )}
                 </div>
@@ -5188,17 +5231,17 @@ export default function TrabajoDetallePage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-widest text-blue-300">
-                      🔒 Comunicación protegida
+                      {T("🔒 Comunicación protegida", "🔒 Protected communication")}
                     </p>
 
                     <h2 className="mt-1 text-2xl font-black">
                       Chat con{" "}
                       {trabajo.customer_name ||
-                        "el cliente"}
+                        T("el cliente", "the customer")}
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-300">
-                      RELYDO mantiene privado el número real del cliente.
+                      {T("RELYDO mantiene privado el número real del cliente.", "RELYDO keeps the customer’s real phone number private.")}
                     </p>
                   </div>
 
@@ -5219,7 +5262,7 @@ export default function TrabajoDetallePage() {
               <div className="max-h-[430px] min-h-[260px] overflow-y-auto bg-slate-50 p-5">
                 {cargandoChat ? (
                   <div className="flex min-h-[220px] items-center justify-center text-sm font-bold text-slate-500">
-                    Cargando conversación...
+                    {T("Cargando conversación...", "Loading conversation...")}
                   </div>
                 ) : mensajesChat.length === 0 ? (
                   <div className="flex min-h-[220px] flex-col items-center justify-center text-center">
@@ -5228,11 +5271,11 @@ export default function TrabajoDetallePage() {
                     </div>
 
                     <p className="mt-3 font-black text-slate-800">
-                      Todavía no hay mensajes
+                      {T("Todavía no hay mensajes", "There are no messages yet")}
                     </p>
 
                     <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">
-                      Coordina el servicio aquí sin pedir ni mostrar números personales.
+                      {T("Coordina el servicio aquí sin pedir ni mostrar números personales.", "Coordinate the service here without asking for or displaying personal phone numbers.")}
                     </p>
                   </div>
                 ) : (
@@ -5267,12 +5310,12 @@ export default function TrabajoDetallePage() {
                                 }`}
                               >
                                 {mio
-                                  ? "Tú"
+                                  ? T(T("Tú", "You"), "You")
                                   : item.sender_role ===
                                     "admin"
                                   ? "RELYDO Admin"
                                   : trabajo.customer_name ||
-                                    "Cliente"}
+                                    T("Cliente", "Customer")}
                               </p>
 
                               <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6">
@@ -5287,7 +5330,8 @@ export default function TrabajoDetallePage() {
                                 }`}
                               >
                                 {formatearHoraChat(
-                                  item.created_at
+                                  item.created_at,
+                                  language
                                 )}
                               </p>
                             </div>
@@ -5326,7 +5370,7 @@ export default function TrabajoDetallePage() {
                         }}
                         rows={2}
                         maxLength={1500}
-                        placeholder="Escribe un mensaje..."
+                        placeholder={T("Escribe un mensaje...", "Write a message...")}
                         className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
                       />
 
@@ -5343,7 +5387,7 @@ export default function TrabajoDetallePage() {
                       >
                         {enviandoMensajeChat
                           ? "Enviando..."
-                          : "Enviar"}
+                          : T(T("Enviar", "Send"), "Send")}
                       </button>
                     </div>
 
@@ -5351,12 +5395,12 @@ export default function TrabajoDetallePage() {
                       "completed" &&
                       trabajo.completed_at && (
                         <p className="mt-2 text-xs font-bold text-amber-700">
-                          ⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.
+                          {T("⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.", "⏳ The chat will remain open for up to 12 hours after the job is completed.")}
                         </p>
                       )}
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      🔒 Los números personales no se muestran. Usa este chat para coordinar el trabajo dentro de RELYDO.
+                      {T("🔒 Los números personales no se muestran. Usa este chat para coordinar el trabajo dentro de RELYDO.", "🔒 Personal phone numbers are not displayed. Use this chat to coordinate the job within RELYDO.")}
                     </p>
                   </>
                 ) : (
@@ -5384,27 +5428,27 @@ export default function TrabajoDetallePage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-sm font-black uppercase tracking-wide text-rose-700">
-                  ⚠️ Reclamo del cliente
+                  {T("⚠️ Reclamo del cliente", "⚠️ Customer claim")}
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
                   {profesionalYaRespondio
-                    ? "Respuesta enviada al reclamo"
+                    ? T("Respuesta enviada al reclamo", "Claim response submitted")
                     : reclamo.status === "open" ||
                       reclamo.status === "reviewing" ||
                       reclamo.status === "in_review"
-                    ? "Adjuntar evidencia al reclamo"
-                    : "Historial del reclamo"}
+                    ? T("Adjuntar evidencia al reclamo", "Attach evidence to claim")
+                    : T("Historial del reclamo", "Claim history")}
                 </h2>
 
                 <p className="mt-2 max-w-3xl text-slate-600">
                   {profesionalYaRespondio
-                    ? "Tu respuesta quedó registrada. Ya no puedes agregar, quitar ni modificar información de este reclamo."
+                    ? T("Tu respuesta quedó registrada. Ya no puedes agregar, quitar ni modificar información de este reclamo.", "Your response was recorded. You can no longer add, remove, or modify information for this claim.")
                     : reclamo.status === "open" ||
                       reclamo.status === "reviewing" ||
                       reclamo.status === "in_review"
-                    ? "Puedes enviar una sola respuesta con fotos o videos para que RELYDO tenga evidencia de ambas partes antes de resolver el reclamo."
-                    : "Consulta los detalles, la evidencia y la resolución final de este reclamo."}
+                    ? T("Puedes enviar una sola respuesta con fotos o videos para que RELYDO tenga evidencia de ambas partes antes de resolver el reclamo.", "You can submit one response with photos or videos so RELYDO has evidence from both parties before resolving the claim.")
+                    : T("Consulta los detalles, la evidencia y la resolución final de este reclamo.", "Review the details, evidence, and final resolution of this claim.")}
                 </p>
               </div>
 
@@ -5418,9 +5462,9 @@ export default function TrabajoDetallePage() {
                 }`}
               >
                 {reclamo.status === "open"
-                  ? "Abierto"
+                  ? T(T("Abierto", "Open"), "Open")
                   : reclamo.status === "reviewing"
-                  ? "En revisión"
+                  ? T(T("En revisión", "Under review"), "Under review")
                   : "Cerrado"}
               </span>
             </div>
@@ -5466,19 +5510,20 @@ export default function TrabajoDetallePage() {
                       }`}
                     >
                       {tiempoRespuestaReclamo.vencido
-                        ? "Ya no puedes enviar nueva evidencia desde el panel. Admin revisará el reclamo con la información disponible."
-                        : "Tienes 24 horas desde que se abrió el reclamo para enviar tu respuesta, fotos o videos."}
+                        ? T("Ya no puedes enviar nueva evidencia desde el panel. Admin revisará el reclamo con la información disponible.", "You can no longer submit new evidence from the dashboard. Admin will review the claim using the available information.")
+                        : T("Tienes 24 horas desde que se abrió el reclamo para enviar tu respuesta, fotos o videos.", "You have 24 hours from when the claim was opened to submit your response, photos, or videos.")}
                     </p>
                   </div>
 
                   {reclamo.provider_response_deadline && (
                     <div className="rounded-xl bg-white px-4 py-3 text-sm shadow-sm">
                       <p className="font-bold text-slate-500">
-                        Fecha límite
+                        {T("Fecha límite", "Deadline")}
                       </p>
                       <p className="mt-1 font-black text-slate-900">
                         {formatearFechaHora(
-                          reclamo.provider_response_deadline
+                          reclamo.provider_response_deadline,
+                          language
                         )}
                       </p>
                     </div>
@@ -5489,7 +5534,7 @@ export default function TrabajoDetallePage() {
 
             <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50 p-5">
               <p className="text-sm font-bold text-rose-700">
-                Motivo del cliente
+                {T("Motivo del cliente", "Customer reason")}
               </p>
 
               <p className="mt-2 font-black text-rose-950">
@@ -5506,7 +5551,7 @@ export default function TrabajoDetallePage() {
             {evidenciasReclamo.length > 0 && (
               <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <p className="font-black text-slate-900">
-                  Evidencia que ya enviaste
+                  {T("Evidencia que ya enviaste", "Evidence you already submitted")}
                 </p>
 
                 <p className="mt-1 text-sm text-slate-600">
@@ -5514,12 +5559,12 @@ export default function TrabajoDetallePage() {
                     (item) =>
                       item.file_type === "image"
                   ).length}{" "}
-                  foto(s) ·{" "}
+                  {T("foto(s)", "photo(s)")} ·{" "}
                   {evidenciasReclamo.filter(
                     (item) =>
                       item.file_type === "video"
                   ).length}{" "}
-                  video(s)
+                  {T("video(s)", "video(s)")}
                 </p>
               </div>
             )}
@@ -5537,7 +5582,7 @@ export default function TrabajoDetallePage() {
                       </p>
 
                       <p className="mt-1 text-sm text-slate-600">
-                        Hasta 10 fotos y 2 videos en total. Máximo 50 MB por archivo.
+                        {T("Hasta 10 fotos y 2 videos en total. Máximo 50 MB por archivo.", "Up to 10 photos and 2 videos total. Maximum 50 MB per file.")}
                       </p>
                     </div>
 
@@ -5610,11 +5655,11 @@ export default function TrabajoDetallePage() {
 
                 <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
                   <label className="mb-2 block font-black text-slate-900">
-                    Explicación de la evidencia *
+                    {T("Explicación de la evidencia *", "Evidence explanation *")}
                   </label>
 
                   <p className="mb-3 text-sm text-slate-600">
-                    Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar este reclamo.
+                    {T("Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar este reclamo.", "Describe what the photos or videos show and what RELYDO should consider when reviewing this claim.")}
                   </p>
 
                   <textarea
@@ -5627,7 +5672,7 @@ export default function TrabajoDetallePage() {
                     rows={5}
                     maxLength={1500}
                     disabled={subiendoEvidencia}
-                    placeholder="Ejemplo: Estas fotos muestran que el trabajo sí fue terminado y que el daño reportado por el cliente ya existía antes de comenzar..."
+                    placeholder={T("Ejemplo: Estas fotos muestran que el trabajo sí fue terminado y que el daño reportado por el cliente ya existía antes de comenzar...", "Example: These photos show that the work was completed and that the damage reported by the customer already existed before the job started...")}
                     className="w-full resize-none rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500 disabled:bg-slate-100"
                   />
 
@@ -5650,12 +5695,12 @@ export default function TrabajoDetallePage() {
                   className="mt-5 w-full rounded-xl bg-rose-700 px-6 py-4 text-lg font-black text-white shadow transition hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {subiendoEvidencia
-                    ? "Subiendo evidencia..."
-                    : "Enviar evidencia al reclamo"}
+                    ? T(T("Subiendo evidencia...", "Uploading evidence..."), "Uploading evidence...")
+                    : T(T("Enviar evidencia al reclamo", "Submit evidence to claim"), "Submit evidence to claim")}
                 </button>
 
                 <p className="mt-3 text-center text-xs leading-5 text-slate-500">
-                  Una vez enviada, la evidencia quedará asociada al reclamo para revisión de RELYDO.
+                  {T("Una vez enviada, la evidencia quedará asociada al reclamo para revisión de RELYDO.", "Once submitted, the evidence will be linked to the claim for RELYDO review.")}
                 </p>
               </>
             )}
@@ -5664,11 +5709,11 @@ export default function TrabajoDetallePage() {
               tiempoRespuestaReclamo.vencido && (
                 <div className="mt-5 rounded-2xl border border-red-300 bg-red-50 p-5">
                   <p className="font-black text-red-900">
-                    ⏰ Plazo de respuesta vencido
+                    {T("⏰ Plazo de respuesta vencido", "⏰ Response deadline expired")}
                   </p>
 
                   <p className="mt-2 text-sm leading-6 text-red-800">
-                    Ya no puedes agregar comentarios, fotos o videos a este reclamo. RELYDO lo revisará con la evidencia disponible.
+                    {T("Ya no puedes agregar comentarios, fotos o videos a este reclamo. RELYDO lo revisará con la evidencia disponible.", "You can no longer add comments, photos, or videos to this claim. RELYDO will review it using the available evidence.")}
                   </p>
                 </div>
               )}
@@ -5676,21 +5721,21 @@ export default function TrabajoDetallePage() {
             {profesionalYaRespondio && (
               <div className="mt-5 rounded-2xl border border-emerald-300 bg-emerald-50 p-5">
                 <p className="font-black text-emerald-900">
-                  ✅ Tu respuesta ya fue enviada
+                  {T("✅ Tu respuesta ya fue enviada", "✅ Your response has already been submitted")}
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-emerald-800">
-                  La evidencia y tu explicación quedaron registradas para revisión de RELYDO. Por seguridad, ya no puedes agregar, quitar ni modificar información de este reclamo.
+                  {T("La evidencia y tu explicación quedaron registradas para revisión de RELYDO. Por seguridad, ya no puedes agregar, quitar ni modificar información de este reclamo.", "Your evidence and explanation were recorded for RELYDO review. For security, you can no longer add, remove, or modify information for this claim.")}
                 </p>
 
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-white p-4">
                   <p className="text-xs font-black uppercase tracking-wide text-emerald-700">
-                    Tu explicación
+                    {T("Tu explicación", "Your explanation")}
                   </p>
 
                   <p className="mt-2 whitespace-pre-wrap text-slate-700">
                     {reclamo.provider_response ||
-                      "El profesional envió evidencia para responder al reclamo."}
+                      T("El profesional envió evidencia para responder al reclamo.", "The professional submitted evidence in response to the claim.")}
                   </p>
                 </div>
               </div>
@@ -5701,17 +5746,17 @@ export default function TrabajoDetallePage() {
               reclamo.status !== "in_review" && (
                 <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
                   <p className="font-black text-green-900">
-                    ✅ Reclamo resuelto
+                    {T("✅ Reclamo resuelto", "✅ Claim resolved")}
                   </p>
 
                   <p className="mt-2 text-sm leading-6 text-green-800">
-                    RELYDO cerró este reclamo. El trabajo fue autorizado para continuar y ya puedes completar el servicio normalmente.
+                    {T("RELYDO cerró este reclamo. El trabajo fue autorizado para continuar y ya puedes completar el servicio normalmente.", "RELYDO closed this claim. The job was authorized to continue and you can now complete the service normally.")}
                   </p>
 
                   {reclamo.resolution_notes && (
                     <div className="mt-4 rounded-xl border border-green-200 bg-white p-4">
                       <p className="text-xs font-black uppercase tracking-wide text-green-700">
-                        Resolución de RELYDO
+                        {T("Resolución de RELYDO", "RELYDO resolution")}
                       </p>
 
                       <p className="mt-2 whitespace-pre-wrap text-slate-700">
@@ -5748,18 +5793,18 @@ export default function TrabajoDetallePage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                 💵
               </span>
-              Enviar presupuesto
+              {T(T("Enviar presupuesto", "Send quote"), "Send quote")}
             </h2>
 
             {oferta ? (
               <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6">
 
                 <p className="text-lg font-black text-green-900">
-                  ✅ Presupuesto enviado
+                  {T("✅ Presupuesto enviado", "✅ Quote sent")}
                 </p>
 
                 <p className="mt-2 text-green-800">
-                  El cliente ya puede comparar tu presupuesto con otras ofertas.
+                  {T("El cliente ya puede comparar tu presupuesto con otras ofertas.", "The customer can now compare your quote with other offers.")}
                 </p>
               </div>
             ) : (
@@ -5774,7 +5819,7 @@ export default function TrabajoDetallePage() {
 
                   <div>
                     <label className="mb-2 block text-sm font-bold text-slate-800">
-                      Precio
+                      {T("Precio", "Price")}
                     </label>
 
                     <div className="flex overflow-hidden rounded-xl border border-slate-300 bg-white focus-within:border-blue-500">
@@ -5812,7 +5857,7 @@ export default function TrabajoDetallePage() {
 
                   <div>
                     <label className="mb-2 block text-sm font-bold text-slate-800">
-                      Duración estimada
+                      {T("Duración estimada", "Estimated duration")}
                     </label>
 
                     <input
@@ -5830,14 +5875,14 @@ export default function TrabajoDetallePage() {
                 <div className="mt-5">
 
                   <label className="mb-2 block text-sm font-bold text-slate-800">
-                    Mensaje para el cliente
+                    {T("Mensaje para el cliente", "Message to customer")}
                   </label>
 
                   <textarea
                     name="message"
                     rows={4}
                     required
-                    placeholder="Escribe un mensaje para el cliente..."
+                    placeholder={T("Escribe un mensaje para el cliente...", "Write a message for the customer...")}
                     className="w-full resize-none rounded-xl border border-slate-300 p-4 text-slate-900 outline-none focus:border-blue-500"
                   />
                 </div>
@@ -5850,12 +5895,12 @@ export default function TrabajoDetallePage() {
                   className="mt-5 w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-black text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {enviando
-                    ? "Enviando presupuesto..."
-                    : "Enviar presupuesto"}
+                    ? T(T("Enviando presupuesto...", "Sending quote..."), "Sending quote...")
+                    : T(T("Enviar presupuesto", "Send quote"), "Send quote")}
                 </button>
 
                 <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-                  💡 El cliente podrá comparar tu precio, tiempo de llegada y duración estimada con otros profesionales.
+                  {T("💡 El cliente podrá comparar tu precio, tiempo de llegada y duración estimada con otros profesionales.", "💡 The customer can compare your price, arrival time, and estimated duration with other professionals.")}
                 </div>
               </form>
             )}

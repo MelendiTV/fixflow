@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import NotificationsBell from "@/app/components/NotificationsBell";
 import { AccountModeSwitcher } from "@/app/components/AccountModeSwitcher";
 import { useAccountMode } from "@/app/components/AccountModeProvider";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,16 +42,23 @@ type ReclamoCliente = {
   created_at: string;
 };
 
-function nombreEstado(status: string, jobStage: string | null) {
-  if (status === "open") return "Abierta";
-  if (status === "completed") return "Completada";
-  if (status === "cancelled") return "Cancelada";
+function nombreEstado(
+  status: string,
+  jobStage: string | null,
+  language: "es" | "en"
+) {
+  if (status === "open") return language === "es" ? "Abierta" : "Open";
+  if (status === "completed") return language === "es" ? "Completada" : "Completed";
+  if (status === "cancelled") return language === "es" ? "Cancelada" : "Cancelled";
 
   if (status === "in_progress") {
-    if (jobStage === "on_the_way") return "Profesional en camino";
-    if (jobStage === "arrived") return "Profesional llegó";
-    if (jobStage === "working") return "Trabajo iniciado";
-    return "Profesional contratado";
+    if (jobStage === "on_the_way")
+      return language === "es" ? "Profesional en camino" : "Professional on the way";
+    if (jobStage === "arrived")
+      return language === "es" ? "Profesional llegó" : "Professional arrived";
+    if (jobStage === "working")
+      return language === "es" ? "Trabajo iniciado" : "Work started";
+    return language === "es" ? "Profesional contratado" : "Professional hired";
   }
 
   return status;
@@ -84,7 +92,175 @@ function iconoEstado(status: string, jobStage: string | null) {
 export default function MisSolicitudesPage() {
   const router = useRouter();
   const { setAccountRole } = useAccountMode();
+  const { language } = useLanguage();
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
+
+  const t =
+    language === "es"
+      ? {
+          perfilNoEncontrado: t.perfilNoEncontrado,
+          sinAcceso: t.sinAcceso,
+          cargarSolicitudes: "No pudimos cargar tus solicitudes",
+          cargarReclamos: "No pudimos cargar tus reclamos",
+          errorInesperado: t.errorInesperado,
+          fotoFormato: t.fotoFormato,
+          fotoTamano: t.fotoTamano,
+          sesionNoDisponible: t.sesionNoDisponible,
+          subirFoto: "No se pudo subir la foto",
+          guardarFoto: "La foto subió, pero no se pudo guardar en tu perfil",
+          fotoError: t.fotoError,
+          cargando: "{t.cargando}",
+          ubicacion: "Ubicación",
+          fecha: "Fecha",
+          hora: "Hora",
+          flexible: "Flexible",
+          estadoActual: "{t.estadoActual}",
+          verPresupuestos: "Ver presupuestos",
+          ver{t.seguimiento}: "Ver seguimiento",
+          verDetalles: "Ver detalles",
+          panelCliente: "{t.panelCliente}",
+          fotoAlt: "Foto de",
+          cliente: "cliente",
+          subiendo: "Subiendo...",
+          cambiar: "Cambiar",
+          hola: "Hola",
+          clienteNombre: "Cliente",
+          subiendoFoto: "Subiendo foto...",
+          cambiarFoto: "Cambiar foto de perfil",
+          anadirFoto: "Añadir foto de perfil",
+          descripcionPanel:
+            "{t.descripcionPanel}",
+          vivoActivo: "Actualización en vivo activa",
+          conectandoVivo: "Conectando actualización en vivo...",
+          cuenta: "{t.cuenta}",
+          cerrarSesion: "{t.cerrarSesion}",
+          nuevoTrabajo: "{t.nuevoTrabajo}",
+          verProfesionales: "{t.verProfesionales}",
+          resumen: "{t.resumen}",
+          actividad: "{t.actividad}",
+          pulsaTarjeta: "{t.pulsaTarjeta}",
+          actualizando: "Actualizando...",
+          actualizar: "↻ Actualizar",
+          abiertas: "Abiertas",
+          enProgreso: "En progreso",
+          completadas: "Completadas",
+          canceladas: "Canceladas",
+          reclamos: "Reclamos",
+          historial: "Historial",
+          seguimiento: "{t.seguimiento}",
+          unTrabajoProgreso: "Tienes un trabajo en progreso",
+          trabajosProgreso: "trabajos en progreso",
+          avanceProfesional: "{t.avanceProfesional}",
+          verTrabajos: "Ver",
+          trabajos: "trabajos",
+          sinSolicitudes: "{t.sinSolicitudes}",
+          apareceranAqui: "{t.apareceranAqui}",
+          solicitarTrabajo: "{t.solicitarTrabajo}",
+          solicitudesAbiertas: "{t.solicitudesAbiertas}",
+          esperandoPresupuestos: "{t.esperandoPresupuestos}",
+          trabajosEnProgreso: "{t.trabajosEnProgreso}",
+          estadoTrabajos: "{t.estadoTrabajos}",
+          trabajosCompletados: "{t.trabajosCompletados}",
+          historialTerminados: "{t.historialTerminados}",
+          solicitudesCanceladas: "{t.solicitudesCanceladas}",
+          historialCanceladas: "{t.historialCanceladas}",
+          proteccion: "{t.proteccion}",
+          misReclamos: "{t.misReclamos}",
+          revisarReclamos: "{t.revisarReclamos}",
+          activos: "activos",
+          sinReclamos: "{t.sinReclamos}",
+          reclamoTrabajo: "Reclamo de trabajo",
+          verTrabajoRelacionado: "Ver trabajo relacionado",
+          abierto: "Abierto",
+          enRevision: "En revisión",
+          resuelto: "Resuelto",
+          historialCompleto: "{t.historialCompleto}",
+          todasSolicitudes: "{t.todasSolicitudes}",
+          todasVista: "{t.todasVista}",
+          sinHistorial: "{t.sinSolicitudes} en el historial.",
+        }
+      : {
+          perfilNoEncontrado: "We could not find your customer profile.",
+          sinAcceso: "This account does not have access to customer mode.",
+          cargarSolicitudes: "We could not load your requests",
+          cargarReclamos: "We could not load your claims",
+          errorInesperado: "An unexpected error occurred.",
+          fotoFormato: "The photo must be JPG, PNG, or WEBP.",
+          fotoTamano: "The photo cannot exceed 5 MB.",
+          sesionNoDisponible: "Your session is no longer available.",
+          subirFoto: "We could not upload the photo",
+          guardarFoto: "The photo was uploaded, but it could not be saved to your profile",
+          fotoError: "We could not upload the photo.",
+          cargando: "Loading customer dashboard...",
+          ubicacion: "Location",
+          fecha: "Date",
+          hora: "Time",
+          flexible: "Flexible",
+          estadoActual: "Current status",
+          verPresupuestos: "View quotes",
+          ver{t.seguimiento}: "Track job",
+          verDetalles: "View details",
+          panelCliente: "Customer dashboard",
+          fotoAlt: "Photo of",
+          cliente: "customer",
+          subiendo: "Uploading...",
+          cambiar: "Change",
+          hola: "Hello",
+          clienteNombre: "Customer",
+          subiendoFoto: "Uploading photo...",
+          cambiarFoto: "Change profile photo",
+          anadirFoto: "Add profile photo",
+          descripcionPanel:
+            "Manage your requests, track your jobs, and find professionals from one place.",
+          vivoActivo: "Live updates active",
+          conectandoVivo: "Connecting live updates...",
+          cuenta: "Account",
+          cerrarSesion: "Sign out",
+          nuevoTrabajo: "+ Request a new job",
+          verProfesionales: "View professionals",
+          resumen: "Summary",
+          actividad: "Your RELYDO activity",
+          pulsaTarjeta: "Select any card to go directly to that section.",
+          actualizando: "Updating...",
+          actualizar: "↻ Refresh",
+          abiertas: "Open",
+          enProgreso: "In progress",
+          completadas: "Completed",
+          canceladas: "Cancelled",
+          reclamos: "Claims",
+          historial: "History",
+          seguimiento: "Tracking",
+          unTrabajoProgreso: "You have one job in progress",
+          trabajosProgreso: "jobs in progress",
+          avanceProfesional: "Review the progress reported by each professional here.",
+          verTrabajos: "View",
+          trabajos: "jobs",
+          sinSolicitudes: "You don't have any requests yet",
+          apareceranAqui: "Your requests will appear here once you submit a job.",
+          solicitarTrabajo: "Request a job",
+          solicitudesAbiertas: "Open requests",
+          esperandoPresupuestos: "Waiting for quotes from professionals.",
+          trabajosEnProgreso: "Jobs in progress",
+          estadoTrabajos: "Track the current status of all your jobs here.",
+          trabajosCompletados: "Completed jobs",
+          historialTerminados: "History of completed jobs.",
+          solicitudesCanceladas: "Cancelled requests",
+          historialCanceladas: "History of requests that were cancelled.",
+          proteccion: "Protection",
+          misReclamos: "My claims",
+          revisarReclamos: "Review your open, under-review, and resolved claims.",
+          activos: "active",
+          sinReclamos: "You don't have any claims.",
+          reclamoTrabajo: "Job claim",
+          verTrabajoRelacionado: "View related job",
+          abierto: "Open",
+          enRevision: "Under review",
+          resuelto: "Resolved",
+          historialCompleto: "Full history",
+          todasSolicitudes: "All your requests",
+          todasVista: "Open, in-progress, completed, and cancelled requests in one view.",
+          sinHistorial: "You don't have any requests in your history yet.",
+        };
 
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [cliente, setCliente] = useState<ClienteProfile | null>(null);
@@ -210,14 +386,14 @@ export default function MisSolicitudesPage() {
         .maybeSingle();
 
       if (profileError || !profileData) {
-        throw new Error("No se encontró tu perfil de cliente.");
+        throw new Error(t.perfilNoEncontrado);
       }
 
       if (
         profileData.role !== "customer" &&
         profileData.role !== "provider"
       ) {
-        throw new Error("Esta cuenta no tiene acceso al modo cliente.");
+        throw new Error(t.sinAcceso);
       }
 
       setAccountRole(
@@ -250,7 +426,7 @@ export default function MisSolicitudesPage() {
 
       if (solicitudesError) {
         throw new Error(
-          `No pudimos cargar tus solicitudes: ${solicitudesError.message}`
+          `${t.cargarSolicitudes}: ${solicitudesError.message}`
         );
       }
 
@@ -271,7 +447,7 @@ export default function MisSolicitudesPage() {
 
       if (reclamosError) {
         throw new Error(
-          `No pudimos cargar tus reclamos: ${reclamosError.message}`
+          `${t.cargarReclamos}: ${reclamosError.message}`
         );
       }
 
@@ -280,7 +456,7 @@ export default function MisSolicitudesPage() {
       console.error(err);
 
       setError(
-        err instanceof Error ? err.message : "Ocurrió un error inesperado."
+        err instanceof Error ? err.message : t.errorInesperado
       );
     } finally {
       if (mostrarCarga) {
@@ -306,13 +482,13 @@ export default function MisSolicitudesPage() {
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
 
     if (!tiposPermitidos.includes(file.type)) {
-      setError("La foto debe ser JPG, PNG o WEBP.");
+      setError(t.fotoFormato);
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("La foto no puede superar 5 MB.");
+      setError(t.fotoTamano);
       event.target.value = "";
       return;
     }
@@ -326,7 +502,7 @@ export default function MisSolicitudesPage() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        throw new Error("Tu sesión ya no está disponible.");
+        throw new Error(t.sesionNoDisponible);
       }
 
       const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -340,7 +516,7 @@ export default function MisSolicitudesPage() {
         });
 
       if (uploadError) {
-        throw new Error(`No se pudo subir la foto: ${uploadError.message}`);
+        throw new Error(`${t.subirFoto}: ${uploadError.message}`);
       }
 
       const {
@@ -356,7 +532,7 @@ export default function MisSolicitudesPage() {
 
       if (updateError) {
         throw new Error(
-          `La foto subió, pero no se pudo guardar en tu perfil: ${updateError.message}`
+          `${t.guardarFoto}: ${updateError.message}`
         );
       }
 
@@ -372,7 +548,7 @@ export default function MisSolicitudesPage() {
       console.error("Error subiendo foto de cliente:", err);
 
       setError(
-        err instanceof Error ? err.message : "No se pudo subir la foto."
+        err instanceof Error ? err.message : t.fotoError
       );
     } finally {
       setSubiendoAvatar(false);
@@ -395,7 +571,7 @@ export default function MisSolicitudesPage() {
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
           <p className="font-bold text-slate-700">
-            Cargando panel del cliente...
+            {t.cargando}
           </p>
         </div>
       </main>
@@ -432,7 +608,7 @@ export default function MisSolicitudesPage() {
   );
 
   function renderSolicitud(solicitud: Solicitud) {
-    const nombre = nombreEstado(solicitud.status, solicitud.job_stage);
+    const nombre = nombreEstado(solicitud.status, solicitud.job_stage, language);
     const estilo = estiloEstado(solicitud.status, solicitud.job_stage);
     const icono = iconoEstado(solicitud.status, solicitud.job_stage);
 
@@ -460,20 +636,20 @@ export default function MisSolicitudesPage() {
 
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <InfoBox
-            titulo="Ubicación"
+            titulo={t.ubicacion}
             valor={`${solicitud.city}, ${solicitud.state} ${solicitud.zip_code}`}
             icono="📍"
           />
 
           <InfoBox
-            titulo="Fecha"
-            valor={solicitud.preferred_date || "Flexible"}
+            titulo={t.fecha}
+            valor={solicitud.preferred_date || t.flexible}
             icono="📅"
           />
 
           <InfoBox
-            titulo="Hora"
-            valor={solicitud.preferred_time || "Flexible"}
+            titulo={t.hora}
+            valor={solicitud.preferred_time || t.flexible}
             icono="🕐"
           />
         </div>
@@ -487,7 +663,7 @@ export default function MisSolicitudesPage() {
 
               <div>
                 <p className="text-sm font-bold text-blue-700">
-                  Estado actual
+                  {t.estadoActual}
                 </p>
                 <p className="font-extrabold text-blue-950">{nombre}</p>
               </div>
@@ -529,7 +705,7 @@ export default function MisSolicitudesPage() {
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-300" />
-                  Panel del cliente
+                  {t.panelCliente}
                 </div>
 
                 <div className="mt-4 text-2xl font-black">RELYDO</div>
@@ -539,7 +715,7 @@ export default function MisSolicitudesPage() {
                     {cliente?.avatar_url ? (
                       <img
                         src={cliente.avatar_url}
-                        alt={`Foto de ${cliente.full_name || "cliente"}`}
+                        alt={`${t.fotoAlt} ${cliente.full_name || t.cliente}`}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -554,7 +730,7 @@ export default function MisSolicitudesPage() {
                       onClick={() => avatarInputRef.current?.click()}
                       className="absolute inset-x-0 bottom-0 bg-slate-950/75 px-2 py-1.5 text-[9px] font-black uppercase tracking-wide text-white opacity-0 transition group-hover:opacity-100 disabled:cursor-not-allowed"
                     >
-                      {subiendoAvatar ? "Subiendo..." : "Cambiar"}
+                      {subiendoAvatar ? t.subiendo : t.cambiar}
                     </button>
                   </div>
 
@@ -568,7 +744,7 @@ export default function MisSolicitudesPage() {
 
                   <div>
                     <h1 className="text-3xl font-black tracking-tight md:text-5xl">
-                      Hola, {cliente?.full_name || "Cliente"}
+                      {t.hola}, {cliente?.full_name || t.clienteNombre}
                     </h1>
 
                     <button
@@ -587,7 +763,7 @@ export default function MisSolicitudesPage() {
                 </div>
 
                 <p className="mt-4 max-w-xl text-base leading-7 text-blue-100 md:text-lg">
-                  Administra tus solicitudes, sigue tus trabajos y encuentra profesionales desde un solo lugar.
+                  {t.descripcionPanel}
                 </p>
 
                 <div className="mt-5">
@@ -618,7 +794,7 @@ export default function MisSolicitudesPage() {
 
                 <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
                   <p className="text-xs font-black uppercase tracking-wide text-blue-200">
-                    Cuenta
+                    {t.cuenta}
                   </p>
 
                   <p className="mt-1 max-w-[220px] truncate text-sm font-bold text-white">
@@ -636,7 +812,7 @@ export default function MisSolicitudesPage() {
                     onClick={cerrarSesion}
                     className="mt-3 w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-black text-white transition hover:bg-white/20"
                   >
-                    Cerrar sesión
+                    {t.cerrarSesion}
                   </button>
                 </div>
               </div>
@@ -652,7 +828,7 @@ export default function MisSolicitudesPage() {
             onClick={() => router.push("/solicitar-trabajo")}
             className="rounded-2xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white shadow transition hover:-translate-y-0.5 hover:bg-blue-800"
           >
-            + Solicitar nuevo trabajo
+            {t.nuevoTrabajo}
           </button>
 
           <button
@@ -660,7 +836,7 @@ export default function MisSolicitudesPage() {
             onClick={() => router.push("/profesionales")}
             className="rounded-2xl border-2 border-blue-700 bg-white px-6 py-4 text-lg font-extrabold text-blue-700 shadow transition hover:-translate-y-0.5 hover:bg-blue-50"
           >
-            Ver profesionales
+            {t.verProfesionales}
           </button>
         </section>
 
@@ -670,15 +846,15 @@ export default function MisSolicitudesPage() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
-                Resumen
+                {t.resumen}
               </p>
 
               <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                Tu actividad en RELYDO
+                {t.actividad}
               </h2>
 
               <p className="mt-2 text-slate-600">
-                Pulsa cualquier tarjeta para ir directamente a esa sección.
+                {t.pulsaTarjeta}
               </p>
             </div>
 
@@ -688,13 +864,13 @@ export default function MisSolicitudesPage() {
               disabled={actualizando}
               className="w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 font-black text-slate-800 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {actualizando ? "Actualizando..." : "↻ Actualizar"}
+              {actualizando ? t.actualizando : t.actualizar}
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-            <ResumenCard
-              titulo="Abiertas"
+            <{t.resumen}Card
+              titulo={t.abiertas}
               valor={String(abiertas.length)}
               clase="text-blue-700"
               icono="📋"
@@ -702,8 +878,8 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("solicitudes-abiertas")}
             />
 
-            <ResumenCard
-              titulo="En progreso"
+            <{t.resumen}Card
+              titulo={t.enProgreso}
               valor={String(enProgreso.length)}
               clase="text-amber-700"
               icono="⚡"
@@ -711,8 +887,8 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("trabajos-en-progreso")}
             />
 
-            <ResumenCard
-              titulo="Completadas"
+            <{t.resumen}Card
+              titulo={t.completadas}
               valor={String(completadas.length)}
               clase="text-emerald-700"
               icono="✓"
@@ -720,8 +896,8 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("trabajos-completados")}
             />
 
-            <ResumenCard
-              titulo="Canceladas"
+            <{t.resumen}Card
+              titulo={t.canceladas}
               valor={String(canceladas.length)}
               clase="text-red-700"
               icono="×"
@@ -729,8 +905,8 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("solicitudes-canceladas")}
             />
 
-            <ResumenCard
-              titulo="Reclamos"
+            <{t.resumen}Card
+              titulo={t.reclamos}
               valor={String(reclamosActivos.length)}
               clase="text-rose-700"
               icono="⚠"
@@ -738,8 +914,8 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("mis-reclamos")}
             />
 
-            <ResumenCard
-              titulo="Historial"
+            <{t.resumen}Card
+              titulo={t.historial}
               valor={String(totalHistorial)}
               clase="text-violet-700"
               icono="↺"
@@ -756,7 +932,7 @@ export default function MisSolicitudesPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-black uppercase tracking-wide text-blue-700">
-                  Seguimiento
+                  {t.seguimiento}
                 </p>
 
                 <h2 className="mt-1 text-xl font-extrabold text-blue-950">
@@ -766,7 +942,7 @@ export default function MisSolicitudesPage() {
                 </h2>
 
                 <p className="mt-1 text-blue-800">
-                  Revisa aquí el avance que reporta cada profesional.
+                  {t.avanceProfesional}
                 </p>
               </div>
 
@@ -794,11 +970,11 @@ export default function MisSolicitudesPage() {
             <div className="text-5xl">📋</div>
 
             <h2 className="mt-4 text-2xl font-extrabold text-slate-900">
-              Todavía no tienes solicitudes
+              {t.sinSolicitudes}
             </h2>
 
             <p className="mt-2 text-slate-600">
-              Cuando solicites un trabajo aparecerá aquí.
+              {t.apareceranAqui}
             </p>
 
             <button
@@ -806,7 +982,7 @@ export default function MisSolicitudesPage() {
               onClick={() => router.push("/solicitar-trabajo")}
               className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-bold text-white hover:bg-blue-800"
             >
-              Solicitar un trabajo
+              {t.solicitarTrabajo}
             </button>
           </section>
         )}
@@ -814,11 +990,11 @@ export default function MisSolicitudesPage() {
         {!error && abiertas.length > 0 && (
           <section id="solicitudes-abiertas" className="mt-8 scroll-mt-6">
             <h2 className="text-3xl font-extrabold text-slate-900">
-              Solicitudes abiertas
+              {t.solicitudesAbiertas}
             </h2>
 
             <p className="mt-2 text-slate-600">
-              Esperando presupuestos de profesionales.
+              {t.esperandoPresupuestos}
             </p>
 
             <div className="mt-5 space-y-5">
@@ -830,11 +1006,11 @@ export default function MisSolicitudesPage() {
         {!error && enProgreso.length > 0 && (
           <section id="trabajos-en-progreso" className="mt-10 scroll-mt-6">
             <h2 className="text-3xl font-extrabold text-slate-900">
-              Trabajos en progreso
+              {t.trabajosEnProgreso}
             </h2>
 
             <p className="mt-2 text-slate-600">
-              Sigue aquí el estado actual de todos tus trabajos.
+              {t.estadoTrabajos}
             </p>
 
             <div className="mt-5 space-y-5">
@@ -846,11 +1022,11 @@ export default function MisSolicitudesPage() {
         {!error && completadas.length > 0 && (
           <section id="trabajos-completados" className="mt-10 scroll-mt-6">
             <h2 className="text-3xl font-extrabold text-slate-900">
-              Trabajos completados
+              {t.trabajosCompletados}
             </h2>
 
             <p className="mt-2 text-slate-600">
-              Historial de trabajos terminados.
+              {t.historialTerminados}
             </p>
 
             <div className="mt-5 space-y-5">
@@ -862,11 +1038,11 @@ export default function MisSolicitudesPage() {
         {!error && canceladas.length > 0 && (
           <section id="solicitudes-canceladas" className="mt-10 scroll-mt-6">
             <h2 className="text-3xl font-extrabold text-slate-900">
-              Solicitudes canceladas
+              {t.solicitudesCanceladas}
             </h2>
 
             <p className="mt-2 text-slate-600">
-              Historial de solicitudes que fueron canceladas.
+              {t.historialCanceladas}
             </p>
 
             <div className="mt-5 space-y-5">
@@ -883,25 +1059,25 @@ export default function MisSolicitudesPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-rose-700">
-                  Protección
+                  {t.proteccion}
                 </p>
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Mis reclamos
+                  {t.misReclamos}
                 </h2>
                 <p className="mt-2 text-slate-600">
-                  Revisa tus reclamos abiertos, en revisión y resueltos.
+                  {t.revisarReclamos}
                 </p>
               </div>
 
               <span className="w-fit rounded-full bg-rose-100 px-4 py-2 font-extrabold text-rose-800">
-                {reclamosActivos.length} activos
+                {reclamosActivos.length} {t.activos}
               </span>
             </div>
 
             {reclamos.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="font-bold text-slate-700">
-                  No tienes reclamos registrados.
+                  {t.sinReclamos}
                 </p>
               </div>
             ) : (
@@ -927,10 +1103,10 @@ export default function MisSolicitudesPage() {
                     >
                       <div>
                         <p className="font-black text-slate-900">
-                          {reclamo.reason || "Reclamo de trabajo"}
+                          {reclamo.reason || t.reclamoTrabajo}
                         </p>
                         <p className="mt-1 text-sm text-slate-600">
-                          {solicitud?.title || "Ver trabajo relacionado"}
+                          {solicitud?.title || t.verTrabajoRelacionado}
                         </p>
                       </div>
 
@@ -964,15 +1140,15 @@ export default function MisSolicitudesPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-violet-700">
-                  Historial completo
+                  {t.historialCompleto}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                  Todas tus solicitudes
+                  {t.todasSolicitudes}
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  Abiertas, en progreso, completadas y canceladas en una sola vista.
+                  {t.todasVista}
                 </p>
               </div>
 
@@ -984,7 +1160,7 @@ export default function MisSolicitudesPage() {
             {solicitudes.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="font-bold text-slate-700">
-                  Todavía no tienes solicitudes en el historial.
+                  {t.sinSolicitudes} en el historial.
                 </p>
               </div>
             ) : (
@@ -1014,7 +1190,7 @@ export default function MisSolicitudesPage() {
                         solicitud.job_stage
                       )}`}
                     >
-                      {nombreEstado(solicitud.status, solicitud.job_stage)}
+                      {nombreEstado(solicitud.status, solicitud.job_stage, language)}
                     </span>
                   </button>
                 ))}
@@ -1028,7 +1204,7 @@ export default function MisSolicitudesPage() {
   );
 }
 
-function ResumenCard({
+function {t.resumen}Card({
   titulo,
   valor,
   clase,

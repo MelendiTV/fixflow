@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +12,80 @@ const supabase = createClient(
 
 export default function LoginProfesional() {
   const router = useRouter();
+  const { language } = useLanguage();
+
+  const text =
+    language === "es"
+      ? {
+          noIniciarSesion: text.noIniciarSesion,
+          noComprobarCuenta: "No se pudo comprobar tu cuenta",
+          perfilNoValido:
+            text.perfilNoValido,
+          noCargarPerfil:
+            "No se pudo cargar el perfil profesional",
+          sinAcceso:
+            text.sinAcceso,
+          errorLogin:
+            text.errorLogin,
+          escribeEmail:
+            text.escribeEmail,
+          correoRecuperacion:
+            text.correoRecuperacion,
+          limiteCorreos:
+            text.limiteCorreos,
+          noEnviarCorreo:
+            "No se pudo enviar el correo",
+          noEnviarRecuperacion:
+            text.noEnviarRecuperacion,
+          titulo: "{text.titulo}",
+          descripcion:
+            "{text.descripcion}",
+          email: "Email",
+          emailPlaceholder: "tu@email.com",
+          password: "Contraseña",
+          passwordPlaceholder: "Tu contraseña",
+          enviandoCorreo: "Enviando correo...",
+          olvidoPassword: "¿Olvidaste tu contraseña?",
+          entrando: "Entrando...",
+          iniciarSesion: "Iniciar sesión",
+          noCuenta: "¿Todavía no tienes cuenta?",
+          registrate: "{text.registrate}",
+        }
+      : {
+          noIniciarSesion: "Unable to sign in.",
+          noComprobarCuenta: "We could not verify your account",
+          perfilNoValido:
+            "No valid profile was found for this account.",
+          noCargarPerfil:
+            "We could not load the professional profile",
+          sinAcceso:
+            "This account does not have access to the professional portal.",
+          errorLogin:
+            "An unexpected error occurred while signing in.",
+          escribeEmail:
+            "Enter your email first to reset your password.",
+          correoRecuperacion:
+            "We sent you an email to change your password. Check your Spam or Junk folder as well.",
+          limiteCorreos:
+            "Too many emails have been requested in a short period. Please wait before trying again.",
+          noEnviarCorreo:
+            "We could not send the email",
+          noEnviarRecuperacion:
+            "We could not send the password recovery email.",
+          titulo: "Professional sign in",
+          descripcion:
+            "Sign in to access your account.",
+          email: "Email",
+          emailPlaceholder: "you@email.com",
+          password: "Password",
+          passwordPlaceholder: "Your password",
+          enviandoCorreo: "Sending email...",
+          olvidoPassword: "Forgot your password?",
+          entrando: "Signing in...",
+          iniciarSesion: "Sign in",
+          noCuenta: "Don't have an account yet?",
+          registrate: "Register as a professional",
+        };
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -131,7 +206,7 @@ export default function LoginProfesional() {
 
       if (!data.user) {
         throw new Error(
-          "No se pudo iniciar sesión."
+          text.noIniciarSesion
         );
       }
 
@@ -159,7 +234,7 @@ export default function LoginProfesional() {
 
       if (profileError) {
         throw new Error(
-          `No se pudo comprobar tu cuenta: ${profileError.message}`
+          `${text.noComprobarCuenta}: ${profileError.message}`
         );
       }
 
@@ -187,7 +262,7 @@ export default function LoginProfesional() {
         await supabase.auth.signOut();
 
         throw new Error(
-          "No se encontró un perfil válido para esta cuenta."
+          text.perfilNoValido
         );
       }
 
@@ -232,7 +307,7 @@ export default function LoginProfesional() {
 
         if (providerError) {
           throw new Error(
-            `No se pudo cargar el perfil profesional: ${providerError.message}`
+            `${text.noCargarPerfil}: ${providerError.message}`
           );
         }
 
@@ -283,7 +358,7 @@ export default function LoginProfesional() {
       await supabase.auth.signOut();
 
       throw new Error(
-        "Esta cuenta no tiene acceso al portal profesional."
+        text.sinAcceso
       );
     } catch (err) {
       console.error(err);
@@ -294,7 +369,7 @@ export default function LoginProfesional() {
         );
       } else {
         setError(
-          "Ocurrió un error inesperado al iniciar sesión."
+          text.errorLogin
         );
       }
 
@@ -311,7 +386,7 @@ export default function LoginProfesional() {
 
     if (!emailLimpio) {
       setError(
-        "Escribe primero tu email para recuperar la contraseña."
+        text.escribeEmail
       );
       return;
     }
@@ -339,7 +414,7 @@ export default function LoginProfesional() {
       }
 
       setMensaje(
-        "Te enviamos un correo para cambiar tu contraseña. Revisa también Spam o Correo no deseado."
+        text.correoRecuperacion
       );
     } catch (err) {
       if (err instanceof Error) {
@@ -349,16 +424,16 @@ export default function LoginProfesional() {
             .includes("rate limit")
         ) {
           setError(
-            "Se han solicitado demasiados correos en poco tiempo. Espera un poco antes de intentarlo nuevamente."
+            text.limiteCorreos
           );
         } else {
           setError(
-            `No se pudo enviar el correo: ${err.message}`
+            `${text.noEnviarCorreo}: ${err.message}`
           );
         }
       } else {
         setError(
-          "No se pudo enviar el correo de recuperación."
+          text.noEnviarRecuperacion
         );
       }
     } finally {
@@ -380,11 +455,11 @@ export default function LoginProfesional() {
           </div>
 
           <h1 className="mt-2 text-3xl font-extrabold">
-            Acceso profesional
+            {text.titulo}
           </h1>
 
           <p className="mt-2 text-blue-100">
-            Inicia sesión para acceder a tu cuenta.
+            {text.descripcion}
           </p>
 
         </div>
@@ -399,7 +474,7 @@ export default function LoginProfesional() {
           <div>
 
             <label className="mb-2 block font-bold text-slate-900">
-              Email
+              {text.email}
             </label>
 
             <input
@@ -412,7 +487,7 @@ export default function LoginProfesional() {
                   e.target.value
                 )
               }
-              placeholder="tu@email.com"
+              placeholder={text.emailPlaceholder}
               className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
             />
 
@@ -421,7 +496,7 @@ export default function LoginProfesional() {
           <div>
 
             <label className="mb-2 block font-bold text-slate-900">
-              Contraseña
+              {text.password}
             </label>
 
             <input
@@ -434,7 +509,7 @@ export default function LoginProfesional() {
                   e.target.value
                 )
               }
-              placeholder="Tu contraseña"
+              placeholder={text.passwordPlaceholder}
               className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
             />
 
@@ -487,13 +562,13 @@ export default function LoginProfesional() {
           <div className="border-t border-slate-200 pt-6">
 
             <p className="text-center text-slate-600">
-              ¿Todavía no tienes cuenta?{" "}
+              {text.noCuenta}{" "}
 
               <a
                 href="/registro-profesional"
                 className="font-bold text-blue-700 hover:underline"
               >
-                Regístrate como profesional
+                {text.registrate}
               </a>
 
             </p>
