@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { sendRelydoNotification } from "../../../../lib/serverNotifications";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -253,6 +254,7 @@ export async function POST(request: NextRequest) {
       .from("service_requests")
       .select(`
         id,
+        title,
         status,
         job_stage,
         customer_id,
@@ -483,6 +485,32 @@ export async function POST(request: NextRequest) {
           );
         }
 
+        try {
+          await Promise.allSettled([
+            sendRelydoNotification({
+              userId: claim.customer_id,
+              type: "claim_resolved",
+              title: "Reclamo resuelto",
+              message: `RELYDO resolvió el reclamo a favor del profesional. El trabajo continuará. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+              requestId: claim.request_id,
+              url: `/mis-solicitudes/${claim.request_id}`,
+            }),
+            sendRelydoNotification({
+              userId: claim.provider_id,
+              type: "claim_resolved",
+              title: "Reclamo resuelto",
+              message: `RELYDO resolvió el reclamo a tu favor. El trabajo fue desbloqueado y puedes continuar. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+              requestId: claim.request_id,
+              url: `/trabajos/${claim.request_id}`,
+            }),
+          ]);
+        } catch (notificationError) {
+          console.warn(
+            "El reclamo fue resuelto, pero falló el envío de notificaciones:",
+            notificationError
+          );
+        }
+
         return NextResponse.json({
           success: true,
           action:
@@ -696,6 +724,32 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      try {
+        await Promise.allSettled([
+          sendRelydoNotification({
+            userId: claim.customer_id,
+            type: "claim_resolved",
+            title: "Reclamo resuelto",
+            message: `RELYDO resolvió el reclamo a favor del profesional. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+            requestId: claim.request_id,
+            url: `/mis-solicitudes/${claim.request_id}`,
+          }),
+          sendRelydoNotification({
+            userId: claim.provider_id,
+            type: "claim_resolved",
+            title: "Reclamo resuelto",
+            message: `RELYDO resolvió el reclamo a tu favor. Se liberaron $${providerNet.toFixed(2)}. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+            requestId: claim.request_id,
+            url: `/trabajos/${claim.request_id}`,
+          }),
+        ]);
+      } catch (notificationError) {
+        console.warn(
+          "El reclamo fue resuelto, pero falló el envío de notificaciones:",
+          notificationError
+        );
+      }
+
       return NextResponse.json({
         success: true,
         action: "pay_provider",
@@ -855,6 +909,32 @@ export async function POST(request: NextRequest) {
               refund.id,
           },
           { status: 500 }
+        );
+      }
+
+      try {
+        await Promise.allSettled([
+          sendRelydoNotification({
+            userId: claim.customer_id,
+            type: "claim_resolved",
+            title: "Reclamo resuelto",
+            message: `RELYDO resolvió el reclamo a tu favor. Se procesó un reembolso de $${totalRefunded.toFixed(2)}. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+            requestId: claim.request_id,
+            url: `/mis-solicitudes/${claim.request_id}`,
+          }),
+          sendRelydoNotification({
+            userId: claim.provider_id,
+            type: "claim_resolved",
+            title: "Reclamo resuelto",
+            message: `RELYDO resolvió el reclamo a favor del cliente. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+            requestId: claim.request_id,
+            url: `/trabajos/${claim.request_id}`,
+          }),
+        ]);
+      } catch (notificationError) {
+        console.warn(
+          "El reclamo fue resuelto, pero falló el envío de notificaciones:",
+          notificationError
         );
       }
 
@@ -1387,7 +1467,37 @@ export async function POST(request: NextRequest) {
     }
 
     // ======================================================
-    // 7C-6. RESPUESTA FINAL
+    // 7C-6. NOTIFICAR RESOLUCIÓN
+    // ======================================================
+
+    try {
+      await Promise.allSettled([
+        sendRelydoNotification({
+          userId: claim.customer_id,
+          type: "claim_resolved",
+          title: "Reclamo resuelto",
+          message: `RELYDO resolvió parcialmente el reclamo. Reembolso para ti: $${customerRefundAmount.toFixed(2)}. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+          requestId: claim.request_id,
+          url: `/mis-solicitudes/${claim.request_id}`,
+        }),
+        sendRelydoNotification({
+          userId: claim.provider_id,
+          type: "claim_resolved",
+          title: "Reclamo resuelto",
+          message: `RELYDO resolvió parcialmente el reclamo. Compensación para ti: $${providerAwardAmount.toFixed(2)}. ${serviceRequest.title || "Trabajo RELYDO"}.`,
+          requestId: claim.request_id,
+          url: `/trabajos/${claim.request_id}`,
+        }),
+      ]);
+    } catch (notificationError) {
+      console.warn(
+        "El reclamo fue resuelto, pero falló el envío de notificaciones:",
+        notificationError
+      );
+    }
+
+    // ======================================================
+    // 7C-7. RESPUESTA FINAL
     // ======================================================
 
     return NextResponse.json({

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { sendRelydoNotification } from "../../../lib/serverNotifications";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -163,6 +164,7 @@ export async function POST(
         )
         .select(`
           id,
+          title,
           customer_id,
           status,
           job_stage,
@@ -1024,6 +1026,37 @@ export async function POST(
         },
         { status: 500 }
       );
+    }
+
+    if (
+      serviceRequest.preferred_provider_id
+    ) {
+      try {
+        await sendRelydoNotification({
+          userId:
+            serviceRequest.preferred_provider_id,
+          type:
+            "job_cancelled_by_customer",
+          title:
+            "Trabajo cancelado por el cliente",
+          message:
+            `${serviceRequest.title || "Trabajo RELYDO"}: el cliente canceló el trabajo.${
+              providerAwardAmount > 0
+                ? ` Compensación por cancelación: $${providerAwardAmount.toFixed(2)}.`
+                : ""
+            }`,
+          requestId,
+          url:
+            `/trabajos/${requestId}`,
+        });
+      } catch (
+        notificationError
+      ) {
+        console.warn(
+          "La cancelación se completó, pero no pudimos notificar al profesional:",
+          notificationError
+        );
+      }
     }
 
     return NextResponse.json({

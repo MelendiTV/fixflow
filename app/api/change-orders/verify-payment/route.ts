@@ -9,6 +9,10 @@ import {
   createClient,
 } from "@supabase/supabase-js";
 
+import {
+  sendRelydoNotification,
+} from "../../../lib/serverNotifications";
+
 const stripe =
   new Stripe(
     process.env.STRIPE_SECRET_KEY!
@@ -578,7 +582,38 @@ export async function POST(
     }
 
     // ======================================================
-    // 11. RESPUESTA
+    // 11. NOTIFICAR AL PROFESIONAL
+    // ======================================================
+
+    try {
+      await sendRelydoNotification({
+        userId:
+          providerId,
+        type:
+          "change_order_paid",
+        title:
+          "Pago adicional confirmado",
+        message:
+          `El cliente pagó el cambio de presupuesto. Monto adicional: $${additionalAmount.toFixed(
+            2
+          )}. Neto adicional para ti: $${providerNetAmount.toFixed(
+            2
+          )}.`,
+        requestId,
+        url:
+          `/trabajos/${requestId}`,
+      });
+    } catch (
+      notificationError
+    ) {
+      console.warn(
+        "El pago adicional quedó confirmado, pero no pudimos notificar al profesional:",
+        notificationError
+      );
+    }
+
+    // ======================================================
+    // 12. RESPUESTA
     // ======================================================
 
     return NextResponse.json({

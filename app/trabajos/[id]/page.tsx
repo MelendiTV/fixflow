@@ -788,6 +788,78 @@ export default function TrabajoDetallePage() {
     };
   }, []);
 
+
+  async function notificarEventoTrabajo(
+    event: string,
+    extra: Record<string, unknown> = {}
+  ) {
+    try {
+      const {
+        data: {
+          session,
+        },
+      } =
+        await supabase.auth.getSession();
+
+      const accessToken =
+        session?.access_token;
+
+      if (!accessToken) {
+        console.warn(
+          "RELYDO: no encontramos access token para notificar el evento.",
+          event
+        );
+        return;
+      }
+
+      const response =
+        await fetch(
+          "/api/notifications/job-event",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+            body:
+              JSON.stringify({
+                event,
+                requestId: id,
+                ...extra,
+              }),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(() => null);
+
+      if (!response.ok) {
+        console.warn(
+          "RELYDO: el evento ocurrió, pero la notificación no pudo enviarse:",
+          event,
+          result
+        );
+        return;
+      }
+
+      console.log(
+        "RELYDO: notificación enviada:",
+        event,
+        result
+      );
+    } catch (notificationError) {
+      console.warn(
+        "RELYDO: error enviando notificación del evento:",
+        event,
+        notificationError
+      );
+    }
+  }
+
   async function cargarTodo() {
     setCargando(true);
     setError("");
@@ -1726,77 +1798,13 @@ export default function TrabajoDetallePage() {
         }
       );
 
-      /*
-        NOTIFICAR AL CLIENTE:
-        - guarda notificación en RELYDO
-        - dispara Realtime para el sonido
-        - envía Push a los dispositivos registrados
-
-        Si la notificación falla, NO revertimos
-        el cambio de etapa porque el estado del
-        trabajo ya fue actualizado correctamente.
-      */
-
-      try {
-        const {
-          data: {
-            session,
-          },
-        } =
-          await supabase.auth.getSession();
-
-        const accessToken =
-          session?.access_token;
-
-        if (accessToken) {
-          const notificationResponse =
-            await fetch(
-              "/api/push/job-status",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                  Authorization:
-                    `Bearer ${accessToken}`,
-                },
-                body:
-                  JSON.stringify({
-                    requestId:
-                      trabajo.id,
-                    stage:
-                      nuevaEtapa,
-                  }),
-              }
-            );
-
-          const notificationResult =
-            await notificationResponse
-              .json()
-              .catch(() => null);
-
-          if (!notificationResponse.ok) {
-            console.warn(
-              "La etapa se actualizó, pero no se pudo notificar al cliente:",
-              notificationResult
-            );
-          } else {
-            console.log(
-              "Notificación de etapa enviada:",
-              notificationResult
-            );
-          }
-        } else {
-          console.warn(
-            "La etapa se actualizó, pero no encontramos access token para notificar al cliente."
-          );
+      await notificarEventoTrabajo(
+        "provider_stage_changed",
+        {
+          stage:
+            nuevaEtapa,
         }
-      } catch (notificationError) {
-        console.warn(
-          "La etapa se actualizó, pero ocurrió un error notificando al cliente:",
-          notificationError
-        );
-      }
+      );
 
       const textos:
         Record<
@@ -2226,6 +2234,10 @@ export default function TrabajoDetallePage() {
         };
       });
 
+      await notificarEventoTrabajo(
+        "job_completed"
+      );
+
       // 3. La liberación del pago se procesa automáticamente
       // en el servidor cuando vence la retención de 36 horas.
 
@@ -2414,6 +2426,10 @@ export default function TrabajoDetallePage() {
         - rechaza la oferta de este profesional
         - registra este trabajo en provider_released_jobs
       */
+
+      await notificarEventoTrabajo(
+        "provider_released_job"
+      );
 
       router.replace(
         "/panel-profesional"
@@ -2870,6 +2886,14 @@ export default function TrabajoDetallePage() {
         ""
       );
 
+      await notificarEventoTrabajo(
+        "claim_provider_responded",
+        {
+          claimId:
+            reclamo.id,
+        }
+      );
+
       setMensaje(
         nuevasEvidencias.length ===
         1
@@ -3273,6 +3297,14 @@ export default function TrabajoDetallePage() {
       );
       setArchivosCambioPresupuesto(
         []
+      );
+
+      await notificarEventoTrabajo(
+        "change_order_requested",
+        {
+          changeOrderId:
+            cambio.id,
+        }
       );
 
       setMensaje(

@@ -1103,7 +1103,37 @@ export default function NotificationsBell({
 
               if (
                 nueva.type ===
-                "job_cancelled_by_customer"
+                "job_cancelled_by_customer" ||
+                nueva.type ===
+                "claim_opened" ||
+                nueva.type ===
+                "claim_created" ||
+                nueva.type ===
+                "provider_released_job"
+              ) {
+                await sonidoAlerta();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                  "change_order_accepted" ||
+                nueva.type ===
+                  "change_order_paid" ||
+                nueva.type ===
+                  "claim_resolved" ||
+                nueva.type ===
+                  "payment_released"
+              ) {
+                await sonidoPositivo();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                  "change_order_rejected" ||
+                nueva.type ===
+                  "change_order_cancelled"
               ) {
                 await sonidoAlerta();
                 return;
@@ -1152,7 +1182,49 @@ export default function NotificationsBell({
 
               if (
                 nueva.type ===
-                "provider_released_job"
+                  "provider_released_job" ||
+                nueva.type ===
+                  "job_cancelled_by_customer" ||
+                nueva.type ===
+                  "job_cancelled" ||
+                nueva.type ===
+                  "claim_opened" ||
+                nueva.type ===
+                  "claim_created"
+              ) {
+                await sonidoAlerta();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                  "change_order_requested" ||
+                nueva.type ===
+                  "change_order_created"
+              ) {
+                await sonidoAviso();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                  "change_order_accepted" ||
+                nueva.type ===
+                  "change_order_paid" ||
+                nueva.type ===
+                  "claim_resolved" ||
+                nueva.type ===
+                  "refund_processed"
+              ) {
+                await sonidoPositivo();
+                return;
+              }
+
+              if (
+                nueva.type ===
+                  "change_order_rejected" ||
+                nueva.type ===
+                  "change_order_cancelled"
               ) {
                 await sonidoAlerta();
                 return;
@@ -1406,7 +1478,33 @@ export default function NotificationsBell({
         return "🔄";
 
       case "job_cancelled_by_customer":
+      case "job_cancelled":
         return "🚫";
+
+      case "change_order_requested":
+      case "change_order_created":
+        return "🧾";
+
+      case "change_order_accepted":
+      case "change_order_paid":
+        return "💵";
+
+      case "change_order_rejected":
+      case "change_order_cancelled":
+        return "❌";
+
+      case "claim_opened":
+      case "claim_created":
+        return "⚠️";
+
+      case "claim_resolved":
+        return "⚖️";
+
+      case "payment_released":
+        return "💸";
+
+      case "refund_processed":
+        return "↩️";
 
       default:
         return "🔔";

@@ -1439,6 +1439,78 @@ export default function MisSolicitudDetallePage() {
     CARGAR DETALLE
   */
 
+
+  async function notificarEventoTrabajo(
+    event: string,
+    extra: Record<string, unknown> = {}
+  ) {
+    try {
+      const {
+        data: {
+          session,
+        },
+      } =
+        await supabase.auth.getSession();
+
+      const accessToken =
+        session?.access_token;
+
+      if (!accessToken) {
+        console.warn(
+          "RELYDO: no encontramos access token para notificar el evento.",
+          event
+        );
+        return;
+      }
+
+      const response =
+        await fetch(
+          "/api/notifications/job-event",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization:
+                `Bearer ${accessToken}`,
+            },
+            body:
+              JSON.stringify({
+                event,
+                requestId: id,
+                ...extra,
+              }),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(() => null);
+
+      if (!response.ok) {
+        console.warn(
+          "RELYDO: el evento ocurrió, pero la notificación no pudo enviarse:",
+          event,
+          result
+        );
+        return;
+      }
+
+      console.log(
+        "RELYDO: notificación enviada:",
+        event,
+        result
+      );
+    } catch (notificationError) {
+      console.warn(
+        "RELYDO: error enviando notificación del evento:",
+        event,
+        notificationError
+      );
+    }
+  }
+
   async function cargarDetalle(
     mostrarCarga = true
   ) {
@@ -2236,6 +2308,14 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           )
       );
 
+      await notificarEventoTrabajo(
+        "change_order_answered",
+        {
+          changeOrderId:
+            changeOrder.id,
+        }
+      );
+
       if (
         decision === "accepted"
       ) {
@@ -2982,6 +3062,14 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       await subirEvidenciasReclamo(
         claimData.id,
         user.id
+      );
+
+      await notificarEventoTrabajo(
+        "claim_created",
+        {
+          claimId:
+            claimData.id,
+        }
       );
 
       setClaim(claimData as JobClaim);
