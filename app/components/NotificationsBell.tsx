@@ -166,24 +166,90 @@ export default function NotificationsBell({
     }
 
     try {
-      const registration =
-        await navigator.serviceWorker.register(
-          "/sw.js"
-        );
+      if (
+        typeof Notification !== "undefined" &&
+        Notification.permission === "denied"
+      ) {
+        setPushActivo(false);
+        return;
+      }
 
-      await navigator.serviceWorker.ready;
+      await navigator.serviceWorker.register(
+        "/sw.js"
+      );
+
+      const registration =
+        await navigator.serviceWorker.ready;
 
       const subscription =
         await registration.pushManager.getSubscription();
 
-      setPushActivo(
-        Boolean(subscription)
-      );
+      if (!subscription) {
+        setPushActivo(false);
+        return;
+      }
+
+      /*
+        La suscripción Push pertenece al ORIGEN actual.
+        localhost y relydo.vercel.app son orígenes diferentes.
+        Si existe una suscripción en este origen, la sincronizamos
+        también con Supabase para evitar que el navegador esté
+        suscrito pero RELYDO no tenga el dispositivo registrado.
+      */
+
+      const json =
+        subscription.toJSON();
+
+      const endpoint =
+        subscription.endpoint;
+
+      const p256dh =
+        json.keys?.p256dh;
+
+      const auth =
+        json.keys?.auth;
+
+      if (
+        endpoint &&
+        p256dh &&
+        auth
+      ) {
+        const {
+          error: syncError,
+        } = await supabase
+          .from("push_subscriptions")
+          .upsert(
+            {
+              user_id: userId,
+              endpoint,
+              p256dh,
+              auth,
+              user_agent:
+                navigator.userAgent,
+              updated_at:
+                new Date().toISOString(),
+            },
+            {
+              onConflict: "endpoint",
+            }
+          );
+
+        if (syncError) {
+          console.warn(
+            "La suscripción Push existe en el navegador, pero no se pudo sincronizar con RELYDO:",
+            syncError
+          );
+        }
+      }
+
+      setPushActivo(true);
     } catch (error) {
       console.error(
         "Error comprobando Push:",
         error
       );
+
+      setPushActivo(false);
     }
   }
 
@@ -1492,6 +1558,13 @@ export default function NotificationsBell({
                   {pushError && (
                     <p className="mt-2 text-xs font-bold text-red-700">
                       {pushError}
+                    </p>
+                  )}
+
+                  {!pushActivo && (
+                    <p className="mt-2 text-[11px] leading-4 text-slate-500">
+                      La activación Push es independiente para cada dirección del sitio
+                      (por ejemplo, localhost y relydo.vercel.app).
                     </p>
                   )}
                 </div>

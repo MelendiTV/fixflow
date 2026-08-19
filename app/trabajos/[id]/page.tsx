@@ -1726,6 +1726,78 @@ export default function TrabajoDetallePage() {
         }
       );
 
+      /*
+        NOTIFICAR AL CLIENTE:
+        - guarda notificación en RELYDO
+        - dispara Realtime para el sonido
+        - envía Push a los dispositivos registrados
+
+        Si la notificación falla, NO revertimos
+        el cambio de etapa porque el estado del
+        trabajo ya fue actualizado correctamente.
+      */
+
+      try {
+        const {
+          data: {
+            session,
+          },
+        } =
+          await supabase.auth.getSession();
+
+        const accessToken =
+          session?.access_token;
+
+        if (accessToken) {
+          const notificationResponse =
+            await fetch(
+              "/api/push/job-status",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                  Authorization:
+                    `Bearer ${accessToken}`,
+                },
+                body:
+                  JSON.stringify({
+                    requestId:
+                      trabajo.id,
+                    stage:
+                      nuevaEtapa,
+                  }),
+              }
+            );
+
+          const notificationResult =
+            await notificationResponse
+              .json()
+              .catch(() => null);
+
+          if (!notificationResponse.ok) {
+            console.warn(
+              "La etapa se actualizó, pero no se pudo notificar al cliente:",
+              notificationResult
+            );
+          } else {
+            console.log(
+              "Notificación de etapa enviada:",
+              notificationResult
+            );
+          }
+        } else {
+          console.warn(
+            "La etapa se actualizó, pero no encontramos access token para notificar al cliente."
+          );
+        }
+      } catch (notificationError) {
+        console.warn(
+          "La etapa se actualizó, pero ocurrió un error notificando al cliente:",
+          notificationError
+        );
+      }
+
       const textos:
         Record<
           string,
