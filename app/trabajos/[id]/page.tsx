@@ -3330,7 +3330,7 @@ export default function TrabajoDetallePage() {
 
   function motivoChatBloqueado() {
     if (reclamoActivoChat) {
-      return "Chat bloqueado porque existe un reclamo activo. RELYDO Admin gestiona el caso desde este momento.";
+      return T("Chat bloqueado porque existe un reclamo activo. RELYDO Admin gestiona el caso desde este momento.", "Chat is blocked because there is an active claim. RELYDO Admin is managing the case from this point forward.");
     }
 
     if (
@@ -3338,20 +3338,20 @@ export default function TrabajoDetallePage() {
         "completed"
     ) {
       if (!trabajo.completed_at) {
-        return "El trabajo está completado y el chat ya está cerrado.";
+        return T("El trabajo está completado y el chat ya está cerrado.", "The job is completed and the chat is now closed.");
       }
 
-      return "El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.";
+      return T("El período de 12 horas después de completar el trabajo terminó. El historial permanece disponible.", "The 12-hour period after job completion has ended. The chat history remains available.");
     }
 
     if (
       trabajo?.status ===
         "cancelled"
     ) {
-      return "Este trabajo fue cancelado. El chat está cerrado.";
+      return T("Este trabajo fue cancelado. El chat está cerrado.", "This job was cancelled. The chat is closed.");
     }
 
-    return "El chat estará disponible cuando seas el profesional contratado.";
+    return T("El chat estará disponible cuando seas el profesional contratado.", "Chat will be available when you are the hired professional.");
   }
 
   async function enviarMensajeChat() {
@@ -3399,7 +3399,7 @@ export default function TrabajoDetallePage() {
 
       if (insertError) {
         throw new Error(
-          `No se pudo enviar el mensaje: ${insertError.message}`
+          `${T("No se pudo enviar el mensaje", "The message could not be sent")}: ${insertError.message}`
         );
       }
 
@@ -3426,7 +3426,7 @@ export default function TrabajoDetallePage() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudo enviar el mensaje."
+          : T("No se pudo enviar el mensaje.", "The message could not be sent.")
       );
     } finally {
       setEnviandoMensajeChat(false);
@@ -3437,7 +3437,7 @@ export default function TrabajoDetallePage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="rounded-2xl bg-white px-8 py-6 font-bold text-slate-700 shadow-xl">
-          Cargando trabajo...
+          {T("Cargando trabajo...", "Loading job...")}
         </div>
       </main>
     );
@@ -3451,7 +3451,7 @@ export default function TrabajoDetallePage() {
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-xl">
           <h1 className="text-2xl font-black text-red-700">
-            Trabajo no disponible
+            {T("Trabajo no disponible", "Job unavailable")}
           </h1>
 
           <p className="mt-4 text-slate-600">
@@ -3467,7 +3467,7 @@ export default function TrabajoDetallePage() {
             }
             className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-bold text-white"
           >
-            Volver al panel
+            {T("Volver al panel", "Back to dashboard")}
           </button>
         </div>
       </main>
@@ -3757,7 +3757,7 @@ export default function TrabajoDetallePage() {
           }
           className="mb-6 flex items-center gap-2 font-bold text-blue-700 transition hover:text-blue-900"
         >
-          ← Volver al panel
+          ← {T("Volver al panel", "Back to dashboard")}
         </button>
 
         {/* AVISO CANCELADO */}
