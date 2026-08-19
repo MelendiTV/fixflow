@@ -651,14 +651,14 @@ export default function Home() {
       {/* BENEFICIOS */}
       <section className="bg-white px-5 py-10 md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
             {beneficios.map((item, index) => (
               <div
                 key={item.title}
-                className="group rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-5 lg:p-6"
+                className="group rounded-[1.15rem] border border-slate-200 bg-white p-3 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:rounded-[1.35rem] sm:p-5 lg:p-6"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-base font-black text-white shadow-md shadow-blue-600/20 sm:h-11 sm:w-11 sm:text-lg">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-black text-white shadow-md shadow-blue-600/20 sm:h-11 sm:w-11 sm:rounded-xl sm:text-lg">
                     {item.icon}
                   </div>
 
@@ -667,11 +667,11 @@ export default function Home() {
                   </span>
                 </div>
 
-                <h3 className="mt-4 text-base font-black tracking-[-0.02em] sm:text-lg lg:text-xl">
+                <h3 className="mt-3 text-[15px] font-black leading-5 tracking-[-0.02em] sm:mt-4 sm:text-lg lg:text-xl">
                   {item.title}
                 </h3>
 
-                <p className="mt-2 text-sm leading-5 text-slate-600 sm:leading-6 lg:text-[15px]">
+                <p className="mt-1.5 text-[12px] leading-4.5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-6 lg:text-[15px]">
                   {item.description}
                 </p>
               </div>
@@ -777,11 +777,11 @@ export default function Home() {
                 {text.funcionaBadge}
               </p>
 
-              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">
+              <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] sm:mt-3 sm:text-4xl md:text-5xl">
                 {text.funcionaTitulo}
               </h2>
 
-              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+              <p className="mt-3 max-w-xl text-base leading-6 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">
                 {text.funcionaSub}
               </p>
             </div>
@@ -854,11 +854,11 @@ export default function Home() {
               {text.seguridadBadge}
             </p>
 
-            <h2 className="mt-3 max-w-3xl text-4xl font-black tracking-[-0.04em] md:text-6xl">
+            <h2 className="mt-2 max-w-3xl text-3xl font-black tracking-[-0.04em] sm:mt-3 sm:text-4xl md:text-6xl">
               {text.seguridadTitulo}
             </h2>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-100">
+            <p className="mt-3 max-w-2xl text-base leading-6 text-blue-100 sm:mt-6 sm:text-lg sm:leading-8">
               {text.seguridadDesc}
             </p>
 
@@ -873,13 +873,13 @@ export default function Home() {
                   key={title}
                   className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur"
                 >
-                  <div className="mb-4 h-1.5 w-10 rounded-full bg-blue-300" />
+                  <div className="mb-2.5 h-1 w-8 rounded-full bg-blue-300 sm:mb-4 sm:h-1.5 sm:w-10" />
 
-                  <h3 className="font-black">
+                  <h3 className="text-sm font-black sm:text-base">
                     {title}
                   </h3>
 
-                  <p className="mt-2 text-sm leading-6 text-blue-100/85">
+                  <p className="mt-1.5 text-[12px] leading-4.5 text-blue-100/85 sm:mt-2 sm:text-sm sm:leading-6">
                     {desc}
                   </p>
                 </div>
