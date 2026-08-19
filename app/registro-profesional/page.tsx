@@ -350,6 +350,16 @@ export default function RegistroProfesional() {
 
           <div className="bg-blue-700 px-8 py-7 text-white">
 
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="mb-5 inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/20"
+              aria-label={T("Regresar", "Go back")}
+            >
+              <span aria-hidden="true">←</span>
+              {T("Regresar", "Back")}
+            </button>
+
             <div className="flex flex-col gap-2">
 
               <div className="text-2xl font-black tracking-tight">
@@ -890,7 +900,7 @@ export default function RegistroProfesional() {
                       </h3>
 
                       <p className="mt-1 text-sm leading-6 text-amber-800">
-                        {T("Crear una cuenta no significa que RELYDO haya verificado al profesional. Después de confirmar tu correo deberás subir los documentos necesarios.", "Creating an account does not mean RELYDO has verified the professional. After confirming your email, you must upload the required documents.")}
+                        {T("Enviar documentos no significa que tu cuenta ya esté verificada. Tu estado permanecerá pendiente hasta que RELYDO complete la revisión.", "Submitting documents does not mean your account is already verified. Your status will remain pending until RELYDO completes the review.")}
                       </p>
 
                     </div>

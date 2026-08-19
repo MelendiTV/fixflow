@@ -1,6 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { useLanguage } from "@/app/components/LanguageProvider";
 
 type Servicio = {
@@ -8,11 +12,24 @@ type Servicio = {
   trade: string;
   icono: string;
   descripcion: string;
+  palabrasClave: string[];
 };
 
-export default function Servicios() {
+function normalizarTexto(texto: string) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function ServiciosContenido() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { language } = useLanguage();
+
+  const buscar =
+    searchParams.get("buscar") || "";
 
   const text =
     language === "es"
@@ -28,6 +45,12 @@ export default function Servicios() {
             "Describe el trabajo y encuentra un profesional adecuado para ayudarte.",
           solicitarTrabajo:
             "Solicitar un trabajo",
+          resultadoPara:
+            "Resultado para",
+          sinResultados:
+            "No encontramos un servicio que coincida con tu búsqueda.",
+          verTodos:
+            "Ver todos los servicios",
         }
       : {
           titulo: "Our services",
@@ -41,6 +64,12 @@ export default function Servicios() {
             "Describe the job and find the right professional to help you.",
           solicitarTrabajo:
             "Request a job",
+          resultadoPara:
+            "Result for",
+          sinResultados:
+            "We couldn't find a service matching your search.",
+          verTodos:
+            "View all services",
         };
 
   const servicios: Servicio[] =
@@ -52,6 +81,21 @@ export default function Servicios() {
             icono: "🔧",
             descripcion:
               "Fugas, tuberías, grifería, drenajes y reparaciones.",
+            palabrasClave: [
+              "plomeria",
+              "plomero",
+              "plomera",
+              "plumbing",
+              "plumber",
+              "tuberia",
+              "tuberias",
+              "fuga",
+              "fugas",
+              "grifo",
+              "griferia",
+              "drenaje",
+              "drenajes",
+            ],
           },
           {
             nombre: "Electricidad",
@@ -59,6 +103,18 @@ export default function Servicios() {
             icono: "⚡",
             descripcion:
               "Instalaciones, reparaciones y problemas eléctricos.",
+            palabrasClave: [
+              "electricidad",
+              "electricista",
+              "electrico",
+              "electrica",
+              "electrical",
+              "electrician",
+              "electric",
+              "cableado",
+              "enchufe",
+              "breaker",
+            ],
           },
           {
             nombre: "Pintura",
@@ -66,6 +122,16 @@ export default function Servicios() {
             icono: "🎨",
             descripcion:
               "Pintura interior, exterior y retoques.",
+            palabrasClave: [
+              "pintura",
+              "pintor",
+              "pintora",
+              "painting",
+              "painter",
+              "paint",
+              "pared",
+              "paredes",
+            ],
           },
           {
             nombre: "Jardinería",
@@ -73,6 +139,18 @@ export default function Servicios() {
             icono: "🌿",
             descripcion:
               "Mantenimiento, limpieza y cuidado de exteriores.",
+            palabrasClave: [
+              "jardineria",
+              "jardinero",
+              "jardinera",
+              "jardin",
+              "landscaping",
+              "landscaper",
+              "garden",
+              "yard",
+              "cesped",
+              "pasto",
+            ],
           },
           {
             nombre: "Limpieza",
@@ -80,6 +158,16 @@ export default function Servicios() {
             icono: "🧹",
             descripcion:
               "Limpieza residencial y otros servicios de limpieza.",
+            palabrasClave: [
+              "limpieza",
+              "limpiador",
+              "limpiadora",
+              "cleaning",
+              "cleaner",
+              "clean",
+              "casa",
+              "house cleaning",
+            ],
           },
           {
             nombre: "Aire acondicionado",
@@ -87,6 +175,18 @@ export default function Servicios() {
             icono: "❄️",
             descripcion:
               "HVAC, aire acondicionado, diagnóstico y mantenimiento.",
+            palabrasClave: [
+              "aire acondicionado",
+              "aire",
+              "ac",
+              "a/c",
+              "hvac",
+              "climatizacion",
+              "air conditioning",
+              "air conditioner",
+              "heating",
+              "cooling",
+            ],
           },
           {
             nombre: "Carpintería",
@@ -94,6 +194,15 @@ export default function Servicios() {
             icono: "🪚",
             descripcion:
               "Reparaciones, instalaciones y trabajos de carpintería.",
+            palabrasClave: [
+              "carpinteria",
+              "carpintero",
+              "carpintera",
+              "carpentry",
+              "carpenter",
+              "madera",
+              "wood",
+            ],
           },
           {
             nombre: "Mudanzas",
@@ -101,6 +210,16 @@ export default function Servicios() {
             icono: "📦",
             descripcion:
               "Ayuda con mudanzas, carga y traslado.",
+            palabrasClave: [
+              "mudanza",
+              "mudanzas",
+              "mover",
+              "moving",
+              "mover",
+              "movers",
+              "traslado",
+              "carga",
+            ],
           },
         ]
       : [
@@ -110,6 +229,19 @@ export default function Servicios() {
             icono: "🔧",
             descripcion:
               "Leaks, pipes, faucets, drains, and repairs.",
+            palabrasClave: [
+              "plumbing",
+              "plumber",
+              "plomeria",
+              "plomero",
+              "plomera",
+              "pipe",
+              "pipes",
+              "leak",
+              "leaks",
+              "faucet",
+              "drain",
+            ],
           },
           {
             nombre: "Electrical",
@@ -117,6 +249,16 @@ export default function Servicios() {
             icono: "⚡",
             descripcion:
               "Installations, repairs, and electrical issues.",
+            palabrasClave: [
+              "electrical",
+              "electrician",
+              "electric",
+              "electricidad",
+              "electricista",
+              "wiring",
+              "outlet",
+              "breaker",
+            ],
           },
           {
             nombre: "Painting",
@@ -124,6 +266,16 @@ export default function Servicios() {
             icono: "🎨",
             descripcion:
               "Interior painting, exterior painting, and touch-ups.",
+            palabrasClave: [
+              "painting",
+              "painter",
+              "paint",
+              "pintura",
+              "pintor",
+              "pintora",
+              "wall",
+              "walls",
+            ],
           },
           {
             nombre: "Landscaping",
@@ -131,6 +283,18 @@ export default function Servicios() {
             icono: "🌿",
             descripcion:
               "Outdoor maintenance, cleanup, and landscaping care.",
+            palabrasClave: [
+              "landscaping",
+              "landscaper",
+              "garden",
+              "gardener",
+              "yard",
+              "lawn",
+              "jardineria",
+              "jardinero",
+              "jardinera",
+              "cesped",
+            ],
           },
           {
             nombre: "Cleaning",
@@ -138,6 +302,15 @@ export default function Servicios() {
             icono: "🧹",
             descripcion:
               "Residential cleaning and other cleaning services.",
+            palabrasClave: [
+              "cleaning",
+              "cleaner",
+              "clean",
+              "house cleaning",
+              "limpieza",
+              "limpiador",
+              "limpiadora",
+            ],
           },
           {
             nombre: "Air conditioning",
@@ -145,6 +318,17 @@ export default function Servicios() {
             icono: "❄️",
             descripcion:
               "HVAC, air conditioning, diagnostics, and maintenance.",
+            palabrasClave: [
+              "hvac",
+              "air conditioning",
+              "air conditioner",
+              "ac",
+              "a/c",
+              "heating",
+              "cooling",
+              "aire acondicionado",
+              "aire",
+            ],
           },
           {
             nombre: "Carpentry",
@@ -152,6 +336,15 @@ export default function Servicios() {
             icono: "🪚",
             descripcion:
               "Repairs, installations, and carpentry work.",
+            palabrasClave: [
+              "carpentry",
+              "carpenter",
+              "wood",
+              "carpinteria",
+              "carpintero",
+              "carpintera",
+              "madera",
+            ],
           },
           {
             nombre: "Moving",
@@ -159,18 +352,92 @@ export default function Servicios() {
             icono: "📦",
             descripcion:
               "Help with moving, loading, and transportation.",
+            palabrasClave: [
+              "moving",
+              "mover",
+              "movers",
+              "move",
+              "mudanza",
+              "mudanzas",
+              "traslado",
+              "loading",
+            ],
           },
         ];
 
+  const busquedaNormalizada =
+    normalizarTexto(buscar);
+
+  const serviciosFiltrados =
+    !busquedaNormalizada
+      ? servicios
+      : servicios.filter((servicio) => {
+          const nombreNormalizado =
+            normalizarTexto(servicio.nombre);
+
+          const tradeNormalizado =
+            normalizarTexto(servicio.trade);
+
+          if (
+            nombreNormalizado.includes(
+              busquedaNormalizada
+            ) ||
+            busquedaNormalizada.includes(
+              nombreNormalizado
+            ) ||
+            tradeNormalizado.includes(
+              busquedaNormalizada
+            )
+          ) {
+            return true;
+          }
+
+          return servicio.palabrasClave.some(
+            (palabra) => {
+              const palabraNormalizada =
+                normalizarTexto(palabra);
+
+              return (
+                palabraNormalizada ===
+                  busquedaNormalizada ||
+                palabraNormalizada.includes(
+                  busquedaNormalizada
+                ) ||
+                busquedaNormalizada.includes(
+                  palabraNormalizada
+                )
+              );
+            }
+          );
+        });
+
   function verProfesionales(trade: string) {
     router.push(
-      `/profesionales?trade=${encodeURIComponent(trade)}`
+      `/profesionales?trade=${encodeURIComponent(
+        trade
+      )}`
     );
+  }
+
+  function verTodos() {
+    router.push("/servicios");
   }
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-12">
       <div className="mx-auto max-w-7xl">
+
+        {/* BOTÓN REGRESAR */}
+
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="mb-6 inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-sm transition hover:border-blue-300 hover:text-blue-700 hover:shadow-md"
+          aria-label={language === "es" ? "Regresar" : "Go back"}
+        >
+          <span aria-hidden="true" className="text-xl leading-none">←</span>
+          {language === "es" ? "Regresar" : "Back"}
+        </button>
 
         {/* HEADER */}
 
@@ -186,38 +453,79 @@ export default function Servicios() {
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">
             {text.descripcion}
           </p>
+
+          {buscar && (
+            <div className="mt-5">
+              <p className="text-sm font-semibold text-slate-600">
+                {text.resultadoPara}:{" "}
+                <span className="font-extrabold text-blue-700">
+                  “{buscar}”
+                </span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* SERVICIOS */}
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {servicios.map((servicio) => (
+        {serviciosFiltrados.length > 0 ? (
+          <div
+            className={`mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 ${
+              serviciosFiltrados.length === 1
+                ? "mx-auto max-w-md"
+                : "lg:grid-cols-4"
+            }`}
+          >
+            {serviciosFiltrados.map(
+              (servicio) => (
+                <button
+                  key={servicio.trade}
+                  type="button"
+                  onClick={() =>
+                    verProfesionales(
+                      servicio.trade
+                    )
+                  }
+                  className="group rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-md transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
+                    {servicio.icono}
+                  </div>
+
+                  <h2 className="mt-5 text-xl font-extrabold text-slate-900 group-hover:text-blue-700">
+                    {servicio.nombre}
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {servicio.descripcion}
+                  </p>
+
+                  <div className="mt-5 font-bold text-blue-700">
+                    {text.verProfesionales} →
+                  </div>
+                </button>
+              )
+            )}
+          </div>
+        ) : (
+          <div className="mx-auto mt-10 max-w-2xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-md">
+            <div className="text-4xl">
+              🔎
+            </div>
+
+            <h2 className="mt-4 text-xl font-extrabold text-slate-900">
+              {text.sinResultados}
+            </h2>
+
             <button
-              key={servicio.trade}
               type="button"
-              onClick={() =>
-                verProfesionales(servicio.trade)
-              }
-              className="group rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-md transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl"
+              onClick={verTodos}
+              className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-extrabold text-white transition hover:bg-blue-800"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
-                {servicio.icono}
-              </div>
-
-              <h2 className="mt-5 text-xl font-extrabold text-slate-900 group-hover:text-blue-700">
-                {servicio.nombre}
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {servicio.descripcion}
-              </p>
-
-              <div className="mt-5 font-bold text-blue-700">
-                {text.verProfesionales} →
-              </div>
+              {text.verTodos}
             </button>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* CTA */}
 
@@ -243,5 +551,23 @@ export default function Servicios() {
 
       </div>
     </main>
+  );
+}
+
+export default function Servicios() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-slate-100 px-4 py-12">
+          <div className="mx-auto max-w-7xl text-center">
+            <div className="text-3xl font-black text-blue-700">
+              RELYDO
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <ServiciosContenido />
+    </Suspense>
   );
 }

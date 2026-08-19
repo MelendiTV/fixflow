@@ -363,52 +363,51 @@ export default function Home() {
     },
   ];
 
+  const anuncios = [
+    "/ads/4b37dfc4-7eb9-4b5f-8bb5-40eb6a974310.png",
+    "/ads/4daa86f7-42c8-43f5-b5bd-4c6342dfb0dd.png",
+    "/ads/58d502c8-3a92-443d-bb21-d335f41c282b.png",
+    "/ads/8864c5e6-3489-4ca5-8772-87de324ccfc2.png",
+    "/ads/9018c8ec-b41a-4d2c-882a-cac2bd5c0fbe.png",
+    "/ads/24409dde-116e-49cc-a962-70f4ca6595df.png",
+    "/ads/274974a4-c1f1-49e8-9ff6-cbd13ad4b9f7.png",
+    "/ads/ads-2.jpeg",
+    "/ads/ads-5.jpeg",
+  ];
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-blue-500 bg-blue-600 text-white shadow-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+    <main className="min-h-screen overflow-x-hidden bg-white text-slate-950">
+      {/* HEADER PREMIUM */}
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 lg:px-8">
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="text-2xl font-black tracking-wide md:text-3xl"
+            className="flex items-center gap-3"
           >
-            RELYDO
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-xl font-black text-white shadow-lg shadow-blue-600/20">
+              R
+            </span>
+            <span className="text-2xl font-black tracking-[0.06em] text-slate-950 md:text-3xl">
+              RELY<span className="text-blue-600">DO</span>
+            </span>
           </button>
 
-          <nav className="hidden items-center gap-6 lg:flex">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="font-medium hover:text-blue-100"
-            >
+          <nav className="hidden items-center gap-8 lg:flex">
+            <button onClick={() => router.push("/")} className="text-sm font-bold text-slate-700 transition hover:text-blue-600">
               {text.inicio}
             </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/servicios")}
-              className="font-medium hover:text-blue-100"
-            >
+            <button onClick={() => router.push("/servicios")} className="text-sm font-bold text-slate-700 transition hover:text-blue-600">
               {text.servicios}
             </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/profesionales")}
-              className="font-medium hover:text-blue-100"
-            >
+            <button onClick={() => router.push("/profesionales")} className="text-sm font-bold text-slate-700 transition hover:text-blue-600">
               {text.profesionales}
             </button>
-
             <button
-              type="button"
               onClick={() =>
-                document
-                  .getElementById("como-funciona")
-                  ?.scrollIntoView({ behavior: "smooth" })
+                document.getElementById("como-funciona")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="font-medium hover:text-blue-100"
+              className="text-sm font-bold text-slate-700 transition hover:text-blue-600"
             >
               {text.comoFunciona}
             </button>
@@ -418,15 +417,14 @@ export default function Home() {
             <button
               type="button"
               onClick={() => router.push("/login-cliente")}
-              className="rounded-xl bg-white px-3 py-2 text-sm font-extrabold text-blue-700 shadow-sm transition hover:bg-blue-50 sm:px-5 sm:text-base"
+              className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 transition hover:bg-slate-100 sm:px-5"
             >
               {text.iniciarSesion}
             </button>
-
             <button
               type="button"
               onClick={() => router.push("/registro-cliente")}
-              className="hidden rounded-xl border border-white px-5 py-2 font-extrabold text-white transition hover:bg-white hover:text-blue-700 sm:block"
+              className="hidden rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700 sm:block"
             >
               {text.registrarse}
             </button>
@@ -435,415 +433,350 @@ export default function Home() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-slate-50">
-        <div className="absolute -left-40 top-10 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl" />
-        <div className="absolute -right-40 top-20 h-80 w-80 rounded-full bg-indigo-200/40 blur-3xl" />
+      <section className="relative isolate overflow-hidden bg-[#03112d]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(37,99,235,0.36),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(59,130,246,0.22),transparent_24%),linear-gradient(135deg,#020817_0%,#061a42_55%,#03112d_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/20 to-transparent" />
 
-        <div className="relative mx-auto max-w-7xl px-5 py-14 text-center md:py-20">
-          <div className="mx-auto inline-flex rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-black tracking-[0.18em] text-blue-700 shadow-sm sm:text-sm">
-            {text.badge}
-          </div>
+        <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8 lg:py-24">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-4 py-2 text-xs font-black tracking-[0.18em] text-blue-200 backdrop-blur sm:text-sm">
+              <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_18px_rgba(96,165,250,0.9)]" />
+              {text.badge}
+            </div>
 
-          <h1 className="mx-auto mt-6 max-w-5xl text-4xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
-            {text.titulo1}
-            <span className="block text-blue-600">{text.titulo2}</span>
-          </h1>
+            <h1 className="mt-7 text-5xl font-black leading-[0.98] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl">
+              {text.titulo1}
+              <span className="mt-2 block bg-gradient-to-r from-blue-300 via-blue-500 to-cyan-300 bg-clip-text text-transparent">
+                {text.titulo2}
+              </span>
+            </h1>
 
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg md:text-xl">
-            {text.subtitulo}
-          </p>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl">
+              {text.subtitulo}
+            </p>
 
-          <div className="mx-auto mt-8 flex max-w-xl flex-col justify-center gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => router.push("/registro-cliente")}
-              className="rounded-xl bg-blue-600 px-7 py-4 font-black text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
-            >
-              {text.cliente}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/registro-profesional")}
-              className="rounded-xl border-2 border-slate-300 bg-white px-7 py-4 font-black text-slate-800 transition hover:border-blue-600 hover:text-blue-700"
-            >
-              {text.profesional}
-            </button>
-          </div>
-
-          {/* BUSCADOR */}
-          <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-200/60">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <input
-                type="text"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    buscarServicio();
-                  }
-                }}
-                placeholder={text.placeholder}
-                className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-base text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white"
-              />
-
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={buscarServicio}
-                className="rounded-xl bg-blue-600 px-8 py-4 font-black text-white transition hover:bg-blue-700"
+                onClick={() => router.push("/registro-cliente")}
+                className="rounded-2xl bg-blue-600 px-7 py-4 font-black text-white shadow-2xl shadow-blue-600/30 transition hover:-translate-y-0.5 hover:bg-blue-500"
               >
-                {text.buscar}
+                {text.cliente}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/registro-profesional")}
+                className="rounded-2xl border border-white/20 bg-white/10 px-7 py-4 font-black text-white backdrop-blur transition hover:bg-white/15"
+              >
+                {text.profesional}
               </button>
             </div>
+
+            <div className="mt-9 rounded-2xl border border-white/10 bg-white/8 p-2 shadow-2xl backdrop-blur">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") buscarServicio();
+                  }}
+                  placeholder={text.placeholder}
+                  className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white px-5 py-4 text-slate-950 outline-none placeholder:text-slate-400"
+                />
+                <button
+                  type="button"
+                  onClick={buscarServicio}
+                  className="rounded-xl bg-blue-600 px-7 py-4 font-black text-white transition hover:bg-blue-500"
+                >
+                  {text.buscar}
+                </button>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm font-semibold text-slate-400">{text.categorias}</p>
           </div>
 
-          <p className="mt-5 text-sm font-medium text-slate-500 sm:text-base">
-            {text.categorias}
-          </p>
+          <div className="relative">
+            <div className="absolute -inset-8 rounded-[3rem] bg-blue-500/15 blur-3xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-white/5 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.45)] backdrop-blur">
+              <img
+                src={anuncios[1]}
+                alt="RELYDO"
+                className="block h-auto w-full rounded-[1.55rem]"
+              />
+            </div>
 
-          <div className="mx-auto mt-6 flex max-w-xl flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => router.push("/solicitar-trabajo")}
-              className="flex-1 rounded-xl bg-slate-950 px-5 py-3 font-bold text-white transition hover:bg-slate-800"
-            >
-              {text.solicitarTrabajo}
-            </button>
+            <div className="absolute -bottom-6 -left-3 hidden rounded-2xl border border-white/15 bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur md:block">
+              <p className="text-xs font-black tracking-[0.16em] text-blue-300">RELYDO TRUST</p>
+              <p className="mt-1 text-sm font-bold">Verified • Protected • Connected</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            <button
-              type="button"
-              onClick={() => router.push("/mis-solicitudes")}
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-800 transition hover:border-blue-500 hover:text-blue-700"
-            >
-              {text.misSolicitudes}
-            </button>
+      {/* TRUST BAR */}
+      <section className="relative z-10 -mt-1 border-b border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-[1440px] divide-y divide-slate-200 px-5 md:grid-cols-4 md:divide-x md:divide-y-0 lg:px-8">
+          {[
+            [text.verificados, "01"],
+            [text.presupuestos, "02"],
+            [text.pagos, "03"],
+            [text.soporte, "04"],
+          ].map(([label, number]) => (
+            <div key={label} className="flex items-center gap-4 px-4 py-6 md:px-6">
+              <span className="text-2xl font-black text-blue-600">{number}</span>
+              <span className="text-sm font-black text-slate-800">{label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRESENTACIÓN DE MARCA */}
+      <section className="bg-[#f6f8fc] px-5 py-16 md:py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-black tracking-[0.22em] text-blue-600">THE RELYDO EXPERIENCE</p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.035em] text-slate-950 md:text-5xl">
+              {text.confianzaTitulo}
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-600">{text.confianzaSub}</p>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-12">
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 lg:col-span-7">
+              <img src={anuncios[0]} alt="RELYDO presentación" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
+            </div>
+
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[#061632] p-2 shadow-xl shadow-slate-200/70 lg:col-span-5">
+              <img src={anuncios[2]} alt="Identidad RELYDO" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
+            </div>
+
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 lg:col-span-5">
+              <img src={anuncios[3]} alt="RELYDO clientes" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
+            </div>
+
+            <div className="rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white shadow-2xl shadow-blue-600/20 lg:col-span-7 lg:p-10">
+              <p className="text-sm font-black tracking-[0.18em] text-blue-100">ONE PLATFORM</p>
+              <h3 className="mt-3 text-3xl font-black tracking-[-0.025em] md:text-4xl">{text.dosLados}</h3>
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-blue-50">{text.dosLadosSub}</p>
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <button
+                  onClick={() => router.push("/solicitar-trabajo")}
+                  className="rounded-2xl bg-white px-6 py-4 font-black text-blue-700 transition hover:bg-blue-50"
+                >
+                  {text.solicitarTrabajo}
+                </button>
+                <button
+                  onClick={() => router.push("/mis-solicitudes")}
+                  className="rounded-2xl border border-white/30 bg-white/10 px-6 py-4 font-black text-white transition hover:bg-white/15"
+                >
+                  {text.misSolicitudes}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* BENEFICIOS */}
-      <section className="bg-white px-5 py-16 md:py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
-              {text.confianzaTitulo}
-            </h2>
-
-            <p className="mt-4 text-lg text-slate-600">
-              {text.confianzaSub}
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {beneficios.map((item) => (
+      <section className="bg-white px-5 py-16 md:py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {beneficios.map((item, index) => (
               <div
                 key={item.title}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+                className="group rounded-[1.75rem] border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-black text-white">
-                  {item.icon}
+                <div className="flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-600/20">
+                    {item.icon}
+                  </div>
+                  <span className="text-sm font-black text-slate-300">0{index + 1}</span>
                 </div>
-
-                <h3 className="mt-5 text-xl font-black">
-                  {item.title}
-                </h3>
-
-                <p className="mt-2 leading-7 text-slate-600">
-                  {item.description}
-                </p>
+                <h3 className="mt-6 text-xl font-black tracking-[-0.02em]">{item.title}</h3>
+                <p className="mt-3 leading-7 text-slate-600">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CLIENTE / PROFESIONAL */}
-      <section className="px-5 py-16 md:py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <h2 className="text-3xl font-black md:text-4xl">
-              {text.dosLados}
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-lg text-slate-600">
-              {text.dosLadosSub}
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
-            {/* CLIENTE */}
-            <div className="rounded-3xl bg-blue-600 p-7 text-white shadow-xl md:p-10">
-              <p className="text-sm font-black tracking-[0.18em] text-blue-100">
-                {text.paraClientes}
-              </p>
-
-              <h3 className="mt-3 text-3xl font-black">
-                {text.clienteTitulo}
-              </h3>
-
-              <p className="mt-4 max-w-xl leading-7 text-blue-50">
-                {text.clienteDesc}
-              </p>
-
-              <div className="mt-7 space-y-3 font-semibold">
-                <p>✓ {text.clientePunto1}</p>
-                <p>✓ {text.clientePunto2}</p>
-                <p>✓ {text.clientePunto3}</p>
-                <p>✓ {text.clientePunto4}</p>
+      {/* CLIENTES + PROFESIONALES */}
+      <section className="bg-[#020817] px-5 py-16 text-white md:py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid gap-8 xl:grid-cols-2">
+            <article className="overflow-hidden rounded-[2.25rem] border border-white/10 bg-gradient-to-br from-[#08265d] to-[#04122e] shadow-2xl">
+              <div className="p-8 md:p-10">
+                <p className="text-sm font-black tracking-[0.2em] text-blue-300">{text.paraClientes}</p>
+                <h2 className="mt-3 text-4xl font-black tracking-[-0.035em]">{text.clienteTitulo}</h2>
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">{text.clienteDesc}</p>
+                <div className="mt-7 grid gap-3 text-sm font-bold text-slate-100 sm:grid-cols-2">
+                  <p>✓ {text.clientePunto1}</p>
+                  <p>✓ {text.clientePunto2}</p>
+                  <p>✓ {text.clientePunto3}</p>
+                  <p>✓ {text.clientePunto4}</p>
+                </div>
+                <button
+                  onClick={() => router.push("/registro-cliente")}
+                  className="mt-8 rounded-2xl bg-white px-6 py-4 font-black text-blue-700 transition hover:bg-blue-50"
+                >
+                  {text.crearCliente}
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => router.push("/registro-cliente")}
-                className="mt-8 rounded-xl bg-white px-6 py-4 font-black text-blue-700 transition hover:bg-blue-50"
-              >
-                {text.crearCliente}
-              </button>
-            </div>
-
-            {/* PROFESIONAL */}
-            <div className="rounded-3xl bg-slate-950 p-7 text-white shadow-xl md:p-10">
-              <p className="text-sm font-black tracking-[0.18em] text-blue-400">
-                {text.paraPros}
-              </p>
-
-              <h3 className="mt-3 text-3xl font-black">
-                {text.proTitulo}
-              </h3>
-
-              <p className="mt-4 max-w-xl leading-7 text-slate-300">
-                {text.proDesc}
-              </p>
-
-              <div className="mt-7 space-y-3 font-semibold text-slate-100">
-                <p>✓ {text.proPunto1}</p>
-                <p>✓ {text.proPunto2}</p>
-                <p>✓ {text.proPunto3}</p>
-                <p>✓ {text.proPunto4}</p>
+              <div className="border-t border-white/10 bg-black/15 p-3">
+                <img src={anuncios[4]} alt="RELYDO para clientes" className="block h-auto w-full rounded-[1.55rem]" loading="lazy" />
               </div>
+            </article>
 
-              <button
-                type="button"
-                onClick={() => router.push("/registro-profesional")}
-                className="mt-8 rounded-xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-700"
-              >
-                {text.crearPro}
-              </button>
-            </div>
+            <article className="overflow-hidden rounded-[2.25rem] border border-white/10 bg-gradient-to-br from-slate-900 to-[#07142c] shadow-2xl">
+              <div className="p-8 md:p-10">
+                <p className="text-sm font-black tracking-[0.2em] text-blue-400">{text.paraPros}</p>
+                <h2 className="mt-3 text-4xl font-black tracking-[-0.035em]">{text.proTitulo}</h2>
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">{text.proDesc}</p>
+                <div className="mt-7 grid gap-3 text-sm font-bold text-slate-100 sm:grid-cols-2">
+                  <p>✓ {text.proPunto1}</p>
+                  <p>✓ {text.proPunto2}</p>
+                  <p>✓ {text.proPunto3}</p>
+                  <p>✓ {text.proPunto4}</p>
+                </div>
+                <button
+                  onClick={() => router.push("/registro-profesional")}
+                  className="mt-8 rounded-2xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-500"
+                >
+                  {text.crearPro}
+                </button>
+              </div>
+              <div className="border-t border-white/10 bg-black/15 p-3">
+                <img src={anuncios[7]} alt="RELYDO para profesionales" className="block h-auto w-full rounded-[1.55rem]" loading="lazy" />
+              </div>
+            </article>
           </div>
         </div>
       </section>
 
       {/* CÓMO FUNCIONA */}
-      <section
-        id="como-funciona"
-        className="bg-white px-5 py-16 md:py-20"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <p className="text-sm font-black tracking-[0.2em] text-blue-600">
-              {text.funcionaBadge}
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black md:text-4xl">
-              {text.funcionaTitulo}
-            </h2>
-
-            <p className="mx-auto mt-3 max-w-2xl text-lg text-slate-600">
-              {text.funcionaSub}
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {pasos.map((paso) => (
-              <div
-                key={paso.number}
-                className="relative rounded-2xl border border-slate-200 p-6"
-              >
-                <span className="text-4xl font-black text-blue-100">
-                  {paso.number}
-                </span>
-
-                <h3 className="mt-3 text-xl font-black">
-                  {paso.title}
-                </h3>
-
-                <p className="mt-3 leading-7 text-slate-600">
-                  {paso.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PUBLICIDAD */}
-      <section className="px-5 py-16 md:py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center">
-            <p className="text-sm font-black tracking-[0.2em] text-blue-600">
-              RELYDO
-            </p>
-
-            <h2 className="mt-2 text-3xl font-black md:text-4xl">
-              {text.destacado}
-            </h2>
-
-            <p className="mt-3 text-slate-600">
-              {text.destacadoSub}
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {[1, 2, 3].map((numero) => (
-              <div
-                key={numero}
-                className="group relative aspect-[4/3] overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 shadow-md"
-              >
-                <img
-                  src={`/ads/relydo-ad-${numero}.png`}
-                  alt={`RELYDO ${numero}`}
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-
-                <div className="absolute inset-0 -z-10 flex items-center justify-center">
-                  <span className="font-bold text-slate-400">
-                    RELYDO
-                  </span>
+      <section id="como-funciona" className="bg-white px-5 py-16 md:py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="text-sm font-black tracking-[0.2em] text-blue-600">{text.funcionaBadge}</p>
+              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">{text.funcionaTitulo}</h2>
+              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">{text.funcionaSub}</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {pasos.map((paso) => (
+                <div key={paso.number} className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
+                  <div className="text-4xl font-black text-blue-200">{paso.number}</div>
+                  <h3 className="mt-3 text-xl font-black">{paso.title}</h3>
+                  <p className="mt-3 leading-7 text-slate-600">{paso.description}</p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-[2.25rem] border border-slate-200 bg-slate-950 p-2 shadow-2xl">
+            <img src={anuncios[5]} alt="RELYDO app" className="block h-auto w-full rounded-[1.85rem]" loading="lazy" />
           </div>
         </div>
       </section>
 
       {/* SEGURIDAD */}
-      <section className="bg-slate-950 px-5 py-16 text-white md:py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-            <div>
-              <p className="text-sm font-black tracking-[0.2em] text-blue-400">
-                {text.seguridadBadge}
-              </p>
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-800 to-[#02102d] px-5 py-16 text-white md:py-24 lg:px-8">
+        <div className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
+        <div className="absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-blue-300/10 blur-3xl" />
 
-              <h2 className="mt-3 max-w-2xl text-3xl font-black leading-tight md:text-5xl">
-                {text.seguridadTitulo}
-              </h2>
+        <div className="relative mx-auto grid max-w-[1440px] gap-10 xl:grid-cols-[1fr_0.95fr] xl:items-center">
+          <div>
+            <p className="text-sm font-black tracking-[0.2em] text-blue-200">{text.seguridadBadge}</p>
+            <h2 className="mt-3 max-w-3xl text-4xl font-black tracking-[-0.04em] md:text-6xl">
+              {text.seguridadTitulo}
+            </h2>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-100">{text.seguridadDesc}</p>
 
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-                {text.seguridadDesc}
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="mt-9 grid gap-4 sm:grid-cols-2">
               {[
                 [text.seguro1, text.seguro1Desc],
                 [text.seguro2, text.seguro2Desc],
                 [text.seguro3, text.seguro3Desc],
                 [text.seguro4, text.seguro4Desc],
               ].map(([title, desc]) => (
-                <div
-                  key={title}
-                  className="rounded-2xl border border-slate-800 bg-slate-900 p-5"
-                >
-                  <div className="mb-3 h-2 w-10 rounded-full bg-blue-500" />
-
+                <div key={title} className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+                  <div className="mb-4 h-1.5 w-10 rounded-full bg-blue-300" />
                   <h3 className="font-black">{title}</h3>
-
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
-                    {desc}
-                  </p>
+                  <p className="mt-2 text-sm leading-6 text-blue-100/85">{desc}</p>
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+            <img src={anuncios[6]} alt="RELYDO seguridad" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
           </div>
         </div>
       </section>
 
       {/* CTA FINAL */}
-      <section className="px-5 py-16 md:py-24">
-        <div className="mx-auto max-w-5xl rounded-[2rem] bg-blue-600 px-6 py-12 text-center text-white shadow-2xl shadow-blue-600/20 md:px-12 md:py-16">
-          <p className="text-sm font-black tracking-[0.2em] text-blue-100">
-            {text.ctaBadge}
-          </p>
+      <section className="bg-[#f6f8fc] px-5 py-16 md:py-24 lg:px-8">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid overflow-hidden rounded-[2.5rem] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] xl:grid-cols-[0.9fr_1.1fr]">
+            <div className="flex flex-col justify-center p-8 md:p-12 xl:p-14">
+              <p className="text-sm font-black tracking-[0.2em] text-blue-600">{text.ctaBadge}</p>
+              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">{text.ctaTitulo}</h2>
+              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">{text.ctaDesc}</p>
 
-          <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-black md:text-5xl">
-            {text.ctaTitulo}
-          </h2>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <button
+                  onClick={() => router.push("/registro-cliente")}
+                  className="rounded-2xl bg-blue-600 px-7 py-4 font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+                >
+                  {text.ctaCliente}
+                </button>
+                <button
+                  onClick={() => router.push("/registro-profesional")}
+                  className="rounded-2xl border border-slate-300 bg-white px-7 py-4 font-black text-slate-800 transition hover:border-blue-500 hover:text-blue-700"
+                >
+                  {text.ctaPro}
+                </button>
+              </div>
+            </div>
 
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-blue-50">
-            {text.ctaDesc}
-          </p>
-
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={() => router.push("/registro-cliente")}
-              className="rounded-xl bg-white px-7 py-4 font-black text-blue-700 transition hover:bg-blue-50"
-            >
-              {text.ctaCliente}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push("/registro-profesional")}
-              className="rounded-xl border-2 border-white px-7 py-4 font-black text-white transition hover:bg-white hover:text-blue-700"
-            >
-              {text.ctaPro}
-            </button>
+            <div className="bg-[#07152f] p-3">
+              <img src={anuncios[8]} alt="RELYDO" className="block h-full min-h-[320px] w-full rounded-[1.8rem] object-cover object-center" loading="lazy" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer
-        id="contacto"
-        className="border-t border-slate-200 bg-white px-5 py-12"
-      >
-        <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 lg:grid-cols-4">
+      <footer id="contacto" className="border-t border-slate-200 bg-white px-5 py-12 lg:px-8">
+        <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="text-2xl font-black text-blue-600"
+              className="text-2xl font-black tracking-[0.05em] text-slate-950"
             >
-              RELYDO
+              RELY<span className="text-blue-600">DO</span>
             </button>
-
-            <p className="mt-4 max-w-xs leading-7 text-slate-600">
-              {text.footerDesc}
-            </p>
+            <p className="mt-4 max-w-xs leading-7 text-slate-600">{text.footerDesc}</p>
           </div>
 
           <div>
             <h3 className="font-black">{text.footerPlataforma}</h3>
             <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <button onClick={() => router.push("/")}>
-                {text.footerInicio}
-              </button>
-              <button onClick={() => router.push("/servicios")}>
-                {text.footerServicios}
-              </button>
-              <button onClick={() => router.push("/profesionales")}>
-                {text.footerProfesionales}
-              </button>
+              <button onClick={() => router.push("/")}>{text.footerInicio}</button>
+              <button onClick={() => router.push("/servicios")}>{text.footerServicios}</button>
+              <button onClick={() => router.push("/profesionales")}>{text.footerProfesionales}</button>
             </div>
           </div>
 
           <div>
             <h3 className="font-black">{text.footerCuenta}</h3>
             <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <button onClick={() => router.push("/login-cliente")}>
-                {text.footerLogin}
-              </button>
-              <button onClick={() => router.push("/registro-cliente")}>
-                {text.footerCliente}
-              </button>
-              <button onClick={() => router.push("/registro-profesional")}>
-                {text.footerPro}
-              </button>
+              <button onClick={() => router.push("/login-cliente")}>{text.footerLogin}</button>
+              <button onClick={() => router.push("/registro-cliente")}>{text.footerCliente}</button>
+              <button onClick={() => router.push("/registro-profesional")}>{text.footerPro}</button>
             </div>
           </div>
 
@@ -856,7 +789,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mx-auto mt-10 max-w-7xl border-t border-slate-200 pt-6 text-center text-sm text-slate-500">
+        <div className="mx-auto mt-10 max-w-[1440px] border-t border-slate-200 pt-6 text-center text-sm text-slate-500">
           © {new Date().getFullYear()} RELYDO. {text.derechos}
         </div>
       </footer>
