@@ -401,13 +401,6 @@ export default function RegistroProfesional() {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => router.replace("/login-profesional")}
-              className="mt-7 w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800"
-            >
-              {T("Ir a iniciar sesión", "Go to sign in")}
-            </button>
           </div>
         </div>
       </main>
