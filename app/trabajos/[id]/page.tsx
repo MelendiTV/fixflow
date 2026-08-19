@@ -3671,7 +3671,7 @@ export default function TrabajoDetallePage() {
     {
       numero: 1,
       icono: "🤝",
-      titulo: T(T(T("Contratado", "Hired"), "Hired"), "Hired"),
+      titulo: T("Contratado", "Hired"),
       texto:
         T("Aceptaste el trabajo", "You accepted the job"),
     },
@@ -3693,14 +3693,14 @@ export default function TrabajoDetallePage() {
       numero: 4,
       icono: "🛠️",
       titulo:
-        T(T(T("Trabajo iniciado", "Work started"), "Work started"), "Work started"),
+        T("Trabajo iniciado", "Work started"),
       texto:
         T("Comenzaste el trabajo", "You started the job"),
     },
     {
       numero: 5,
       icono: "✅",
-      titulo: T(T(T("Completado", "Completed"), "Completed"), "Completed"),
+      titulo: T("Completado", "Completed"),
       texto:
         T("Trabajo terminado", "Job finished"),
     },
@@ -3926,14 +3926,14 @@ export default function TrabajoDetallePage() {
                   }`}
                 >
                   {cancelado
-                    ? T(T("Cancelado", "Cancelled"), "Cancelled")
+                    ? T("Cancelado", "Cancelled")
                     : trabajo.status ===
                       "completed"
-                    ? T(T("Completado", "Completed"), "Completed")
+                    ? T("Completado", "Completed")
                     : trabajo.status ===
                       "in_progress"
-                    ? T(T("En progreso", "In progress"), "In progress")
-                    : T(T("Abierto", "Open"), "Open")}
+                    ? T("En progreso", "In progress")
+                    : T("Abierto", "Open")}
                 </span>
 
                 {contratado && (
@@ -4131,14 +4131,14 @@ export default function TrabajoDetallePage() {
                             <h3 className="text-xl font-black text-blue-950">
                               {etapaActual ===
                               1
-                                ? T(T("Trabajo contratado", "Job hired"), "Job hired")
+                                ? T("Trabajo contratado", "Job hired")
                                 : etapaActual ===
                                   2
-                                ? T(T("Vas en camino", "You are on the way"), "You are on the way")
+                                ? T("Vas en camino", "You are on the way")
                                 : etapaActual ===
                                   3
-                                ? T(T("Ya llegaste", "You arrived"), "You arrived")
-                                : T(T("Trabajo iniciado", "Work started"), "Work started")}
+                                ? T("Ya llegaste", "You arrived")
+                                : T("Trabajo iniciado", "Work started")}
                             </h3>
 
                             <p className="mt-1 text-sm leading-6 text-blue-900">
@@ -4278,7 +4278,7 @@ export default function TrabajoDetallePage() {
                                         onClick={guardarEvidenciaFinal}
                                         className="w-full rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
-                                        {subiendoEvidenciaFinal ? T(T("Guardando evidencia...", "Saving evidence..."), "Saving evidence...") : T(T("Guardar evidencia", "Save evidence"), "Save evidence")}
+                                        {subiendoEvidenciaFinal ? T("Guardando evidencia...", "Saving evidence...") : T("Guardar evidencia", "Save evidence")}
                                       </button>
                                     </div>
                                   )}
@@ -4287,7 +4287,7 @@ export default function TrabajoDetallePage() {
                                 <div className="border-t border-slate-100 bg-slate-50/70 p-5 md:border-l md:border-t-0 md:p-6">
                                   <div className="flex items-center gap-3">
                                     <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-xl">🛡️</span>
-                                    <h3 className="font-black text-slate-950">Consejo RELYDO</h3>
+                                    <h3 className="font-black text-slate-950">{T("Consejo RELYDO", "RELYDO tip")}</h3>
                                   </div>
                                   <p className="mt-4 text-sm leading-7 text-slate-600">
                                     {T("La evidencia protege tanto al cliente como a ti. Asegúrate de mostrar claramente el resultado final.", "The evidence protects both the customer and you. Make sure the final result is clearly shown.")}
@@ -4317,10 +4317,10 @@ export default function TrabajoDetallePage() {
                                 <span>
                                   <span className="block font-black">
                                     {cambioPresupuestoPendiente
-                                      ? T(T("Cambio de presupuesto pendiente", "Budget change pending"), "Budget change pending")
+                                      ? T("Cambio de presupuesto pendiente", "Budget change pending")
                                       : reclamoActivo
-                                      ? T(T("Cambio bloqueado por reclamo", "Change blocked by claim"), "Change blocked by claim")
-                                      : T(T("Solicitar cambio de presupuesto", "Request budget change"), "Request budget change")}
+                                      ? T("Cambio bloqueado por reclamo", "Change blocked by claim")
+                                      : T("Solicitar cambio de presupuesto", "Request budget change")}
                                   </span>
                                   {!cambioPresupuestoPendiente && !reclamoActivo && (
                                     <span className="mt-0.5 block text-sm font-medium text-slate-600">
@@ -4349,12 +4349,12 @@ export default function TrabajoDetallePage() {
                               }`}
                             >
                               {reclamoActivo
-                                ? T(T("🔒 Bloqueado por reclamo", "🔒 Blocked by claim"), "🔒 Blocked by claim")
+                                ? T("🔒 Bloqueado por reclamo", "🔒 Blocked by claim")
                                 : !evidenciasFinales.some((item) => item.file_type === "image")
                                 ? T("🔒 Completar trabajo\nSube y guarda al menos 1 foto para habilitar", "🔒 Complete job\nUpload and save at least 1 photo to enable")
                                 : completando
                                 ? "Completando..."
-                                : T(T("✓ Completar trabajo", "✓ Complete job"), "✓ Complete job")}
+                                : T("✓ Completar trabajo", "✓ Complete job")}
                             </button>
                           )}
 
@@ -4410,8 +4410,8 @@ export default function TrabajoDetallePage() {
                                 className="mt-4 w-full rounded-xl border-2 border-red-600 bg-white px-5 py-3 font-extrabold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 {liberandoTrabajo
-                                  ? T(T("Liberando trabajo...", "Releasing job..."), "Releasing job...")
-                                  : T(T("⚠️ No puedo realizar este trabajo", "⚠️ I can’t perform this job"), "⚠️ I can’t perform this job")}
+                                  ? T("Liberando trabajo...", "Releasing job...")
+                                  : T("⚠️ No puedo realizar este trabajo", "⚠️ I can’t perform this job")}
                               </button>
 
                             </div>
@@ -4758,8 +4758,8 @@ export default function TrabajoDetallePage() {
                               className="mt-5 w-full rounded-xl bg-violet-600 px-5 py-3.5 font-black text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {enviandoCambioPresupuesto
-                                ? T(T("Enviando cambio...", "Sending change..."), "Sending change...")
-                                : T(T("Enviar cambio al cliente", "Send change to customer"), "Send change to customer")}
+                                ? T("Enviando cambio...", "Sending change...")
+                                : T("Enviar cambio al cliente", "Send change to customer")}
                             </button>
 
                             <p className="mt-3 text-center text-xs leading-5 text-slate-500">
@@ -5157,7 +5157,7 @@ export default function TrabajoDetallePage() {
                           Tiempo para llegar
                         </p>
                         <p className="mt-1 font-black text-slate-900">
-                          {mostrarMinutos(oferta.arrival_minutes)}
+                          {mostrarMinutos(oferta.arrival_minutes, language)}
                         </p>
                       </div>
 
@@ -5166,7 +5166,7 @@ export default function TrabajoDetallePage() {
                           {T("Duración estimada", "Estimated duration")}
                         </p>
                         <p className="mt-1 font-black text-slate-900">
-                          {mostrarMinutos(oferta.estimated_job_minutes)}
+                          {mostrarMinutos(oferta.estimated_job_minutes, language)}
                         </p>
                       </div>
                     </div>
@@ -5310,7 +5310,7 @@ export default function TrabajoDetallePage() {
                                 }`}
                               >
                                 {mio
-                                  ? T(T("Tú", "You"), "You")
+                                  ? T("Tú", "You")
                                   : item.sender_role ===
                                     "admin"
                                   ? "RELYDO Admin"
@@ -5386,8 +5386,8 @@ export default function TrabajoDetallePage() {
                         className="rounded-2xl bg-blue-700 px-6 py-3.5 font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {enviandoMensajeChat
-                          ? "Enviando..."
-                          : T(T("Enviar", "Send"), "Send")}
+                          ? T("Enviando...", "Sending...")
+                          : T("Enviar", "Send")}
                       </button>
                     </div>
 
@@ -5462,9 +5462,9 @@ export default function TrabajoDetallePage() {
                 }`}
               >
                 {reclamo.status === "open"
-                  ? T(T("Abierto", "Open"), "Open")
+                  ? T("Abierto", "Open")
                   : reclamo.status === "reviewing"
-                  ? T(T("En revisión", "Under review"), "Under review")
+                  ? T("En revisión", "Under review")
                   : "Cerrado"}
               </span>
             </div>
@@ -5695,8 +5695,8 @@ export default function TrabajoDetallePage() {
                   className="mt-5 w-full rounded-xl bg-rose-700 px-6 py-4 text-lg font-black text-white shadow transition hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {subiendoEvidencia
-                    ? T(T("Subiendo evidencia...", "Uploading evidence..."), "Uploading evidence...")
-                    : T(T("Enviar evidencia al reclamo", "Submit evidence to claim"), "Submit evidence to claim")}
+                    ? T("Subiendo evidencia...", "Uploading evidence...")
+                    : T("Enviar evidencia al reclamo", "Submit evidence to claim")}
                 </button>
 
                 <p className="mt-3 text-center text-xs leading-5 text-slate-500">
@@ -5793,7 +5793,7 @@ export default function TrabajoDetallePage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                 💵
               </span>
-              {T(T("Enviar presupuesto", "Send quote"), "Send quote")}
+              {T("Enviar presupuesto", "Send quote")}
             </h2>
 
             {oferta ? (
@@ -5895,8 +5895,8 @@ export default function TrabajoDetallePage() {
                   className="mt-5 w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-black text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {enviando
-                    ? T(T("Enviando presupuesto...", "Sending quote..."), "Sending quote...")
-                    : T(T("Enviar presupuesto", "Send quote"), "Send quote")}
+                    ? T("Enviando presupuesto...", "Sending quote...")
+                    : T("Enviar presupuesto", "Send quote")}
                 </button>
 
                 <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">

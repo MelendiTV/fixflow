@@ -51,51 +51,51 @@ export default function CompletarVerificacion() {
     language === "es"
       ? {
           cuentaNoEncontrada:
-            text.cuentaNoEncontrada,
+            "No pudimos encontrar tu cuenta de RELYDO.",
           perfilIncompleto:
-            text.perfilIncompleto,
+            "Tu perfil profesional todavía no está completo.",
           soloArchivos:
             "solo se permiten archivos PDF, JPG o PNG.",
           maximoArchivo:
             "el archivo no puede superar 10 MB.",
           usuarioNoAutenticado:
-            text.usuarioNoAutenticado,
+            "No hay un usuario autenticado.",
           errorSubida:
             "No se pudo subir",
           errorRegistroArchivo:
             "El archivo se subió, pero no pudo registrarse en la base de datos",
           perfilNoIdentificado:
-            text.perfilNoIdentificado,
+            "No pudimos identificar tu perfil profesional.",
           licenciaObligatoria:
-            text.licenciaObligatoria,
+            "Tu perfil indica que necesitas licencia. Debes subir una copia de tu licencia.",
           seguroObligatorio:
-            text.seguroObligatorio,
+            "Tu perfil indica que tienes seguro. Debes subir un comprobante de seguro.",
           bondObligatorio:
-            text.bondObligatorio,
+            "Tu perfil indica que tienes bond/fianza. Debes subir un comprobante.",
           documentoMinimo:
-            text.documentoMinimo,
+            "Debes subir al menos un documento para solicitar la verificación.",
           actualizarEstado:
             "Los documentos se enviaron, pero no se pudo actualizar tu estado",
           documentosEnviados:
-            text.documentosEnviados,
+            "Documentos enviados correctamente. Tu cuenta está pendiente de revisión.",
           errorInesperado:
-            text.errorInesperado,
+            "Ocurrió un error inesperado.",
           comprobandoSesion:
-            "{text.comprobandoSesion}",
+            "Comprobando sesión...",
           noCargarVerificacion:
-            "{text.noCargarVerificacion}",
+            "No pudimos cargar la verificación",
           cerrarSesion:
-            "{text.cerrarSesion}",
+            "Cerrar sesión",
           completarVerificacion:
-            "{text.completarVerificacion}",
+            "Completar verificación profesional",
           subirDocumentos:
-            "{text.subirDocumentos}",
+            "Sube tus documentos para solicitar la revisión de tu cuenta.",
           volverPanel:
-            "{text.volverPanel}",
+            "Volver al panel",
           cuenta:
-            "{text.cuenta}",
+            "Cuenta",
           documentosRequeridos:
-            "{text.documentosRequeridos}",
+            "Documentos requeridos",
           licencia:
             "Licencia",
           requerida:
@@ -127,13 +127,13 @@ export default function CompletarVerificacion() {
           otroDocumento:
             "Otro documento de verificación",
           otroDocumentoDescripcion:
-            "{text.otroDocumentoDescripcion}",
+            "Si tu actividad no requiere licencia, seguro o bond/fianza, puedes enviar otro documento relacionado con tu negocio o actividad profesional para revisión.",
           verificacionRequerida:
-            "{text.verificacionRequerida}",
+            "Verificación requerida",
           avisoVerificacion:
-            "{text.avisoVerificacion}",
+            "Enviar documentos no significa que tu cuenta ya esté verificada. Tu estado permanecerá pendiente hasta que RELYDO complete la revisión.",
           formatosPermitidos:
-            "{text.formatosPermitidos}",
+            "Formatos permitidos: PDF, JPG y PNG. Máximo 10 MB por archivo.",
           subiendo:
             "Subiendo documentos...",
           enviar:
@@ -763,8 +763,8 @@ export default function CompletarVerificacion() {
                   {text.licencia}:{" "}
                   <strong>
                     {profile?.license_required
-                      ? "Requerida"
-                      : "No requerida"}
+                      ? text.requerida
+                      : text.noRequerida}
                   </strong>
                 </p>
 
@@ -772,8 +772,8 @@ export default function CompletarVerificacion() {
                   {text.seguro}:{" "}
                   <strong>
                     {profile?.insured
-                      ? "Requerido"
-                      : "No requerido"}
+                      ? text.requerido
+                      : text.noRequerido}
                   </strong>
                 </p>
 
@@ -781,8 +781,8 @@ export default function CompletarVerificacion() {
                   {text.bondFianza}:{" "}
                   <strong>
                     {profile?.bonded
-                      ? "Requerido"
-                      : "No requerido"}
+                      ? text.requerido
+                      : text.noRequerido}
                   </strong>
                 </p>
 
@@ -805,8 +805,8 @@ export default function CompletarVerificacion() {
 
                 <p className="mb-4 text-sm text-slate-600">
                   {profile?.license_required
-                    ? "Este documento es obligatorio según la información de tu perfil."
-                    : "Sube este documento si corresponde a tu actividad."}
+                    ? text.licenciaDescripcionSi
+                    : text.licenciaDescripcionNo}
                 </p>
 
                 <input
@@ -830,8 +830,8 @@ export default function CompletarVerificacion() {
 
                 <p className="mb-4 text-sm text-slate-600">
                   {profile?.insured
-                    ? "Tu perfil indica que tienes seguro. Debes subir un comprobante vigente."
-                    : "Sube el comprobante si tienes seguro de responsabilidad."}
+                    ? text.seguroDescripcionSi
+                    : text.seguroDescripcionNo}
                 </p>
 
                 <input
@@ -855,8 +855,8 @@ export default function CompletarVerificacion() {
 
                 <p className="mb-4 text-sm text-slate-600">
                   {profile?.bonded
-                    ? "Tu perfil indica que tienes bond/fianza. Debes subir el comprobante."
-                    : "Sube este documento si corresponde."}
+                    ? text.bondDescripcionSi
+                    : text.bondDescripcionNo}
                 </p>
 
                 <input
@@ -927,8 +927,8 @@ export default function CompletarVerificacion() {
                 className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {subiendo
-                  ? "Subiendo documentos..."
-                  : "Enviar documentos para verificación"}
+                  ? text.subiendo
+                  : text.enviar}
               </button>
 
             </form>

@@ -17,29 +17,29 @@ export default function LoginProfesional() {
   const text =
     language === "es"
       ? {
-          noIniciarSesion: text.noIniciarSesion,
+          noIniciarSesion: "No se pudo iniciar sesión.",
           noComprobarCuenta: "No se pudo comprobar tu cuenta",
           perfilNoValido:
-            text.perfilNoValido,
+            "No se encontró un perfil válido para esta cuenta.",
           noCargarPerfil:
             "No se pudo cargar el perfil profesional",
           sinAcceso:
-            text.sinAcceso,
+            "Esta cuenta no tiene acceso al portal profesional.",
           errorLogin:
-            text.errorLogin,
+            "Ocurrió un error inesperado al iniciar sesión.",
           escribeEmail:
-            text.escribeEmail,
+            "Escribe primero tu correo para recuperar tu contraseña.",
           correoRecuperacion:
-            text.correoRecuperacion,
+            "Te enviamos un correo para cambiar tu contraseña. Revisa también la carpeta de Spam o correo no deseado.",
           limiteCorreos:
-            text.limiteCorreos,
+            "Se han solicitado demasiados correos en poco tiempo. Espera antes de intentarlo de nuevo.",
           noEnviarCorreo:
             "No se pudo enviar el correo",
           noEnviarRecuperacion:
-            text.noEnviarRecuperacion,
-          titulo: "{text.titulo}",
+            "No se pudo enviar el correo de recuperación de contraseña.",
+          titulo: "Iniciar sesión como profesional",
           descripcion:
-            "{text.descripcion}",
+            "Inicia sesión para acceder a tu cuenta.",
           email: "Email",
           emailPlaceholder: "tu@email.com",
           password: "Contraseña",
@@ -49,7 +49,7 @@ export default function LoginProfesional() {
           entrando: "Entrando...",
           iniciarSesion: "Iniciar sesión",
           noCuenta: "¿Todavía no tienes cuenta?",
-          registrate: "{text.registrate}",
+          registrate: "Regístrate como profesional",
         }
       : {
           noIniciarSesion: "Unable to sign in.",
@@ -526,8 +526,8 @@ export default function LoginProfesional() {
                 className="text-sm font-bold text-blue-700 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {recuperando
-                  ? "Enviando correo..."
-                  : "¿Olvidaste tu contraseña?"}
+                  ? text.enviandoCorreo
+                  : text.olvidoPassword}
               </button>
 
             </div>
@@ -555,8 +555,8 @@ export default function LoginProfesional() {
             className="w-full rounded-xl bg-blue-700 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {cargando
-              ? "Entrando..."
-              : "Iniciar sesión"}
+              ? text.entrando
+              : text.iniciarSesion}
           </button>
 
           <div className="border-t border-slate-200 pt-6">

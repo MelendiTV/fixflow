@@ -640,7 +640,7 @@ export default function PagosProfesionalPage() {
           }
           className="font-bold text-blue-700 hover:underline"
         >
-          ← {T("Volver al panel", "Back to dashboard")} profesional
+          ← {T("Volver al panel profesional", "Back to professional dashboard")}
         </button>
 
         <section className="mt-5 overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-xl">
@@ -678,7 +678,7 @@ export default function PagosProfesionalPage() {
 
               <p className="mt-2 text-xl font-black text-slate-950">
                 {profile.business_name ||
-                  "{T("Profesional RELYDO", "RELYDO Professional")}"}
+                  T("Profesional RELYDO", "RELYDO Professional")}
               </p>
 
               <p className="mt-1 break-all text-sm text-slate-500">
@@ -738,7 +738,7 @@ export default function PagosProfesionalPage() {
                 <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
 
                   <p className="font-black text-emerald-900">
-                    ✓ {T("Pagos y depósitos", "Payments and payouts")} habilitados
+                    ✓ {T("Pagos y depósitos habilitados", "Payments and payouts enabled")}
                   </p>
 
                   <p className="mt-1 text-sm text-emerald-800">
@@ -813,9 +813,7 @@ export default function PagosProfesionalPage() {
                         className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-amber-900"
                       >
                         •{" "}
-                        {formatearRequisito(
-                          requisito
-                        )}
+                        {formatearRequisito(requisito, language)}
                       </div>
                     )
                   )}
@@ -851,9 +849,7 @@ export default function PagosProfesionalPage() {
                         className="rounded-xl bg-white px-4 py-3 text-sm font-bold text-red-900"
                       >
                         •{" "}
-                        {formatearRequisito(
-                          requisito
-                        )}
+                        {formatearRequisito(requisito, language)}
                       </div>
                     )
                   )}
@@ -953,8 +949,10 @@ export default function PagosProfesionalPage() {
             <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3">
 
               <p className="text-center text-xs leading-5 text-slate-500">
-                🔒 Tus datos financieros se procesan de forma segura mediante Stripe.
-                RELYDO no necesita mostrar ni almacenar tu número completo de cuenta o tarjeta.
+                {T(
+                  "🔒 Tus datos financieros se procesan de forma segura mediante Stripe. RELYDO no necesita mostrar ni almacenar tu número completo de cuenta o tarjeta.",
+                  "🔒 Your financial data is processed securely through Stripe. RELYDO does not need to display or store your full account or card number."
+                )}
               </p>
 
             </div>
@@ -1100,8 +1098,13 @@ export default function PagosProfesionalPage() {
                         </p>
                         <p className="mt-1 text-xs leading-5 text-emerald-800">
                           {payment.released_at
-                            ? `Liberado ${formatearFecha(payment.released_at)}.`
-                            : "El pago fue liberado al profesional."}
+                            ? language === "es"
+                              ? `Liberado ${formatearFecha(payment.released_at, language)}.`
+                              : `Released ${formatearFecha(payment.released_at, language)}.`
+                            : T(
+                                "El pago fue liberado al profesional.",
+                                "The payment was released to the professional."
+                              )}
                         </p>
                         {payment.stripe_transfer_id && (
                           <p className="mt-2 break-all text-[11px] font-bold text-emerald-700">

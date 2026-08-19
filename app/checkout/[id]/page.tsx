@@ -152,87 +152,87 @@ export default function CheckoutPage() {
           pagoVerificacionInesperada:
             "La verificación del pago devolvió una respuesta inesperada.",
           pagoNoVerificado:
-            text.pagoNoVerificado,
+            "Stripe confirmó el regreso, pero RELYDO no pudo verificar el pago.",
           noVerificarPago:
-            text.noVerificarPago,
+            "No pudimos verificar el pago.",
           faltaCheckout:
-            text.faltaCheckout,
+            "Falta información necesaria para abrir el checkout.",
           solicitudNoDisponible:
-            text.solicitudNoDisponible,
+            "No encontramos esta solicitud o no tienes permiso para pagarla.",
           solicitudNoAbierta:
-            text.solicitudNoAbierta,
+            "Esta solicitud ya no está disponible para un nuevo checkout.",
           ofertaNoEncontrada:
-            text.ofertaNoEncontrada,
+            "No encontramos el presupuesto seleccionado.",
           ofertaNoDisponible:
-            text.ofertaNoDisponible,
+            "Este presupuesto ya no está disponible.",
           configuracionPago:
-            text.configuracionPago,
+            "No pudimos cargar la configuración de pagos de RELYDO.",
           errorInesperado:
-            text.errorInesperado,
+            "Ocurrió un error inesperado.",
           profesionalRelydo:
-            text.profesionalRelydo,
+            "Profesional RELYDO",
           noIniciarPago:
-            text.noIniciarPago,
+            "No pudimos iniciar el pago.",
           stripeSinUrl:
-            text.stripeSinUrl,
+            "Stripe no devolvió una URL de checkout.",
           errorIniciarPago:
-            text.errorIniciarPago,
+            "Ocurrió un error al iniciar el pago.",
           confirmandoPago:
             "Confirmando tu pago con Stripe...",
           preparandoCheckout:
             "Preparando checkout...",
           noAbrirCheckout:
-            "{text.noAbrirCheckout}",
+            "No pudimos abrir el checkout",
           volverPresupuesto:
-            "{text.volverPresupuesto}",
+            "Volver al presupuesto",
           checkoutSeguro:
-            "{text.checkoutSeguro}",
+            "Checkout seguro",
           confirmarPagar:
-            "{text.confirmarPagar}",
+            "Confirmar y pagar",
           revisarServicio:
-            "{text.revisarServicio}",
+            "Revisa el servicio antes de continuar al pago.",
           servicio:
             "Servicio",
           profesionalSeleccionado:
-            "{text.profesionalSeleccionado}",
+            "Profesional seleccionado",
           verificado:
             "Verificado",
           llegadaEstimada:
-            "{text.llegadaEstimada}",
+            "Llegada estimada",
           duracionEstimada:
-            "{text.duracionEstimada}",
+            "Duración estimada",
           ubicacion:
-            "{text.ubicacion}",
+            "Ubicación",
           fechaHora:
-            "{text.fechaHora}",
+            "Fecha / hora",
           flexible:
-            text.flexible,
+            "Flexible",
           resumen:
-            "{text.resumen}",
+            "Resumen",
           totalServicio:
-            "{text.totalServicio}",
+            "Total del servicio",
           incluyeTarifa:
-            "{text.incluyeTarifa}",
+            "Incluye la tarifa de servicio de RELYDO.",
           ocultarDesglose:
-            text.ocultarDesglose,
+            "Ocultar desglose",
           verDesglose:
-            text.verDesglose,
+            "Ver desglose",
           servicioProfesional:
-            "{text.servicioProfesional}",
+            "Servicio profesional",
           tarifaRelydo:
-            "{text.tarifaRelydo}",
+            "Tarifa de servicio RELYDO",
           total:
             "Total",
           pagoProtegido:
             "Pago protegido",
           stripeSeguro:
-            "{text.stripeSeguro}",
+            "Serás enviado al checkout seguro de Stripe para completar el pago.",
           abriendoPago:
             "Abriendo pago seguro...",
           continuarPago:
             "Continuar al pago",
           modoPrueba:
-            "{text.modoPrueba}",
+            "Estás usando Stripe en modo de prueba. No se moverá dinero real.",
         }
       : {
           pagoVerificacionInesperada:
@@ -292,7 +292,7 @@ export default function CheckoutPage() {
           fechaHora:
             "Date / time",
           flexible:
-            text.flexible,
+            "Flexible",
           resumen:
             "Summary",
           totalServicio:
@@ -804,8 +804,8 @@ export default function CheckoutPage() {
 
                     <p className="mt-1 font-semibold text-slate-500">
                       {nombreOficio(
-                        profesional?.trade ||
-                          null
+                        profesional?.trade || null,
+                        language
                       )}
                     </p>
                   </div>
@@ -828,7 +828,8 @@ export default function CheckoutPage() {
 
                     <p className="mt-1 font-black text-slate-900">
                       {mostrarMinutos(
-                        oferta.arrival_minutes
+                        oferta.arrival_minutes,
+                        language
                       )}
                     </p>
 
@@ -842,7 +843,8 @@ export default function CheckoutPage() {
 
                     <p className="mt-1 font-black text-slate-900">
                       {mostrarMinutos(
-                        oferta.estimated_job_minutes
+                        oferta.estimated_job_minutes,
+                        language
                       )}
                     </p>
 

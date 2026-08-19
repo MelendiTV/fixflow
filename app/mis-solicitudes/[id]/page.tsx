@@ -415,7 +415,6 @@ const DETAIL_TRANSLATIONS_EN: Record<string, string> = {
   "Ejemplo: Estas fotos muestran la parte del trabajo que quedó incompleta y el daño que encontré después del servicio...": "Example: These photos show the part of the job that was left incomplete and the damage I found after the service...",
   "presupuesto disponible": "offer available",
   "presupuestos disponibles": "offers available",
-  "Profesional": "Professional"
 };
 
 function detailText(language: "es" | "en", spanish: string) {
@@ -3423,7 +3422,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           <div className="bg-blue-700 p-8 text-white">
 
             <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-sm font-bold text-blue-800">
-              {T(nombreEstadoSolicitud(\n                solicitud.status\n              ))}
+              {T(
+                nombreEstadoSolicitud(
+                  solicitud.status
+                )
+              )}
             </span>
 
             <h1 className="mt-4 text-3xl font-extrabold md:text-4xl">
@@ -3535,11 +3538,21 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
-                  {T(tituloEtapa(\n                    solicitud.status,\n                    solicitud.job_stage\n                  ))}
+                  {T(
+                    tituloEtapa(
+                      solicitud.status,
+                      solicitud.job_stage
+                    )
+                  )}
                 </h2>
 
                 <p className="mt-2 text-slate-600">
-                  {T(textoEtapa(\n                    solicitud.status,\n                    solicitud.job_stage\n                  ))}
+                  {T(
+                    textoEtapa(
+                      solicitud.status,
+                      solicitud.job_stage
+                    )
+                  )}
                 </p>
               </div>
 

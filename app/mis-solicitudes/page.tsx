@@ -98,168 +98,324 @@ export default function MisSolicitudesPage() {
   const t =
     language === "es"
       ? {
-          perfilNoEncontrado: t.perfilNoEncontrado,
-          sinAcceso: t.sinAcceso,
-          cargarSolicitudes: "No pudimos cargar tus solicitudes",
-          cargarReclamos: "No pudimos cargar tus reclamos",
-          errorInesperado: t.errorInesperado,
-          fotoFormato: t.fotoFormato,
-          fotoTamano: t.fotoTamano,
-          sesionNoDisponible: t.sesionNoDisponible,
-          subirFoto: "No se pudo subir la foto",
-          guardarFoto: "La foto subió, pero no se pudo guardar en tu perfil",
-          fotoError: t.fotoError,
-          cargando: "{t.cargando}",
-          ubicacion: "Ubicación",
-          fecha: "Fecha",
-          hora: "Hora",
-          flexible: "Flexible",
-          estadoActual: "{t.estadoActual}",
-          verPresupuestos: "Ver presupuestos",
-          ver{t.seguimiento}: "Ver seguimiento",
-          verDetalles: "Ver detalles",
-          panelCliente: "{t.panelCliente}",
-          fotoAlt: "Foto de",
-          cliente: "cliente",
-          subiendo: "Subiendo...",
-          cambiar: "Cambiar",
-          hola: "Hola",
-          clienteNombre: "Cliente",
-          subiendoFoto: "Subiendo foto...",
-          cambiarFoto: "Cambiar foto de perfil",
-          anadirFoto: "Añadir foto de perfil",
+          perfilNoEncontrado:
+            "No pudimos encontrar tu perfil de cliente.",
+          sinAcceso:
+            "Esta cuenta no tiene acceso al modo cliente.",
+          cargarSolicitudes:
+            "No pudimos cargar tus solicitudes",
+          cargarReclamos:
+            "No pudimos cargar tus reclamos",
+          errorInesperado:
+            "Ocurrió un error inesperado.",
+          fotoFormato:
+            "La foto debe ser JPG, PNG o WEBP.",
+          fotoTamano:
+            "La foto no puede superar 5 MB.",
+          sesionNoDisponible:
+            "Tu sesión ya no está disponible.",
+          subirFoto:
+            "No se pudo subir la foto",
+          guardarFoto:
+            "La foto subió, pero no se pudo guardar en tu perfil",
+          fotoError:
+            "No se pudo subir la foto.",
+          cargando:
+            "Cargando panel de cliente...",
+          ubicacion:
+            "Ubicación",
+          fecha:
+            "Fecha",
+          hora:
+            "Hora",
+          flexible:
+            "Flexible",
+          estadoActual:
+            "Estado actual",
+          verPresupuestos:
+            "Ver presupuestos",
+          verSeguimiento:
+            "Ver seguimiento",
+          verDetalles:
+            "Ver detalles",
+          panelCliente:
+            "Panel de cliente",
+          fotoAlt:
+            "Foto de",
+          cliente:
+            "cliente",
+          subiendo:
+            "Subiendo...",
+          cambiar:
+            "Cambiar",
+          hola:
+            "Hola",
+          clienteNombre:
+            "Cliente",
+          subiendoFoto:
+            "Subiendo foto...",
+          cambiarFoto:
+            "Cambiar foto de perfil",
+          anadirFoto:
+            "Añadir foto de perfil",
           descripcionPanel:
-            "{t.descripcionPanel}",
-          vivoActivo: "Actualización en vivo activa",
-          conectandoVivo: "Conectando actualización en vivo...",
-          cuenta: "{t.cuenta}",
-          cerrarSesion: "{t.cerrarSesion}",
-          nuevoTrabajo: "{t.nuevoTrabajo}",
-          verProfesionales: "{t.verProfesionales}",
-          resumen: "{t.resumen}",
-          actividad: "{t.actividad}",
-          pulsaTarjeta: "{t.pulsaTarjeta}",
-          actualizando: "Actualizando...",
-          actualizar: "↻ Actualizar",
-          abiertas: "Abiertas",
-          enProgreso: "En progreso",
-          completadas: "Completadas",
-          canceladas: "Canceladas",
-          reclamos: "Reclamos",
-          historial: "Historial",
-          seguimiento: "{t.seguimiento}",
-          unTrabajoProgreso: "Tienes un trabajo en progreso",
-          trabajosProgreso: "trabajos en progreso",
-          avanceProfesional: "{t.avanceProfesional}",
-          verTrabajos: "Ver",
-          trabajos: "trabajos",
-          sinSolicitudes: "{t.sinSolicitudes}",
-          apareceranAqui: "{t.apareceranAqui}",
-          solicitarTrabajo: "{t.solicitarTrabajo}",
-          solicitudesAbiertas: "{t.solicitudesAbiertas}",
-          esperandoPresupuestos: "{t.esperandoPresupuestos}",
-          trabajosEnProgreso: "{t.trabajosEnProgreso}",
-          estadoTrabajos: "{t.estadoTrabajos}",
-          trabajosCompletados: "{t.trabajosCompletados}",
-          historialTerminados: "{t.historialTerminados}",
-          solicitudesCanceladas: "{t.solicitudesCanceladas}",
-          historialCanceladas: "{t.historialCanceladas}",
-          proteccion: "{t.proteccion}",
-          misReclamos: "{t.misReclamos}",
-          revisarReclamos: "{t.revisarReclamos}",
-          activos: "activos",
-          sinReclamos: "{t.sinReclamos}",
-          reclamoTrabajo: "Reclamo de trabajo",
-          verTrabajoRelacionado: "Ver trabajo relacionado",
-          abierto: "Abierto",
-          enRevision: "En revisión",
-          resuelto: "Resuelto",
-          historialCompleto: "{t.historialCompleto}",
-          todasSolicitudes: "{t.todasSolicitudes}",
-          todasVista: "{t.todasVista}",
-          sinHistorial: "{t.sinSolicitudes} en el historial.",
+            "Administra tus solicitudes, sigue tus trabajos y encuentra profesionales desde un solo lugar.",
+          vivoActivo:
+            "Actualización en vivo activa",
+          conectandoVivo:
+            "Conectando actualización en vivo...",
+          cuenta:
+            "Cuenta",
+          cerrarSesion:
+            "Cerrar sesión",
+          nuevoTrabajo:
+            "+ Solicitar un nuevo trabajo",
+          verProfesionales:
+            "Ver profesionales",
+          resumen:
+            "Resumen",
+          actividad:
+            "Tu actividad en RELYDO",
+          pulsaTarjeta:
+            "Pulsa cualquier tarjeta para ir directamente a esa sección.",
+          actualizando:
+            "Actualizando...",
+          actualizar:
+            "↻ Actualizar",
+          abiertas:
+            "Abiertas",
+          enProgreso:
+            "En progreso",
+          completadas:
+            "Completadas",
+          canceladas:
+            "Canceladas",
+          reclamos:
+            "Reclamos",
+          historial:
+            "Historial",
+          seguimiento:
+            "Seguimiento",
+          unTrabajoProgreso:
+            "Tienes un trabajo en progreso",
+          trabajosProgreso:
+            "trabajos en progreso",
+          avanceProfesional:
+            "Revisa aquí el avance reportado por cada profesional.",
+          verTrabajos:
+            "Ver",
+          trabajos:
+            "trabajos",
+          sinSolicitudes:
+            "Todavía no tienes solicitudes",
+          apareceranAqui:
+            "Tus solicitudes aparecerán aquí cuando solicites un trabajo.",
+          solicitarTrabajo:
+            "Solicitar un trabajo",
+          solicitudesAbiertas:
+            "Solicitudes abiertas",
+          esperandoPresupuestos:
+            "Esperando presupuestos de profesionales.",
+          trabajosEnProgreso:
+            "Trabajos en progreso",
+          estadoTrabajos:
+            "Sigue aquí el estado actual de todos tus trabajos.",
+          trabajosCompletados:
+            "Trabajos completados",
+          historialTerminados:
+            "Historial de trabajos terminados.",
+          solicitudesCanceladas:
+            "Solicitudes canceladas",
+          historialCanceladas:
+            "Historial de solicitudes que fueron canceladas.",
+          proteccion:
+            "Protección",
+          misReclamos:
+            "Mis reclamos",
+          revisarReclamos:
+            "Revisa tus reclamos abiertos, en revisión y resueltos.",
+          activos:
+            "activos",
+          sinReclamos:
+            "No tienes reclamos.",
+          reclamoTrabajo:
+            "Reclamo de trabajo",
+          verTrabajoRelacionado:
+            "Ver trabajo relacionado",
+          abierto:
+            "Abierto",
+          enRevision:
+            "En revisión",
+          resuelto:
+            "Resuelto",
+          historialCompleto:
+            "Historial completo",
+          todasSolicitudes:
+            "Todas tus solicitudes",
+          todasVista:
+            "Solicitudes abiertas, en progreso, completadas y canceladas en una sola vista.",
+          sinHistorial:
+            "No tienes solicitudes en tu historial todavía.",
         }
       : {
-          perfilNoEncontrado: "We could not find your customer profile.",
-          sinAcceso: "This account does not have access to customer mode.",
-          cargarSolicitudes: "We could not load your requests",
-          cargarReclamos: "We could not load your claims",
-          errorInesperado: "An unexpected error occurred.",
-          fotoFormato: "The photo must be JPG, PNG, or WEBP.",
-          fotoTamano: "The photo cannot exceed 5 MB.",
-          sesionNoDisponible: "Your session is no longer available.",
-          subirFoto: "We could not upload the photo",
-          guardarFoto: "The photo was uploaded, but it could not be saved to your profile",
-          fotoError: "We could not upload the photo.",
-          cargando: "Loading customer dashboard...",
-          ubicacion: "Location",
-          fecha: "Date",
-          hora: "Time",
-          flexible: "Flexible",
-          estadoActual: "Current status",
-          verPresupuestos: "View quotes",
-          ver{t.seguimiento}: "Track job",
-          verDetalles: "View details",
-          panelCliente: "Customer dashboard",
-          fotoAlt: "Photo of",
-          cliente: "customer",
-          subiendo: "Uploading...",
-          cambiar: "Change",
-          hola: "Hello",
-          clienteNombre: "Customer",
-          subiendoFoto: "Uploading photo...",
-          cambiarFoto: "Change profile photo",
-          anadirFoto: "Add profile photo",
+          perfilNoEncontrado:
+            "We could not find your customer profile.",
+          sinAcceso:
+            "This account does not have access to customer mode.",
+          cargarSolicitudes:
+            "We could not load your requests",
+          cargarReclamos:
+            "We could not load your claims",
+          errorInesperado:
+            "An unexpected error occurred.",
+          fotoFormato:
+            "The photo must be JPG, PNG, or WEBP.",
+          fotoTamano:
+            "The photo cannot exceed 5 MB.",
+          sesionNoDisponible:
+            "Your session is no longer available.",
+          subirFoto:
+            "We could not upload the photo",
+          guardarFoto:
+            "The photo was uploaded, but it could not be saved to your profile",
+          fotoError:
+            "We could not upload the photo.",
+          cargando:
+            "Loading customer dashboard...",
+          ubicacion:
+            "Location",
+          fecha:
+            "Date",
+          hora:
+            "Time",
+          flexible:
+            "Flexible",
+          estadoActual:
+            "Current status",
+          verPresupuestos:
+            "View quotes",
+          verSeguimiento:
+            "Track job",
+          verDetalles:
+            "View details",
+          panelCliente:
+            "Customer dashboard",
+          fotoAlt:
+            "Photo of",
+          cliente:
+            "customer",
+          subiendo:
+            "Uploading...",
+          cambiar:
+            "Change",
+          hola:
+            "Hello",
+          clienteNombre:
+            "Customer",
+          subiendoFoto:
+            "Uploading photo...",
+          cambiarFoto:
+            "Change profile photo",
+          anadirFoto:
+            "Add profile photo",
           descripcionPanel:
             "Manage your requests, track your jobs, and find professionals from one place.",
-          vivoActivo: "Live updates active",
-          conectandoVivo: "Connecting live updates...",
-          cuenta: "Account",
-          cerrarSesion: "Sign out",
-          nuevoTrabajo: "+ Request a new job",
-          verProfesionales: "View professionals",
-          resumen: "Summary",
-          actividad: "Your RELYDO activity",
-          pulsaTarjeta: "Select any card to go directly to that section.",
-          actualizando: "Updating...",
-          actualizar: "↻ Refresh",
-          abiertas: "Open",
-          enProgreso: "In progress",
-          completadas: "Completed",
-          canceladas: "Cancelled",
-          reclamos: "Claims",
-          historial: "History",
-          seguimiento: "Tracking",
-          unTrabajoProgreso: "You have one job in progress",
-          trabajosProgreso: "jobs in progress",
-          avanceProfesional: "Review the progress reported by each professional here.",
-          verTrabajos: "View",
-          trabajos: "jobs",
-          sinSolicitudes: "You don't have any requests yet",
-          apareceranAqui: "Your requests will appear here once you submit a job.",
-          solicitarTrabajo: "Request a job",
-          solicitudesAbiertas: "Open requests",
-          esperandoPresupuestos: "Waiting for quotes from professionals.",
-          trabajosEnProgreso: "Jobs in progress",
-          estadoTrabajos: "Track the current status of all your jobs here.",
-          trabajosCompletados: "Completed jobs",
-          historialTerminados: "History of completed jobs.",
-          solicitudesCanceladas: "Cancelled requests",
-          historialCanceladas: "History of requests that were cancelled.",
-          proteccion: "Protection",
-          misReclamos: "My claims",
-          revisarReclamos: "Review your open, under-review, and resolved claims.",
-          activos: "active",
-          sinReclamos: "You don't have any claims.",
-          reclamoTrabajo: "Job claim",
-          verTrabajoRelacionado: "View related job",
-          abierto: "Open",
-          enRevision: "Under review",
-          resuelto: "Resolved",
-          historialCompleto: "Full history",
-          todasSolicitudes: "All your requests",
-          todasVista: "Open, in-progress, completed, and cancelled requests in one view.",
-          sinHistorial: "You don't have any requests in your history yet.",
+          vivoActivo:
+            "Live updates active",
+          conectandoVivo:
+            "Connecting live updates...",
+          cuenta:
+            "Account",
+          cerrarSesion:
+            "Sign out",
+          nuevoTrabajo:
+            "+ Request a new job",
+          verProfesionales:
+            "View professionals",
+          resumen:
+            "Summary",
+          actividad:
+            "Your RELYDO activity",
+          pulsaTarjeta:
+            "Select any card to go directly to that section.",
+          actualizando:
+            "Updating...",
+          actualizar:
+            "↻ Refresh",
+          abiertas:
+            "Open",
+          enProgreso:
+            "In progress",
+          completadas:
+            "Completed",
+          canceladas:
+            "Cancelled",
+          reclamos:
+            "Claims",
+          historial:
+            "History",
+          seguimiento:
+            "Tracking",
+          unTrabajoProgreso:
+            "You have one job in progress",
+          trabajosProgreso:
+            "jobs in progress",
+          avanceProfesional:
+            "Review the progress reported by each professional here.",
+          verTrabajos:
+            "View",
+          trabajos:
+            "jobs",
+          sinSolicitudes:
+            "You don't have any requests yet",
+          apareceranAqui:
+            "Your requests will appear here once you submit a job.",
+          solicitarTrabajo:
+            "Request a job",
+          solicitudesAbiertas:
+            "Open requests",
+          esperandoPresupuestos:
+            "Waiting for quotes from professionals.",
+          trabajosEnProgreso:
+            "Jobs in progress",
+          estadoTrabajos:
+            "Track the current status of all your jobs here.",
+          trabajosCompletados:
+            "Completed jobs",
+          historialTerminados:
+            "History of completed jobs.",
+          solicitudesCanceladas:
+            "Cancelled requests",
+          historialCanceladas:
+            "History of requests that were cancelled.",
+          proteccion:
+            "Protection",
+          misReclamos:
+            "My claims",
+          revisarReclamos:
+            "Review your open, under-review, and resolved claims.",
+          activos:
+            "active",
+          sinReclamos:
+            "You don't have any claims.",
+          reclamoTrabajo:
+            "Job claim",
+          verTrabajoRelacionado:
+            "View related job",
+          abierto:
+            "Open",
+          enRevision:
+            "Under review",
+          resuelto:
+            "Resolved",
+          historialCompleto:
+            "Full history",
+          todasSolicitudes:
+            "All your requests",
+          todasVista:
+            "Open, in-progress, completed, and cancelled requests in one view.",
+          sinHistorial:
+            "You don't have any requests in your history yet.",
         };
 
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
@@ -681,10 +837,10 @@ export default function MisSolicitudesPage() {
           }`}
         >
           {solicitud.status === "open"
-            ? "Ver presupuestos"
+            ? t.verPresupuestos
             : solicitud.status === "in_progress"
-            ? "Ver seguimiento"
-            : "Ver detalles"}
+            ? t.verSeguimiento
+            : t.verDetalles}
         </button>
       </article>
     );
@@ -754,10 +910,10 @@ export default function MisSolicitudesPage() {
                       className="mt-2 text-sm font-bold text-blue-100 underline decoration-white/40 underline-offset-4 transition hover:text-white disabled:opacity-60"
                     >
                       {subiendoAvatar
-                        ? "Subiendo foto..."
+                        ? t.subiendoFoto
                         : cliente?.avatar_url
-                        ? "Cambiar foto de perfil"
-                        : "Añadir foto de perfil"}
+                        ? t.cambiarFoto
+                        : t.anadirFoto}
                     </button>
                   </div>
                 </div>
@@ -781,8 +937,8 @@ export default function MisSolicitudesPage() {
                     />
 
                     {realtimeConectado
-                      ? "Actualización en vivo activa"
-                      : "Conectando actualización en vivo..."}
+                      ? t.vivoActivo
+                      : t.conectandoVivo}
                   </span>
                 </div>
               </div>
@@ -869,7 +1025,7 @@ export default function MisSolicitudesPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-            <{t.resumen}Card
+            <ResumenCard
               titulo={t.abiertas}
               valor={String(abiertas.length)}
               clase="text-blue-700"
@@ -878,7 +1034,7 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("solicitudes-abiertas")}
             />
 
-            <{t.resumen}Card
+            <ResumenCard
               titulo={t.enProgreso}
               valor={String(enProgreso.length)}
               clase="text-amber-700"
@@ -887,7 +1043,7 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("trabajos-en-progreso")}
             />
 
-            <{t.resumen}Card
+            <ResumenCard
               titulo={t.completadas}
               valor={String(completadas.length)}
               clase="text-emerald-700"
@@ -896,7 +1052,7 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("trabajos-completados")}
             />
 
-            <{t.resumen}Card
+            <ResumenCard
               titulo={t.canceladas}
               valor={String(canceladas.length)}
               clase="text-red-700"
@@ -905,7 +1061,7 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("solicitudes-canceladas")}
             />
 
-            <{t.resumen}Card
+            <ResumenCard
               titulo={t.reclamos}
               valor={String(reclamosActivos.length)}
               clase="text-rose-700"
@@ -914,7 +1070,7 @@ export default function MisSolicitudesPage() {
               onClick={() => irASeccion("mis-reclamos")}
             />
 
-            <{t.resumen}Card
+            <ResumenCard
               titulo={t.historial}
               valor={String(totalHistorial)}
               clase="text-violet-700"
@@ -937,8 +1093,10 @@ export default function MisSolicitudesPage() {
 
                 <h2 className="mt-1 text-xl font-extrabold text-blue-950">
                   {enProgreso.length === 1
-                    ? "Tienes un trabajo en progreso"
-                    : `Tienes ${enProgreso.length} trabajos en progreso`}
+                    ? t.unTrabajoProgreso
+                    : language === "es"
+                    ? `Tienes ${enProgreso.length} ${t.trabajosProgreso}`
+                    : `You have ${enProgreso.length} ${t.trabajosProgreso}`}
                 </h2>
 
                 <p className="mt-1 text-blue-800">
@@ -952,8 +1110,8 @@ export default function MisSolicitudesPage() {
                 className="shrink-0 rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800"
               >
                 {enProgreso.length === 1
-                  ? "Ver seguimiento"
-                  : `Ver ${enProgreso.length} trabajos`}
+                  ? t.verSeguimiento
+                  : `${t.verTrabajos} ${enProgreso.length} ${t.trabajos}`}
               </button>
             </div>
           </section>
@@ -1118,11 +1276,11 @@ export default function MisSolicitudesPage() {
                         }`}
                       >
                         {reclamo.status === "open"
-                          ? "Abierto"
+                          ? t.abierto
                           : reclamo.status === "reviewing" ||
                             reclamo.status === "in_review"
-                          ? "En revisión"
-                          : "Resuelto"}
+                          ? t.enRevision
+                          : t.resuelto}
                       </span>
                     </button>
                   );
@@ -1160,7 +1318,7 @@ export default function MisSolicitudesPage() {
             {solicitudes.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
                 <p className="font-bold text-slate-700">
-                  {t.sinSolicitudes} en el historial.
+                  {t.sinHistorial}
                 </p>
               </div>
             ) : (
@@ -1204,7 +1362,7 @@ export default function MisSolicitudesPage() {
   );
 }
 
-function {t.resumen}Card({
+function ResumenCard({
   titulo,
   valor,
   clase,

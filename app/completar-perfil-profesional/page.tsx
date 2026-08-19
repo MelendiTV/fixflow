@@ -18,9 +18,9 @@ export default function CompletarPerfilProfesional() {
     language === "es"
       ? {
           cuentaSinRegistro:
-            text.cuentaSinRegistro,
+            "Esta cuenta no contiene información de registro profesional.",
           faltanDatos:
-            text.faltanDatos,
+            "Faltan datos del registro profesional. Regístrate nuevamente o contacta a RELYDO.",
           crearCuenta:
             "No se pudo crear tu cuenta profesional",
           comprobarPerfil:
@@ -38,21 +38,21 @@ export default function CompletarPerfilProfesional() {
           perfilCreado:
             "Perfil profesional creado correctamente. Especialidad asignada",
           errorInesperado:
-            text.errorInesperado,
+            "Ocurrió un error inesperado.",
           preparandoTitulo:
-            "{text.preparandoTitulo}",
+            "Preparando tu perfil",
           preparandoDescripcion:
-            "{text.preparandoDescripcion}",
+            "Estamos creando tu perfil profesional y asignando tu especialidad.",
           errorTitulo:
-            "{text.errorTitulo}",
+            "No pudimos completar tu perfil",
           reintentar:
-            "{text.reintentar}",
+            "Intentar de nuevo",
           cerrarSesion:
-            "{text.cerrarSesion}",
+            "Cerrar sesión",
           exitoTitulo:
-            "{text.exitoTitulo}",
+            "Perfil creado",
           siguientePaso:
-            "{text.siguientePaso}",
+            "A continuación, continuaremos con la verificación de documentos.",
         }
       : {
           cuentaSinRegistro:
