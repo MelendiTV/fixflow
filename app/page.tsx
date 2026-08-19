@@ -613,32 +613,32 @@ export default function Home() {
               />
             </div>
 
-            <div className="flex flex-col justify-between rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white shadow-2xl shadow-blue-600/20 lg:p-10">
+            <div className="flex flex-col justify-between rounded-[1.5rem] bg-gradient-to-br from-blue-600 to-blue-800 p-5 text-white shadow-2xl shadow-blue-600/20 sm:rounded-[2rem] sm:p-8 lg:p-10">
               <div>
-                <p className="text-sm font-black tracking-[0.18em] text-blue-100">
+                <p className="text-[11px] font-black tracking-[0.18em] text-blue-100 sm:text-sm">
                   ONE PLATFORM
                 </p>
 
-                <h3 className="mt-3 text-3xl font-black tracking-[-0.025em] md:text-4xl">
+                <h3 className="mt-2 text-2xl font-black leading-tight tracking-[-0.025em] sm:mt-3 sm:text-3xl md:text-4xl">
                   {text.dosLados}
                 </h3>
 
-                <p className="mt-4 max-w-2xl text-lg leading-8 text-blue-50">
+                <p className="mt-2.5 max-w-2xl text-sm leading-6 text-blue-50 sm:mt-4 sm:text-lg sm:leading-8">
                   {text.dosLadosSub}
                 </p>
               </div>
 
-              <div className="mt-8 grid gap-4">
+              <div className="mt-4 grid gap-2.5 sm:mt-8 sm:gap-4">
                 <button
                   onClick={() => router.push("/solicitar-trabajo")}
-                  className="rounded-2xl bg-white px-6 py-4 font-black text-blue-700 transition hover:bg-blue-50"
+                  className="rounded-xl bg-white px-5 py-3 text-sm font-black text-blue-700 transition hover:bg-blue-50 sm:rounded-2xl sm:px-6 sm:py-4 sm:text-base"
                 >
                   {text.solicitarTrabajo}
                 </button>
 
                 <button
                   onClick={() => router.push("/mis-solicitudes")}
-                  className="rounded-2xl border border-white/30 bg-white/10 px-6 py-4 font-black text-white transition hover:bg-white/15"
+                  className="rounded-xl border border-white/30 bg-white/10 px-5 py-3 text-sm font-black text-white transition hover:bg-white/15 sm:rounded-2xl sm:px-6 sm:py-4 sm:text-base"
                 >
                   {text.misSolicitudes}
                 </button>
@@ -786,21 +786,21 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
               {pasos.map((paso) => (
                 <div
                   key={paso.number}
-                  className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6"
+                  className="rounded-[1.1rem] border border-slate-200 bg-slate-50 p-3 sm:rounded-[1.6rem] sm:p-6"
                 >
-                  <div className="text-4xl font-black text-blue-200">
+                  <div className="text-2xl font-black text-blue-200 sm:text-4xl">
                     {paso.number}
                   </div>
 
-                  <h3 className="mt-3 text-xl font-black">
+                  <h3 className="mt-2 text-[15px] font-black leading-5 sm:mt-3 sm:text-xl">
                     {paso.title}
                   </h3>
 
-                  <p className="mt-3 leading-7 text-slate-600">
+                  <p className="mt-1.5 text-[12px] leading-4.5 text-slate-600 sm:mt-3 sm:text-base sm:leading-7">
                     {paso.description}
                   </p>
                 </div>
@@ -862,7 +862,7 @@ export default function Home() {
               {text.seguridadDesc}
             </p>
 
-            <div className="mt-9 grid gap-4 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-2 gap-2.5 sm:mt-9 sm:gap-4">
               {[
                 [text.seguro1, text.seguro1Desc],
                 [text.seguro2, text.seguro2Desc],
@@ -871,7 +871,7 @@ export default function Home() {
               ].map(([title, desc]) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur"
+                  className="rounded-xl border border-white/15 bg-white/10 p-3 backdrop-blur sm:rounded-2xl sm:p-5"
                 >
                   <div className="mb-2.5 h-1 w-8 rounded-full bg-blue-300 sm:mb-4 sm:h-1.5 sm:w-10" />
 
