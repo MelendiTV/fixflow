@@ -363,7 +363,8 @@ export default function Home() {
     },
   ];
 
-  const anuncios = [
+  // Imágenes publicitarias según el idioma seleccionado.
+  const anunciosEspanol = [
     "/ads/4b37dfc4-7eb9-4b5f-8bb5-40eb6a974310.png",
     "/ads/4daa86f7-42c8-43f5-b5bd-4c6342dfb0dd.png",
     "/ads/58d502c8-3a92-443d-bb21-d335f41c282b.png",
@@ -374,6 +375,22 @@ export default function Home() {
     "/ads/ads-2.jpeg",
     "/ads/ads-5.jpeg",
   ];
+
+  // ads-13 no existe, por eso no se referencia.
+  // La página usa 9 espacios y tenemos 8 imágenes inglesas; ads-18 se reutiliza al final.
+  const anunciosIngles = [
+    "/ads/ads-10.png",
+    "/ads/ads-11.png",
+    "/ads/ads-12.png",
+    "/ads/ads-14.png",
+    "/ads/ads-15.png",
+    "/ads/ads-16.png",
+    "/ads/ads-17.png",
+    "/ads/ads-18.png",
+    "/ads/ads-18.png",
+  ];
+
+  const anuncios = es ? anunciosEspanol : anunciosIngles;
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-slate-950">
