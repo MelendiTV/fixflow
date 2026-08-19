@@ -70,6 +70,9 @@ function RegistroClienteContenido() {
   const [success, setSuccess] =
     useState("");
 
+  const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] =
+    useState(false);
+
   const text =
     language === "es"
       ? {
@@ -86,6 +89,24 @@ function RegistroClienteContenido() {
           email: "Correo electrónico",
           emailPlaceholder:
             "cliente@email.com",
+
+          correoYaRegistrado:
+            "Este correo electrónico ya está registrado. Inicia sesión o usa otro correo.",
+
+          verificandoCorreo:
+            "Verificando correo...",
+
+          errorVerificandoCorreo:
+            "No pudimos verificar el correo electrónico. Intenta nuevamente.",
+
+          revisarCorreoTitulo:
+            "Revisa tu correo electrónico",
+
+          revisarCorreoDescripcion:
+            "Te enviamos un enlace de verificación. Debes confirmar tu correo antes de iniciar sesión.",
+
+          irALogin:
+            "Ir a iniciar sesión",
 
           telefono: "Teléfono",
           telefonoPlaceholder:
@@ -184,6 +205,24 @@ function RegistroClienteContenido() {
           emailPlaceholder:
             "customer@email.com",
 
+          correoYaRegistrado:
+            "This email address is already registered. Sign in or use a different email.",
+
+          verificandoCorreo:
+            "Checking email...",
+
+          errorVerificandoCorreo:
+            "We could not verify the email address. Please try again.",
+
+          revisarCorreoTitulo:
+            "Check your email",
+
+          revisarCorreoDescripcion:
+            "We sent you a verification link. You must confirm your email before signing in.",
+
+          irALogin:
+            "Go to sign in",
+
           telefono: "Phone",
           telefonoPlaceholder:
             "(702) 555-1234",
@@ -267,6 +306,31 @@ function RegistroClienteContenido() {
             "Loading...",
         };
 
+  function esErrorCorreoYaRegistrado(
+    message: string
+  ) {
+    const mensaje =
+      message.toLowerCase();
+
+    return (
+      mensaje.includes(
+        "user already registered"
+      ) ||
+      mensaje.includes(
+        "already registered"
+      ) ||
+      mensaje.includes(
+        "already been registered"
+      ) ||
+      mensaje.includes(
+        "email already exists"
+      ) ||
+      mensaje.includes(
+        "email address already exists"
+      )
+    );
+  }
+
   function obtenerDestinoSeguro() {
     if (
       redirectParam &&
@@ -290,6 +354,7 @@ function RegistroClienteContenido() {
 
     setError("");
     setSuccess("");
+    setAwaitingEmailConfirmation(false);
 
     const nombreLimpio =
       fullName.trim();
@@ -358,6 +423,51 @@ function RegistroClienteContenido() {
 
     try {
       /*
+        PRIMERO:
+        COMPROBAR EN EL SERVIDOR SI EL CORREO YA EXISTE.
+
+        La ruta /api/auth/check-email utiliza la clave secreta
+        solamente del lado del servidor.
+      */
+
+      const checkEmailResponse = await fetch(
+        "/api/auth/check-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: correoLimpio,
+          }),
+        }
+      );
+
+      if (!checkEmailResponse.ok) {
+        console.error(
+          "Error verificando correo:",
+          await checkEmailResponse.text()
+        );
+
+        setError(
+          text.errorVerificandoCorreo
+        );
+        setLoading(false);
+        return;
+      }
+
+      const checkEmailData =
+        await checkEmailResponse.json();
+
+      if (checkEmailData?.exists === true) {
+        setError(
+          text.correoYaRegistrado
+        );
+        setLoading(false);
+        return;
+      }
+
+      /*
         CREAR USUARIO EN SUPABASE AUTH
 
         IMPORTANTE:
@@ -411,6 +521,18 @@ function RegistroClienteContenido() {
         });
 
       if (signUpError) {
+        if (
+          esErrorCorreoYaRegistrado(
+            signUpError.message
+          )
+        ) {
+          setError(
+            text.correoYaRegistrado
+          );
+          setLoading(false);
+          return;
+        }
+
         throw new Error(
           signUpError.message
         );
@@ -442,34 +564,42 @@ function RegistroClienteContenido() {
       }
 
       /*
-        SI SUPABASE REQUIERE CONFIRMAR EMAIL
+        SI SUPABASE REQUIERE CONFIRMAR EMAIL:
+
+        NO redirigimos automáticamente.
+        El cliente debe revisar su correo y confirmar
+        la cuenta antes de iniciar sesión.
       */
 
       setSuccess(
         text.confirmarEmail
       );
 
-      setTimeout(() => {
-        const destino =
-          obtenerDestinoSeguro();
-
-        router.push(
-          `/login-cliente?redirect=${encodeURIComponent(
-            destino
-          )}`
-        );
-      }, 2000);
+      setAwaitingEmailConfirmation(true);
+      setLoading(false);
+      return;
     } catch (err) {
       console.error(
         "Error registrando cliente:",
         err
       );
 
-      setError(
-        err instanceof Error
-          ? `${text.errorRegistro}: ${err.message}`
-          : text.errorInesperado
-      );
+      if (
+        err instanceof Error &&
+        esErrorCorreoYaRegistrado(
+          err.message
+        )
+      ) {
+        setError(
+          text.correoYaRegistrado
+        );
+      } else {
+        setError(
+          err instanceof Error
+            ? `${text.errorRegistro}: ${err.message}`
+            : text.errorInesperado
+        );
+      }
 
       setLoading(false);
     }
@@ -532,6 +662,33 @@ function RegistroClienteContenido() {
               </div>
             )}
 
+            {awaitingEmailConfirmation ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+                <div className="text-4xl">
+                  ✉️
+                </div>
+
+                <h2 className="mt-3 text-2xl font-extrabold text-emerald-900">
+                  {text.revisarCorreoTitulo}
+                </h2>
+
+                <p className="mt-3 text-emerald-800">
+                  {text.revisarCorreoDescripcion}
+                </p>
+
+                <p className="mt-3 break-all font-bold text-slate-900">
+                  {email.trim().toLowerCase()}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={irALogin}
+                  className="mt-6 w-full rounded-xl bg-blue-700 py-4 text-lg font-extrabold text-white transition hover:bg-blue-800"
+                >
+                  {text.irALogin}
+                </button>
+              </div>
+            ) : (
             <form
               onSubmit={
                 registrarCliente
@@ -846,9 +1003,11 @@ function RegistroClienteContenido() {
               </button>
 
             </form>
+            )}
 
             {/* LOGIN */}
 
+            {!awaitingEmailConfirmation && (
             <div className="mt-6 border-t border-slate-200 pt-6 text-center">
 
               <p className="text-sm text-slate-600">
@@ -865,6 +1024,7 @@ function RegistroClienteContenido() {
               </button>
 
             </div>
+            )}
 
           </div>
         </div>

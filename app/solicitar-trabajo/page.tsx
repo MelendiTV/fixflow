@@ -14,6 +14,10 @@ import {
   useSearchParams,
 } from "next/navigation";
 
+import {
+  useLanguage,
+} from "@/app/components/LanguageProvider";
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
@@ -37,9 +41,10 @@ type FotoSeleccionada = {
 };
 
 function nombreOficio(
-  trade: string | null
+  trade: string | null,
+  language: "es" | "en"
 ) {
-  const oficios: Record<string, string> = {
+  const oficiosEs: Record<string, string> = {
     plumbing: "Plomería",
     electrical: "Electricidad",
     hvac: "HVAC / Aire acondicionado",
@@ -54,9 +59,31 @@ function nombreOficio(
     other: "Otros servicios",
   };
 
+  const oficiosEn: Record<string, string> = {
+    plumbing: "Plumbing",
+    electrical: "Electrical",
+    hvac: "HVAC / Air conditioning",
+    carpentry: "Carpentry",
+    painting: "Painting",
+    landscaping: "Landscaping",
+    cleaning: "Cleaning",
+    moving: "Moving",
+    handyman: "Handyman",
+    "appliance-repair":
+      "Appliance repair",
+    other: "Other services",
+  };
+
   if (!trade) {
-    return "Profesional";
+    return language === "es"
+      ? "Profesional"
+      : "Professional";
   }
+
+  const oficios =
+    language === "es"
+      ? oficiosEs
+      : oficiosEn;
 
   return oficios[trade] || trade;
 }
@@ -64,6 +91,9 @@ function nombreOficio(
 function SolicitarTrabajoContenido() {
   const searchParams =
     useSearchParams();
+
+  const { language } =
+    useLanguage();
 
   const profesionalId =
     searchParams.get("profesional");
@@ -99,6 +129,277 @@ function SolicitarTrabajoContenido() {
     fotosSeleccionadas,
     setFotosSeleccionadas,
   ] = useState<FotoSeleccionada[]>([]);
+
+  const text =
+    language === "es"
+      ? {
+          volver: "Volver",
+          titulo: "Solicitar trabajo",
+          descripcion:
+            "Cuéntanos qué necesitas y encontraremos profesionales que puedan ayudarte.",
+          verificandoProfesional:
+            "Verificando profesional seleccionado...",
+          profesionalPreferido:
+            "Profesional preferido",
+          profesionalRelydo:
+            "Profesional RELYDO",
+          profesionalVerificado:
+            "Profesional verificado por RELYDO",
+          tipoServicio:
+            "Tipo de servicio *",
+          seleccionarServicio:
+            "Selecciona un servicio",
+          problema:
+            "¿Qué problema tienes? *",
+          problemaPlaceholder:
+            "Ej: Tengo una fuga debajo del fregadero",
+          describir:
+            "Describe el trabajo *",
+          describirPlaceholder:
+            "Explica con más detalle qué está pasando...",
+          fotosProblema:
+            "Fotos del problema",
+          fotosAyuda:
+            "Puedes agregar una o varias fotos, hasta un máximo de 5.",
+          seleccionarFotos:
+            "Seleccionar fotos",
+          agregarFotos:
+            "Agregar más fotos",
+          fotosFormato:
+            "JPG, PNG, WEBP u otra imagen compatible · Máximo 10 MB por foto",
+          foto: "Foto",
+          agregarMasAyuda:
+            "Puedes volver a pulsar “Agregar más fotos” y seleccionar otras. Las anteriores no se perderán.",
+          maxFotosSeleccionadas:
+            "Has seleccionado el máximo de 5 fotos.",
+          nombre: "Nombre *",
+          nombrePlaceholder:
+            "Tu nombre",
+          telefono: "Teléfono *",
+          email: "Email *",
+          direccion: "Dirección *",
+          ciudad: "Ciudad *",
+          estado: "Estado *",
+          zip: "ZIP *",
+          fechaPreferida:
+            "Fecha preferida",
+          horaPreferida:
+            "Hora preferida",
+          solicitudPreferidaAntes:
+            "Esta solicitud se registrará con",
+          solicitudPreferidaDespues:
+            "como tu profesional preferido.",
+          esteProfesional:
+            "este profesional",
+          solicitudAbierta:
+            "Esta solicitud quedará abierta para que profesionales verificados puedan revisarla y enviarte sus ofertas.",
+          enviarSolicitud:
+            "Enviar solicitud",
+          creandoSolicitud:
+            "Creando solicitud",
+          ySubiendo:
+            "y subiendo",
+          fotoSingular:
+            "foto",
+          fotoPlural:
+            "fotos",
+          solicitudEnviada:
+            "Solicitud enviada",
+          enviadaCon:
+            "Tu solicitud fue enviada con",
+          profesionalSeleccionado:
+            "el profesional seleccionado",
+          comoPreferido:
+            "como profesional preferido.",
+          recibida:
+            "Hemos recibido tu solicitud.",
+          profesionalesOfertas:
+            "Profesionales verificados podrán revisar el trabajo y enviarte sus ofertas.",
+          unaFotoSubida:
+            "1 foto fue subida correctamente.",
+          fotosSubidas:
+            "fotos fueron subidas correctamente.",
+          verSolicitudes:
+            "Ver mis solicitudes",
+          cargando:
+            "Cargando...",
+          todosObligatorios:
+            "Completa todos los campos obligatorios.",
+          profesionalInvalido:
+            "El profesional seleccionado no es válido o ya no está disponible.",
+          verificarProfesionalError:
+            "No pudimos verificar el profesional seleccionado.",
+          profesionalNoDisponible:
+            "El profesional seleccionado ya no está disponible o no está verificado.",
+          noImagen:
+            "no es una imagen válida.",
+          supera10Mb:
+            "supera el límite de 10 MB.",
+          maxCinco:
+            "Puedes seleccionar un máximo de 5 fotos.",
+          agregarFotosError:
+            "No se pudieron agregar las fotos.",
+          solicitudFotoUploadError:
+            "La solicitud fue creada, pero hubo un problema subiendo",
+          fotosAsociarError:
+            "Las fotos se subieron, pero no se pudieron asociar a la solicitud",
+          cuentaError:
+            "No pudimos verificar tu cuenta",
+          servicioError:
+            "No pudimos identificar el servicio seleccionado.",
+          crearError:
+            "No se pudo crear la solicitud.",
+          inesperado:
+            "Ocurrió un error inesperado.",
+          servicios: {
+            plumbing: "Plomería",
+            electrical: "Electricidad",
+            painting: "Pintura",
+            landscaping: "Jardinería",
+            cleaning: "Limpieza",
+            hvac: "Aire acondicionado / HVAC",
+            carpentry: "Carpintería",
+            moving: "Mudanzas",
+            applianceRepair:
+              "Reparación de electrodomésticos",
+            handyman: "Handyman",
+            other: "Otros servicios",
+          },
+        }
+      : {
+          volver: "Back",
+          titulo: "Request a job",
+          descripcion:
+            "Tell us what you need and we'll find professionals who can help.",
+          verificandoProfesional:
+            "Verifying selected professional...",
+          profesionalPreferido:
+            "Preferred professional",
+          profesionalRelydo:
+            "RELYDO Professional",
+          profesionalVerificado:
+            "Professional verified by RELYDO",
+          tipoServicio:
+            "Service type *",
+          seleccionarServicio:
+            "Select a service",
+          problema:
+            "What problem do you have? *",
+          problemaPlaceholder:
+            "Example: I have a leak under the sink",
+          describir:
+            "Describe the job *",
+          describirPlaceholder:
+            "Explain in more detail what is happening...",
+          fotosProblema:
+            "Photos of the problem",
+          fotosAyuda:
+            "You can add one or more photos, up to a maximum of 5.",
+          seleccionarFotos:
+            "Select photos",
+          agregarFotos:
+            "Add more photos",
+          fotosFormato:
+            "JPG, PNG, WEBP or another compatible image · Maximum 10 MB per photo",
+          foto: "Photo",
+          agregarMasAyuda:
+            "You can tap “Add more photos” again and select more. Your previous photos will not be lost.",
+          maxFotosSeleccionadas:
+            "You have selected the maximum of 5 photos.",
+          nombre: "Name *",
+          nombrePlaceholder:
+            "Your name",
+          telefono: "Phone *",
+          email: "Email *",
+          direccion: "Address *",
+          ciudad: "City *",
+          estado: "State *",
+          zip: "ZIP *",
+          fechaPreferida:
+            "Preferred date",
+          horaPreferida:
+            "Preferred time",
+          solicitudPreferidaAntes:
+            "This request will be created with",
+          solicitudPreferidaDespues:
+            "as your preferred professional.",
+          esteProfesional:
+            "this professional",
+          solicitudAbierta:
+            "This request will remain open so verified professionals can review it and send you offers.",
+          enviarSolicitud:
+            "Submit request",
+          creandoSolicitud:
+            "Creating request",
+          ySubiendo:
+            "and uploading",
+          fotoSingular:
+            "photo",
+          fotoPlural:
+            "photos",
+          solicitudEnviada:
+            "Request submitted",
+          enviadaCon:
+            "Your request was sent with",
+          profesionalSeleccionado:
+            "the selected professional",
+          comoPreferido:
+            "as your preferred professional.",
+          recibida:
+            "We received your request.",
+          profesionalesOfertas:
+            "Verified professionals can review the job and send you offers.",
+          unaFotoSubida:
+            "1 photo was uploaded successfully.",
+          fotosSubidas:
+            "photos were uploaded successfully.",
+          verSolicitudes:
+            "View my requests",
+          cargando:
+            "Loading...",
+          todosObligatorios:
+            "Complete all required fields.",
+          profesionalInvalido:
+            "The selected professional is invalid or no longer available.",
+          verificarProfesionalError:
+            "We could not verify the selected professional.",
+          profesionalNoDisponible:
+            "The selected professional is no longer available or is not verified.",
+          noImagen:
+            "is not a valid image.",
+          supera10Mb:
+            "exceeds the 10 MB limit.",
+          maxCinco:
+            "You can select a maximum of 5 photos.",
+          agregarFotosError:
+            "The photos could not be added.",
+          solicitudFotoUploadError:
+            "The request was created, but there was a problem uploading",
+          fotosAsociarError:
+            "The photos were uploaded, but could not be linked to the request",
+          cuentaError:
+            "We could not verify your account",
+          servicioError:
+            "We could not identify the selected service.",
+          crearError:
+            "The request could not be created.",
+          inesperado:
+            "An unexpected error occurred.",
+          servicios: {
+            plumbing: "Plumbing",
+            electrical: "Electrical",
+            painting: "Painting",
+            landscaping: "Landscaping",
+            cleaning: "Cleaning",
+            hvac: "Air conditioning / HVAC",
+            carpentry: "Carpentry",
+            moving: "Moving",
+            applianceRepair:
+              "Appliance repair",
+            handyman: "Handyman",
+            other: "Other services",
+          },
+        };
 
   useEffect(() => {
     if (profesionalId) {
@@ -167,7 +468,7 @@ function SolicitarTrabajoContenido() {
       );
 
       setError(
-        "No pudimos verificar el profesional seleccionado."
+        text.verificarProfesionalError
       );
 
       setProfesional(null);
@@ -178,7 +479,7 @@ function SolicitarTrabajoContenido() {
 
     if (!data) {
       setError(
-        "El profesional seleccionado ya no está disponible o no está verificado."
+        text.profesionalNoDisponible
       );
 
       setProfesional(null);
@@ -207,7 +508,7 @@ function SolicitarTrabajoContenido() {
       )
     ) {
       throw new Error(
-        `"${file.name}" no es una imagen válida.`
+        `"${file.name}" ${text.noImagen}`
       );
     }
 
@@ -216,7 +517,7 @@ function SolicitarTrabajoContenido() {
       MAX_SIZE
     ) {
       throw new Error(
-        `La imagen "${file.name}" supera el límite de 10 MB.`
+        `"${file.name}" ${text.supera10Mb}`
       );
     }
   }
@@ -284,7 +585,7 @@ function SolicitarTrabajoContenido() {
             disponibles
           ) {
             setError(
-              "Puedes seleccionar un máximo de 5 fotos."
+              text.maxCinco
             );
           }
 
@@ -311,7 +612,7 @@ function SolicitarTrabajoContenido() {
       setError(
         err instanceof Error
           ? err.message
-          : "No se pudieron agregar las fotos."
+          : text.agregarFotosError
       );
     } finally {
       /*
@@ -376,7 +677,7 @@ function SolicitarTrabajoContenido() {
       MAX_FOTOS
     ) {
       throw new Error(
-        `Puedes subir un máximo de ${MAX_FOTOS} fotos.`
+        text.maxCinco
       );
     }
 
@@ -433,7 +734,7 @@ function SolicitarTrabajoContenido() {
 
       if (uploadError) {
         throw new Error(
-          `La solicitud fue creada, pero hubo un problema subiendo "${file.name}": ${uploadError.message}`
+          `${text.solicitudFotoUploadError} "${file.name}": ${uploadError.message}`
         );
       }
 
@@ -468,7 +769,7 @@ function SolicitarTrabajoContenido() {
 
     if (photosError) {
       throw new Error(
-        `Las fotos se subieron, pero no se pudieron asociar a la solicitud: ${photosError.message}`
+        `${text.fotosAsociarError}: ${photosError.message}`
       );
     }
   }
@@ -615,7 +916,7 @@ function SolicitarTrabajoContenido() {
       !zipCode
     ) {
       setError(
-        "Completa todos los campos obligatorios."
+        text.todosObligatorios
       );
 
       setEnviando(false);
@@ -628,7 +929,7 @@ function SolicitarTrabajoContenido() {
       !profesional
     ) {
       setError(
-        "El profesional seleccionado no es válido o ya no está disponible."
+        text.profesionalInvalido
       );
 
       setEnviando(false);
@@ -670,7 +971,7 @@ function SolicitarTrabajoContenido() {
 
       if (perfilError) {
         throw new Error(
-          `No pudimos verificar tu cuenta: ${perfilError.message}`
+          `${text.cuentaError}: ${perfilError.message}`
         );
       }
 
@@ -683,8 +984,8 @@ function SolicitarTrabajoContenido() {
       }
 
       if (
-        perfilCliente.role !==
-        "customer"
+        perfilCliente.role !== "customer" &&
+        perfilCliente.role !== "provider"
       ) {
         await supabase.auth.signOut();
 
@@ -727,7 +1028,7 @@ function SolicitarTrabajoContenido() {
         );
 
         throw new Error(
-          "No pudimos identificar el servicio seleccionado."
+          text.servicioError
         );
       }
 
@@ -799,7 +1100,7 @@ function SolicitarTrabajoContenido() {
 
         throw new Error(
           insertError?.message ||
-            "No se pudo crear la solicitud."
+            text.crearError
         );
       }
 
@@ -900,7 +1201,7 @@ function SolicitarTrabajoContenido() {
         );
       } else {
         setError(
-          "Ocurrió un error inesperado."
+          text.inesperado
         );
       }
     } finally {
@@ -919,26 +1220,26 @@ function SolicitarTrabajoContenido() {
           </div>
 
           <h1 className="mt-4 text-3xl font-extrabold text-slate-900">
-            Solicitud enviada
+            {text.solicitudEnviada}
           </h1>
 
           {profesional ? (
             <p className="mt-4 text-slate-600">
-              Tu solicitud fue enviada con{" "}
+              {text.enviadaCon}{" "}
               <strong>
                 {profesional.business_name ||
-                  "el profesional seleccionado"}
+                  text.profesionalSeleccionado}
               </strong>{" "}
-              como profesional preferido.
+              {text.comoPreferido}
             </p>
           ) : (
             <>
               <p className="mt-4 text-slate-600">
-                Hemos recibido tu solicitud.
+                {text.recibida}
               </p>
 
               <p className="mt-2 text-slate-600">
-                Profesionales verificados podrán revisar el trabajo y enviarte sus ofertas.
+                {text.profesionalesOfertas}
               </p>
             </>
           )}
@@ -949,8 +1250,8 @@ function SolicitarTrabajoContenido() {
               📷{" "}
               {cantidadFotos ===
               1
-                ? "1 foto fue subida correctamente."
-                : `${cantidadFotos} fotos fueron subidas correctamente.`}
+                ? text.unaFotoSubida
+                : `${cantidadFotos} ${text.fotosSubidas}`}
             </div>
           )}
 
@@ -958,7 +1259,7 @@ function SolicitarTrabajoContenido() {
             href="/mis-solicitudes"
             className="mt-8 inline-block rounded-xl bg-blue-700 px-8 py-3 font-bold text-white hover:bg-blue-800"
           >
-            Ver mis solicitudes
+            {text.verSolicitudes}
           </a>
 
         </div>
@@ -982,7 +1283,7 @@ function SolicitarTrabajoContenido() {
             }
             className="font-medium text-blue-700 hover:underline"
           >
-            ← Volver
+            ← {text.volver}
           </a>
 
         </div>
@@ -998,11 +1299,11 @@ function SolicitarTrabajoContenido() {
             </div>
 
             <h1 className="mt-2 text-4xl font-extrabold">
-              Solicitar trabajo
+              {text.titulo}
             </h1>
 
             <p className="mt-2 text-blue-100">
-              Cuéntanos qué necesitas y encontraremos profesionales que puedan ayudarte.
+              {text.descripcion}
             </p>
 
           </div>
@@ -1012,7 +1313,7 @@ function SolicitarTrabajoContenido() {
             {cargandoProfesional && (
               <div className="mb-7 rounded-2xl border border-blue-200 bg-blue-50 p-5">
                 <p className="font-bold text-blue-900">
-                  Verificando profesional seleccionado...
+                  {text.verificandoProfesional}
                 </p>
               </div>
             )}
@@ -1021,22 +1322,23 @@ function SolicitarTrabajoContenido() {
               <div className="mb-7 rounded-2xl border border-green-200 bg-green-50 p-5">
 
                 <p className="text-sm font-bold uppercase tracking-wide text-green-700">
-                  Profesional preferido
+                  {text.profesionalPreferido}
                 </p>
 
                 <h2 className="mt-1 text-xl font-extrabold text-green-900">
                   {profesional.business_name ||
-                    "Profesional RELYDO"}
+                    text.profesionalRelydo}
                 </h2>
 
                 <p className="mt-1 text-green-800">
                   {nombreOficio(
-                    profesional.trade
+                    profesional.trade,
+                    language
                   )}
                 </p>
 
                 <p className="mt-3 text-sm text-green-800">
-                  ✓ Profesional verificado por RELYDO
+                  ✓ {text.profesionalVerificado}
                 </p>
 
               </div>
@@ -1060,7 +1362,7 @@ function SolicitarTrabajoContenido() {
               <div>
 
                 <label className="mb-2 block font-bold text-slate-900">
-                  Tipo de servicio *
+                  {text.tipoServicio}
                 </label>
 
                 <select
@@ -1077,51 +1379,51 @@ function SolicitarTrabajoContenido() {
                     value=""
                     disabled
                   >
-                    Selecciona un servicio
+                    {text.seleccionarServicio}
                   </option>
 
                   <option value="plumbing">
-                    Plomería
+                    {text.servicios.plumbing}
                   </option>
 
                   <option value="electrical">
-                    Electricidad
+                    {text.servicios.electrical}
                   </option>
 
                   <option value="painting">
-                    Pintura
+                    {text.servicios.painting}
                   </option>
 
                   <option value="landscaping">
-                    Jardinería
+                    {text.servicios.landscaping}
                   </option>
 
                   <option value="cleaning">
-                    Limpieza
+                    {text.servicios.cleaning}
                   </option>
 
                   <option value="hvac">
-                    Aire acondicionado / HVAC
+                    {text.servicios.hvac}
                   </option>
 
                   <option value="carpentry">
-                    Carpintería
+                    {text.servicios.carpentry}
                   </option>
 
                   <option value="moving">
-                    Mudanzas
+                    {text.servicios.moving}
                   </option>
 
                   <option value="appliance-repair">
-                    Reparación de electrodomésticos
+                    {text.servicios.applianceRepair}
                   </option>
 
                   <option value="handyman">
-                    Handyman
+                    {text.servicios.handyman}
                   </option>
 
                   <option value="other">
-                    Otros servicios
+                    {text.servicios.other}
                   </option>
 
                 </select>
@@ -1131,14 +1433,14 @@ function SolicitarTrabajoContenido() {
               <div>
 
                 <label className="mb-2 block font-bold text-slate-900">
-                  ¿Qué problema tienes? *
+                  {text.problema}
                 </label>
 
                 <input
                   name="title"
                   type="text"
                   required
-                  placeholder="Ej: Tengo una fuga debajo del fregadero"
+                  placeholder={text.problemaPlaceholder}
                   className="w-full rounded-xl border border-slate-300 p-4 text-slate-900"
                 />
 
@@ -1147,14 +1449,14 @@ function SolicitarTrabajoContenido() {
               <div>
 
                 <label className="mb-2 block font-bold text-slate-900">
-                  Describe el trabajo *
+                  {text.describir}
                 </label>
 
                 <textarea
                   name="description"
                   required
                   rows={5}
-                  placeholder="Explica con más detalle qué está pasando..."
+                  placeholder={text.describirPlaceholder}
                   className="w-full resize-none rounded-xl border border-slate-300 p-4 text-slate-900"
                 />
 
@@ -1167,11 +1469,11 @@ function SolicitarTrabajoContenido() {
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <label className="block font-bold text-slate-900">
-                      Fotos del problema
+                      {text.fotosProblema}
                     </label>
 
                     <p className="mt-1 text-sm text-slate-500">
-                      Puedes agregar una o varias fotos, hasta un máximo de 5.
+                      {text.fotosAyuda}
                     </p>
                   </div>
 
@@ -1199,12 +1501,12 @@ function SolicitarTrabajoContenido() {
 
                   <p className="mt-3 font-extrabold text-slate-900">
                     {fotosSeleccionadas.length === 0
-                      ? "Seleccionar fotos"
-                      : "Agregar más fotos"}
+                      ? text.seleccionarFotos
+                      : text.agregarFotos}
                   </p>
 
                   <p className="mt-1 text-sm text-slate-500">
-                    JPG, PNG, WEBP u otra imagen compatible · Máximo 10 MB por foto
+                    {text.fotosFormato}
                   </p>
 
                   <input
@@ -1238,14 +1540,14 @@ function SolicitarTrabajoContenido() {
                             src={
                               foto.preview
                             }
-                            alt={`Foto seleccionada ${
+                            alt={`${text.foto} ${
                               index + 1
                             }`}
                             className="h-36 w-full object-cover"
                           />
 
                           <div className="absolute inset-x-0 bottom-0 bg-slate-950/70 px-3 py-2 text-xs font-bold text-white">
-                            Foto{" "}
+                            {text.foto}{" "}
                             {index + 1}
                           </div>
 
@@ -1272,13 +1574,13 @@ function SolicitarTrabajoContenido() {
                 {fotosSeleccionadas.length > 0 &&
                   fotosSeleccionadas.length < 5 && (
                     <p className="mt-3 text-sm font-medium text-blue-700">
-                      Puedes volver a pulsar “Agregar más fotos” y seleccionar otras. Las anteriores no se perderán.
+                      {text.agregarMasAyuda}
                     </p>
                   )}
 
                 {fotosSeleccionadas.length === 5 && (
                   <div className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-bold text-green-800">
-                    ✓ Has seleccionado el máximo de 5 fotos.
+                    ✓ {text.maxFotosSeleccionadas}
                   </div>
                 )}
 
@@ -1289,14 +1591,14 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Nombre *
+                    {text.nombre}
                   </label>
 
                   <input
                     name="customer_name"
                     type="text"
                     required
-                    placeholder="Tu nombre"
+                    placeholder={text.nombrePlaceholder}
                     className="w-full rounded-xl border border-slate-300 p-4 text-slate-900"
                   />
 
@@ -1305,7 +1607,7 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Teléfono *
+                    {text.telefono}
                   </label>
 
                   <input
@@ -1323,7 +1625,7 @@ function SolicitarTrabajoContenido() {
               <div>
 
                 <label className="mb-2 block font-bold text-slate-900">
-                  Email *
+                  {text.email}
                 </label>
 
                 <input
@@ -1339,7 +1641,7 @@ function SolicitarTrabajoContenido() {
               <div>
 
                 <label className="mb-2 block font-bold text-slate-900">
-                  Dirección *
+                  {text.direccion}
                 </label>
 
                 <input
@@ -1357,7 +1659,7 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Ciudad *
+                    {text.ciudad}
                   </label>
 
                   <input
@@ -1373,7 +1675,7 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Estado *
+                    {text.estado}
                   </label>
 
                   <input
@@ -1390,7 +1692,7 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    ZIP *
+                    {text.zip}
                   </label>
 
                   <input
@@ -1410,7 +1712,7 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Fecha preferida
+                    {text.fechaPreferida}
                   </label>
 
                   <input
@@ -1424,7 +1726,7 @@ function SolicitarTrabajoContenido() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Hora preferida
+                    {text.horaPreferida}
                   </label>
 
                   <input
@@ -1441,16 +1743,16 @@ function SolicitarTrabajoContenido() {
 
                 {profesional ? (
                   <p className="text-slate-800">
-                    Esta solicitud se registrará con{" "}
+                    {text.solicitudPreferidaAntes}{" "}
                     <strong>
                       {profesional.business_name ||
-                        "este profesional"}
+                        text.esteProfesional}
                     </strong>{" "}
-                    como tu profesional preferido.
+                    {text.solicitudPreferidaDespues}
                   </p>
                 ) : (
                   <p className="text-slate-800">
-                    Esta solicitud quedará abierta para que profesionales verificados puedan revisarla y enviarte sus ofertas.
+                    {text.solicitudAbierta}
                   </p>
                 )}
 
@@ -1465,16 +1767,16 @@ function SolicitarTrabajoContenido() {
                 className="w-full rounded-xl bg-blue-700 py-4 text-lg font-extrabold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {enviando
-                  ? `Creando solicitud${
+                  ? `${text.creandoSolicitud}${
                       fotosSeleccionadas.length > 0
-                        ? ` y subiendo ${fotosSeleccionadas.length} ${
+                        ? ` ${text.ySubiendo} ${fotosSeleccionadas.length} ${
                             fotosSeleccionadas.length === 1
-                              ? "foto"
-                              : "fotos"
+                              ? text.fotoSingular
+                              : text.fotoPlural
                           }`
                         : ""
                     }...`
-                  : "Enviar solicitud"}
+                  : text.enviarSolicitud}
               </button>
 
             </form>
@@ -1489,15 +1791,26 @@ function SolicitarTrabajoContenido() {
   );
 }
 
+function SolicitarTrabajoFallback() {
+  const { language } =
+    useLanguage();
+
+  return (
+    <main className="min-h-screen bg-slate-100 flex items-center justify-center">
+      <p className="font-bold text-slate-700">
+        {language === "es"
+          ? "Cargando..."
+          : "Loading..."}
+      </p>
+    </main>
+  );
+}
+
 export default function SolicitarTrabajo() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-slate-100 flex items-center justify-center">
-          <p className="font-bold text-slate-700">
-            Cargando...
-          </p>
-        </main>
+        <SolicitarTrabajoFallback />
       }
     >
       <SolicitarTrabajoContenido />

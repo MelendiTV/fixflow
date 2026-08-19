@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { useLanguage } from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -159,6 +160,207 @@ type JobMessage = {
   created_at: string;
 };
 
+const DETAIL_TRANSLATIONS_EN: Record<string, string> = {
+  "Cargando solicitud...": "Loading request...",
+  "No se pudo abrir la solicitud": "Could not open the request",
+  "Volver a mis solicitudes": "Back to my requests",
+  "← Volver a mis solicitudes": "← Back to my requests",
+  "📍 Ubicación": "📍 Location",
+  "📅 Fecha preferida": "📅 Preferred date",
+  "🕐 Hora preferida": "🕐 Preferred time",
+  "Buscando un nuevo profesional": "Looking for a new professional",
+  "El profesional anterior ya no está disponible": "The previous professional is no longer available",
+  "Tu solicitud volvió a publicarse automáticamente para que otros profesionales puedan enviarte nuevos presupuestos. No necesitas crear otra solicitud.": "Your request was automatically republished so other professionals can send you new offers. You do not need to create another request.",
+  "Esperando nuevos presupuestos": "Waiting for new offers",
+  "Cuando otro profesional compatible envíe una oferta, aparecerá automáticamente en esta página.": "When another compatible professional sends an offer, it will automatically appear on this page.",
+  "Seguimiento en vivo": "Live tracking",
+  "Resultado financiero": "Financial result",
+  "Reembolso al cliente": "Customer refund",
+  "Compensación al profesional": "Professional compensation",
+  "Nota de resolución": "Resolution note",
+  "¿Ya no necesitas el servicio?": "No longer need the service?",
+  "Puedes cancelar esta solicitud": "You can cancel this request",
+  "La cancelación dejará de estar disponible cuando el profesional haya iniciado el trabajo.": "Cancellation will no longer be available once the professional has started the job.",
+  "Cancelar solicitud": "Cancel request",
+  "¿Por qué deseas cancelar?": "Why do you want to cancel?",
+  "Selecciona un motivo": "Select a reason",
+  "Ya no necesito el servicio": "I no longer need the service",
+  "Encontré otra solución": "I found another solution",
+  "Cambió mi horario": "My schedule changed",
+  "El precio no me conviene": "The price does not work for me",
+  "Otro motivo": "Other reason",
+  "Resumen de la cancelación": "Cancellation summary",
+  "Cancelación sin penalidad": "Cancellation without penalty",
+  "Esta solicitud todavía no tiene un trabajo pagado en progreso.": "This request does not yet have a paid job in progress.",
+  "Total pagado": "Total paid",
+  "No encontramos el pago de este trabajo. Actualiza la página antes de cancelar.": "We could not find the payment for this job. Refresh the page before cancelling.",
+  "Volver": "Back",
+  "Trabajo iniciado": "Job started",
+  "La cancelación automática ya no está disponible": "Automatic cancellation is no longer available",
+  "El profesional ya comenzó el servicio. Si existe un problema con el trabajo, deberá gestionarse mediante el sistema de reclamos de RELYDO.": "The professional has already started the service. If there is a problem with the job, it must be handled through RELYDO's claims system.",
+  "⚠️ Iniciar reclamo": "⚠️ Start claim",
+  "💰 Cambio de presupuesto solicitado": "💰 Budget change requested",
+  "El profesional solicita un monto adicional": "The professional is requesting an additional amount",
+  "Revisa el motivo y los nuevos montos antes de aceptar o rechazar.": "Review the reason and new amounts before accepting or rejecting.",
+  "Total anterior": "Previous total",
+  "Adicional solicitado": "Additional amount requested",
+  "Nuevo total propuesto": "New proposed total",
+  "Motivo": "Reason",
+  "Explicación del profesional": "Professional's explanation",
+  "✓ Cambio pagado": "✓ Change paid",
+  "Tu aprobación quedó registrada. Para completar el cambio, paga ahora el monto adicional mediante Stripe.": "Your approval was recorded. To complete the change, pay the additional amount through Stripe now.",
+  "El cambio fue rechazado. El presupuesto anterior permanece sin cambios.": "The change was rejected. The previous budget remains unchanged.",
+  "✓ Profesional contratado": "✓ Professional hired",
+  "Resumen de pago": "Payment summary",
+  "Presupuesto del profesional": "Professional's price",
+  "Total del cliente": "Customer total",
+  "Estado del pago": "Payment status",
+  "El pago está protegido por RELYDO y todavía no ha sido liberado al profesional.": "The payment is protected by RELYDO and has not yet been released to the professional.",
+  "El pago fue procesado y liberado de acuerdo con el flujo de RELYDO.": "The payment was processed and released according to RELYDO's payment flow.",
+  "RELYDO procesó el reembolso correspondiente a este trabajo.": "RELYDO processed the refund for this job.",
+  "RELYDO procesó un reembolso parcial para este trabajo.": "RELYDO processed a partial refund for this job.",
+  "Llegada estimada": "Estimated arrival",
+  "Duración estimada": "Estimated duration",
+  "Valoración": "Rating",
+  "Ver perfil del profesional": "View professional profile",
+  "🔁 Contratar de nuevo": "🔁 Hire again",
+  "🔒 Comunicación protegida": "🔒 Protected communication",
+  "Los números de teléfono personales permanecen privados.": "Personal phone numbers remain private.",
+  "Cargando conversación...": "Loading conversation...",
+  "Todavía no hay mensajes": "There are no messages yet",
+  "Usa este chat para coordinar el servicio sin compartir tu número personal.": "Use this chat to coordinate the service without sharing your personal phone number.",
+  "⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.": "⏳ The chat will remain open for up to 12 hours after the job is completed.",
+  "🔒 RELYDO mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.": "🔒 RELYDO keeps customer and professional phone numbers private. Do not share personal information or external payment methods in the chat.",
+  "🔒 Chat bloqueado": "🔒 Chat locked",
+  "📸 Evidencia del trabajo terminado": "📸 Completed job evidence",
+  "Fotos y videos registrados por el profesional": "Photos and videos recorded by the professional",
+  "Esta evidencia fue registrada por el profesional al finalizar el servicio y queda asociada a este trabajo para tu protección y la del profesional.": "This evidence was recorded by the professional when the service was completed and remains attached to this job for your protection and the professional's.",
+  "No pudimos abrir este archivo de evidencia.": "We could not open this evidence file.",
+  "Registrado": "Recorded",
+  "🔒 Esta evidencia forma parte del registro del trabajo y no puede ser modificada desde esta pantalla.": "🔒 This evidence is part of the job record and cannot be modified from this screen.",
+  "Gracias por tu calificación": "Thank you for your rating",
+  "Ya calificaste este trabajo.": "You already rated this job.",
+  "Tu calificación": "Your rating",
+  "Tu comentario": "Your comment",
+  "Trabajo completado": "Job completed",
+  "Calificar profesional": "Rate professional",
+  "Tu calificación *": "Your rating *",
+  "Comentario": "Comment",
+  "⚠️ Problema reportado": "⚠️ Problem reported",
+  "Tu reclamo quedó registrado": "Your claim was recorded",
+  "RELYDO conserva este reporte asociado al trabajo.": "RELYDO keeps this report associated with the job.",
+  "Descripción": "Description",
+  "✅ Reclamo resuelto": "✅ Claim resolved",
+  "Resolución de RELYDO": "RELYDO resolution",
+  "Este trabajo está cerrado.": "This job is closed.",
+  "No se pueden abrir nuevos reclamos después de que el trabajo ha sido cancelado.": "New claims cannot be opened after the job has been cancelled.",
+  "¿Hubo un problema con el servicio?": "Was there a problem with the service?",
+  "Reportar un problema": "Report a problem",
+  "Usa esta opción si el trabajo quedó incompleto, hubo daños, un cobro adicional u otro problema importante.": "Use this option if the job was incomplete, there was damage, an additional charge, or another significant problem.",
+  "⚠️ Reportar problema": "⚠️ Report problem",
+  "Abrir reclamo": "Open claim",
+  "Cuéntanos qué ocurrió": "Tell us what happened",
+  "Motivo del reclamo *": "Claim reason *",
+  "Trabajo incompleto": "Incomplete job",
+  "Calidad del trabajo": "Quality of work",
+  "Daños durante el servicio": "Damage during service",
+  "Cobro adicional no acordado": "Unapproved additional charge",
+  "Conducta del profesional": "Professional conduct",
+  "Otro problema": "Other problem",
+  "Explica el problema *": "Explain the problem *",
+  "Fotos o videos": "Photos or videos",
+  "Opcional. Puedes adjuntar hasta 10 fotos y 2 videos como evidencia.": "Optional. You can attach up to 10 photos and 2 videos as evidence.",
+  "📎 Adjuntar archivos": "📎 Attach files",
+  "Formatos permitidos": "Allowed formats",
+  "Fotos: JPG, PNG, WEBP · Videos: MP4, WEBM, MOV · Máximo 50 MB por archivo.": "Photos: JPG, PNG, WEBP · Videos: MP4, WEBM, MOV · Maximum 50 MB per file.",
+  "Quitar": "Remove",
+  "Explicación de la evidencia *": "Evidence explanation *",
+  "Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar tu reclamo.": "Describe what the photos or videos show and what RELYDO should consider when reviewing your claim.",
+  "Cancelar": "Cancel",
+  "Presupuestos recibidos": "Offers received",
+  "Compara precio, tiempo de llegada, experiencia y valoración antes de elegir.": "Compare price, arrival time, experience, and rating before choosing.",
+  "Todavía no tienes presupuestos": "You do not have any offers yet",
+  "Cuando un profesional envíe un presupuesto aparecerá aquí.": "When a professional sends an offer, it will appear here.",
+  "Profesional": "Professional",
+  "✓ Contratado": "✓ Hired",
+  "No seleccionada": "Not selected",
+  "✓ Verificado": "✓ Verified",
+  "Presupuesto": "Price",
+  "🚗 Puede llegar": "🚗 Can arrive",
+  "⏱️ Duración": "⏱️ Duration",
+  "⭐ Valoración": "⭐ Rating",
+  "🛠️ Experiencia": "🛠️ Experience",
+  "Trabajos completados en RELYDO": "Jobs completed on RELYDO",
+  "Mensaje del profesional": "Professional's message",
+  "Sin mensaje adicional.": "No additional message.",
+  "Contratando profesional...": "Hiring professional...",
+  "Tú": "You",
+  "Escribe un mensaje...": "Write a message...",
+  "Enviar": "Send",
+  "🎥 Video": "🎥 Video",
+  "📷 Foto": "📷 Photo",
+  "Cuéntanos cómo fue el servicio...": "Tell us how the service went...",
+  "Enviando calificación...": "Sending rating...",
+  "Enviar reseña": "Submit review",
+  "En revisión": "Under review",
+  "Enviando reclamo...": "Sending claim...",
+  "Enviar reclamo": "Submit claim",
+  "Abierta": "Open",
+  "Trabajo en progreso": "Job in progress",
+  "Completada": "Completed",
+  "Cancelada": "Cancelled",
+  "No indicado": "Not specified",
+  "Pago retenido por RELYDO": "Payment held by RELYDO",
+  "Pago completado": "Payment completed",
+  "Reembolsado": "Refunded",
+  "Reembolso parcial": "Partial refund",
+  "Pago confirmado": "Payment confirmed",
+  "Pago cancelado": "Payment cancelled",
+  "El profesional inició el trabajo": "The professional started the job",
+  "El profesional ya llegó": "The professional has arrived",
+  "El profesional va en camino": "The professional is on the way",
+  "Profesional contratado": "Professional hired",
+  "El profesional marcó el servicio como terminado.": "The professional marked the service as completed.",
+  "El profesional ya comenzó a realizar el servicio.": "The professional has started performing the service.",
+  "El profesional indicó que ya se encuentra en el lugar.": "The professional indicated that they are at the location.",
+  "El profesional indicó que va rumbo a la dirección del servicio.": "The professional indicated that they are on the way to the service address.",
+  "Has contratado a un profesional para realizar este trabajo.": "You hired a professional to perform this job.",
+  "Plomería": "Plumbing",
+  "Electricidad": "Electrical",
+  "HVAC / Aire acondicionado": "HVAC / Air conditioning",
+  "Carpintería": "Carpentry",
+  "Pintura": "Painting",
+  "Jardinería": "Landscaping",
+  "Limpieza": "Cleaning",
+  "Mudanzas": "Moving",
+  "Otros servicios": "Other services",
+  "Profesional RELYDO": "RELYDO Professional",
+  "Va rumbo a tu ubicación": "On the way to your location",
+  "Llegó": "Arrived",
+  "Ya se encuentra en el lugar": "Already at the location",
+  "El servicio está en proceso": "The service is in progress",
+  "Completado": "Completed",
+  "Trabajo terminado": "Job finished",
+  "Actualizando en vivo": "Updating live",
+  "Solicitud cancelada": "Request cancelled",
+  "Este trabajo fue cancelado": "This job was cancelled",
+  "Decisión": "Decision",
+  "El problema es mayor de lo esperado": "The problem is bigger than expected",
+  "Se necesita trabajo adicional": "Additional work is needed",
+  "✕ Rechazar cambio": "✕ Reject change",
+  "✓ Cambio de presupuesto aceptado": "✓ Budget change accepted",
+  "✕ Cambio de presupuesto rechazado": "✕ Budget change rejected",
+  "Cambio de presupuesto cancelado": "Budget change cancelled",
+  "Abriendo pago seguro...": "Opening secure payment...",
+  "Evidencia del trabajo terminado": "Completed job evidence"
+};
+
+function detailText(language: "es" | "en", spanish: string) {
+  return language === "en"
+    ? DETAIL_TRANSLATIONS_EN[spanish] || spanish
+    : spanish;
+}
+
 function nombreOficio(
   trade: string | null
 ) {
@@ -207,13 +409,14 @@ function nombreEstadoSolicitud(
 }
 
 function mostrarMinutos(
-  minutos: number | null
+  minutos: number | null,
+  language: "es" | "en" = "es"
 ) {
   if (
     minutos === null ||
     minutos === undefined
   ) {
-    return "No indicado";
+    return language === "en" ? "Not specified" : "No indicado";
   }
 
   if (minutos < 60) {
@@ -231,8 +434,8 @@ function mostrarMinutos(
   if (restantes === 0) {
     return `${horas} ${
       horas === 1
-        ? "hora"
-        : "horas"
+        ? language === "en" ? "hour" : "hora"
+        : language === "en" ? "hours" : "horas"
     }`;
   }
 
@@ -432,10 +635,11 @@ function calcularCancelacionCliente(
 
 
 function formatearHoraChat(
-  fecha: string
+  fecha: string,
+  language: "es" | "en" = "es"
 ) {
   return new Intl.DateTimeFormat(
-    "es-US",
+    language === "en" ? "en-US" : "es-US",
     {
       hour: "numeric",
       minute: "2-digit",
@@ -448,6 +652,9 @@ function formatearHoraChat(
 }
 
 export default function MisSolicitudDetallePage() {
+  const { language } = useLanguage();
+  const T = (spanish: string) => detailText(language, spanish);
+
   const params =
     useParams<{
       id: string;
@@ -1200,6 +1407,31 @@ export default function MisSolicitudDetallePage() {
         );
 
         return;
+      }
+
+      const { data: accountProfile, error: accountProfileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (accountProfileError || !accountProfile) {
+        throw new Error(
+          language === "en"
+            ? "We could not verify your RELYDO account."
+            : "No pudimos verificar tu cuenta de RELYDO."
+        );
+      }
+
+      if (
+        accountProfile.role !== "customer" &&
+        accountProfile.role !== "provider"
+      ) {
+        throw new Error(
+          language === "en"
+            ? "This account does not have access to customer mode."
+            : "Esta cuenta no tiene acceso al modo cliente."
+        );
       }
 
       const {
@@ -2153,7 +2385,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
     if (review) {
       setError(
-        "Ya calificaste este trabajo."
+        T("Ya calificaste este trabajo.")
       );
 
       return;
@@ -2860,7 +3092,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl bg-white px-8 py-7 shadow-lg">
           <p className="font-bold text-slate-700">
-            Cargando solicitud...
+            {T("Cargando solicitud...")}
           </p>
         </div>
       </main>
@@ -2876,7 +3108,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         <div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-xl">
 
           <h1 className="text-2xl font-extrabold text-red-700">
-            No se pudo abrir la solicitud
+            {T("No se pudo abrir la solicitud")}
           </h1>
 
           <p className="mt-4 text-slate-600">
@@ -2892,7 +3124,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             }
             className="mt-6 rounded-xl bg-blue-700 px-6 py-3 font-bold text-white hover:bg-blue-800"
           >
-            Volver a mis solicitudes
+            {T("Volver a mis solicitudes")}
           </button>
 
         </div>
@@ -3071,36 +3303,36 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
       icono: "🤝",
       titulo: "Contratado",
       descripcion:
-        "Profesional contratado",
+        T("Profesional contratado"),
     },
     {
       numero: 2,
       icono: "🚗",
       titulo: "En camino",
       descripcion:
-        "Va rumbo a tu ubicación",
+        T("Va rumbo a tu ubicación"),
     },
     {
       numero: 3,
       icono: "📍",
-      titulo: "Llegó",
+      titulo: T("Llegó"),
       descripcion:
-        "Ya se encuentra en el lugar",
+        T("Ya se encuentra en el lugar"),
     },
     {
       numero: 4,
       icono: "🛠️",
       titulo:
-        "Trabajo iniciado",
+        T("Trabajo iniciado"),
       descripcion:
-        "El servicio está en proceso",
+        T("El servicio está en proceso"),
     },
     {
       numero: 5,
       icono: "✅",
-      titulo: "Completado",
+      titulo: T("Completado"),
       descripcion:
-        "Trabajo terminado",
+        T("Trabajo terminado"),
     },
   ];
 
@@ -3118,7 +3350,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           }
           className="font-bold text-blue-700 hover:underline"
         >
-          ← Volver a mis solicitudes
+          {T("← Volver a mis solicitudes")}
         </button>
 
         {/* SOLICITUD */}
@@ -3147,7 +3379,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
             <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm text-slate-500">
-                📍 Ubicación
+                {T("📍 Ubicación")}
               </p>
 
               <p className="mt-1 font-extrabold text-slate-900">
@@ -3159,7 +3391,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
             <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm text-slate-500">
-                📅 Fecha preferida
+                {T("📅 Fecha preferida")}
               </p>
 
               <p className="mt-1 font-extrabold text-slate-900">
@@ -3170,7 +3402,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
             <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm text-slate-500">
-                🕐 Hora preferida
+                {T("🕐 Hora preferida")}
               </p>
 
               <p className="mt-1 font-extrabold text-slate-900">
@@ -3199,25 +3431,25 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <div className="flex-1">
 
                   <p className="text-sm font-extrabold uppercase tracking-wide text-amber-700">
-                    Buscando un nuevo profesional
+                    {T("Buscando un nuevo profesional")}
                   </p>
 
                   <h2 className="mt-2 text-2xl font-extrabold text-amber-950">
-                    El profesional anterior ya no está disponible
+                    {T("El profesional anterior ya no está disponible")}
                   </h2>
 
                   <p className="mt-2 leading-7 text-amber-900">
-                    Tu solicitud volvió a publicarse automáticamente para que otros profesionales puedan enviarte nuevos presupuestos. No necesitas crear otra solicitud.
+                    {T("Tu solicitud volvió a publicarse automáticamente para que otros profesionales puedan enviarte nuevos presupuestos. No necesitas crear otra solicitud.")}
                   </p>
 
                   <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-5">
 
                     <p className="font-extrabold text-slate-900">
-                      Esperando nuevos presupuestos
+                      {T("Esperando nuevos presupuestos")}
                     </p>
 
                     <p className="mt-1 text-sm text-slate-600">
-                      Cuando otro profesional compatible envíe una oferta, aparecerá automáticamente en esta página.
+                      {T("Cuando otro profesional compatible envíe una oferta, aparecerá automáticamente en esta página.")}
                     </p>
 
                   </div>
@@ -3238,7 +3470,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div>
                 <p className="text-sm font-black uppercase tracking-wide text-blue-700">
-                  Seguimiento en vivo
+                  {T("Seguimiento en vivo")}
                 </p>
 
                 <h2 className="mt-2 text-2xl font-black text-slate-950">
@@ -3274,7 +3506,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   />
 
                   {realtimeConectado
-                    ? "Actualizando en vivo"
+                    ? T("Actualizando en vivo")
                     : "Conectando..."}
                 </div>
               )}
@@ -3389,14 +3621,14 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 <p className="text-sm font-extrabold uppercase tracking-wide text-red-700">
                   {canceladoPorRelydo
-                    ? "Resolución de RELYDO"
-                    : "Solicitud cancelada"}
+                    ? T("Resolución de RELYDO")
+                    : T("Solicitud cancelada")}
                 </p>
 
                 <h2 className="mt-2 text-2xl font-extrabold text-red-900">
                   {canceladoPorRelydo
                     ? "Trabajo cancelado por resolución de RELYDO"
-                    : "Este trabajo fue cancelado"}
+                    : T("Este trabajo fue cancelado")}
                 </h2>
 
                 <p className="mt-2 text-red-800">
@@ -3410,8 +3642,8 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                     <p className="text-sm font-bold text-slate-500">
                       {canceladoPorRelydo
-                        ? "Decisión"
-                        : "Motivo"}
+                        ? T("Decisión")
+                        : T("Motivo")}
                     </p>
 
                     <p className="mt-2 font-semibold text-slate-800">
@@ -3425,13 +3657,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   reclamoResuelto && (
                     <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
                       <p className="text-sm font-black uppercase tracking-wide text-blue-700">
-                        Resultado financiero
+                        {T("Resultado financiero")}
                       </p>
 
                       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="rounded-xl bg-white p-4">
                           <p className="text-sm font-bold text-slate-500">
-                            Reembolso al cliente
+                            {T("Reembolso al cliente")}
                           </p>
                           <p className="mt-1 text-2xl font-black text-blue-800">
                             ${reembolsoReclamo.toFixed(2)}
@@ -3440,7 +3672,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                         <div className="rounded-xl bg-white p-4">
                           <p className="text-sm font-bold text-slate-500">
-                            Compensación al profesional
+                            {T("Compensación al profesional")}
                           </p>
                           <p className="mt-1 text-2xl font-black text-slate-900">
                             ${compensacionProfesionalReclamo.toFixed(2)}
@@ -3451,7 +3683,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       {claim?.resolution_notes && (
                         <div className="mt-4 rounded-xl bg-white p-4">
                           <p className="text-sm font-bold text-slate-500">
-                            Nota de resolución
+                            {T("Nota de resolución")}
                           </p>
                           <p className="mt-2 whitespace-pre-wrap font-semibold leading-6 text-slate-800">
                             {claim.resolution_notes}
@@ -3475,15 +3707,15 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <div>
 
                   <p className="text-sm font-bold uppercase tracking-wide text-slate-500">
-                    ¿Ya no necesitas el servicio?
+                    {T("¿Ya no necesitas el servicio?")}
                   </p>
 
                   <h2 className="mt-1 text-xl font-extrabold text-slate-900">
-                    Puedes cancelar esta solicitud
+                    {T("Puedes cancelar esta solicitud")}
                   </h2>
 
                   <p className="mt-2 text-sm text-slate-600">
-                    La cancelación dejará de estar disponible cuando el profesional haya iniciado el trabajo.
+                    {T("La cancelación dejará de estar disponible cuando el profesional haya iniciado el trabajo.")}
                   </p>
 
                 </div>
@@ -3499,7 +3731,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   }}
                   className="shrink-0 rounded-xl border-2 border-red-600 bg-white px-5 py-3 font-extrabold text-red-700 hover:bg-red-50"
                 >
-                  Cancelar solicitud
+                  {T("Cancelar solicitud")}
                 </button>
 
               </div>
@@ -3510,11 +3742,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                   <div>
                     <p className="text-sm font-extrabold uppercase tracking-wide text-red-700">
-                      Cancelar solicitud
+                      {T("Cancelar solicitud")}
                     </p>
 
                     <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                      ¿Por qué deseas cancelar?
+                      {T("¿Por qué deseas cancelar?")}
                     </h2>
                   </div>
 
@@ -3547,42 +3779,42 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   className="mt-5 w-full rounded-xl border border-slate-300 bg-white p-4 font-semibold text-slate-900"
                 >
                   <option value="">
-                    Selecciona un motivo
+                    {T("Selecciona un motivo")}
                   </option>
 
                   <option value="Ya no necesito el servicio">
-                    Ya no necesito el servicio
+                    {T("Ya no necesito el servicio")}
                   </option>
 
                   <option value="Encontré otra solución">
-                    Encontré otra solución
+                    {T("Encontré otra solución")}
                   </option>
 
                   <option value="Cambió mi horario">
-                    Cambió mi horario
+                    {T("Cambió mi horario")}
                   </option>
 
                   <option value="El precio no me conviene">
-                    El precio no me conviene
+                    {T("El precio no me conviene")}
                   </option>
 
                   <option value="Otro motivo">
-                    Otro motivo
+                    {T("Otro motivo")}
                   </option>
                 </select>
 
                 <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
                   <p className="text-sm font-black uppercase tracking-wide text-red-700">
-                    Resumen de la cancelación
+                    {T("Resumen de la cancelación")}
                   </p>
 
                   {solicitud.status === "open" ? (
                     <div className="mt-3 rounded-xl bg-white p-4">
                       <p className="font-extrabold text-emerald-700">
-                        Cancelación sin penalidad
+                        {T("Cancelación sin penalidad")}
                       </p>
                       <p className="mt-1 text-sm text-slate-600">
-                        Esta solicitud todavía no tiene un trabajo pagado en progreso.
+                        {T("Esta solicitud todavía no tiene un trabajo pagado en progreso.")}
                       </p>
                     </div>
                   ) : payment ? (
@@ -3606,7 +3838,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       <div className="border-t border-slate-200 pt-3">
                         <div className="flex items-center justify-between gap-4">
                           <span className="font-black text-slate-900">
-                            Reembolso al cliente
+                            {T("Reembolso al cliente")}
                           </span>
                           <strong className="text-xl text-emerald-700">
                             ${resumenCancelacion.reembolso.toFixed(2)}
@@ -3616,7 +3848,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     </div>
                   ) : (
                     <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-                      No encontramos el pago de este trabajo. Actualiza la página antes de cancelar.
+                      {T("No encontramos el pago de este trabajo. Actualiza la página antes de cancelar.")}
                     </div>
                   )}
                 </div>
@@ -3638,7 +3870,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     }
                     className="rounded-xl border-2 border-slate-300 bg-white px-5 py-3 font-extrabold text-slate-700 disabled:opacity-50"
                   >
-                    Volver
+                    {T("Volver")}
                   </button>
 
                   <button
@@ -3667,13 +3899,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             solicitud.job_stage === "working" ? (
           <section className="mt-6 rounded-3xl border border-amber-300 bg-amber-50 p-7 shadow-sm">
             <p className="text-sm font-black uppercase tracking-wide text-amber-700">
-              Trabajo iniciado
+              {T("Trabajo iniciado")}
             </p>
             <h2 className="mt-2 text-xl font-black text-amber-950">
-              La cancelación automática ya no está disponible
+              {T("La cancelación automática ya no está disponible")}
             </h2>
             <p className="mt-2 leading-7 text-amber-900">
-              El profesional ya comenzó el servicio. Si existe un problema con el trabajo, deberá gestionarse mediante el sistema de reclamos de RELYDO.
+              {T("El profesional ya comenzó el servicio. Si existe un problema con el trabajo, deberá gestionarse mediante el sistema de reclamos de RELYDO.")}
             </p>
 
             <button
@@ -3699,7 +3931,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               }}
               className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-amber-600 px-5 py-3.5 font-black text-white transition hover:bg-amber-700 sm:w-auto"
             >
-              ⚠️ Iniciar reclamo
+              {T("⚠️ Iniciar reclamo")}
             </button>
           </section>
         ) : null}
@@ -3710,15 +3942,15 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           <section className="mt-6 overflow-hidden rounded-3xl border-2 border-violet-300 bg-white shadow-xl">
             <div className="bg-violet-700 px-7 py-5 text-white">
               <p className="text-sm font-black uppercase tracking-wide text-violet-100">
-                💰 Cambio de presupuesto solicitado
+                {T("💰 Cambio de presupuesto solicitado")}
               </p>
 
               <h2 className="mt-2 text-2xl font-black">
-                El profesional solicita un monto adicional
+                {T("El profesional solicita un monto adicional")}
               </h2>
 
               <p className="mt-2 max-w-3xl text-violet-100">
-                Revisa el motivo y los nuevos montos antes de aceptar o rechazar.
+                {T("Revisa el motivo y los nuevos montos antes de aceptar o rechazar.")}
               </p>
             </div>
 
@@ -3726,7 +3958,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="rounded-2xl bg-slate-50 p-5">
                   <p className="text-sm font-bold text-slate-500">
-                    Total anterior
+                    {T("Total anterior")}
                   </p>
                   <p className="mt-1 text-2xl font-black text-slate-950">
                     ${Number(
@@ -3737,7 +3969,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 <div className="rounded-2xl bg-violet-50 p-5">
                   <p className="text-sm font-bold text-violet-700">
-                    Adicional solicitado
+                    {T("Adicional solicitado")}
                   </p>
                   <p className="mt-1 text-2xl font-black text-violet-700">
                     +${Number(
@@ -3748,7 +3980,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 <div className="rounded-2xl bg-slate-950 p-5 text-white">
                   <p className="text-sm font-bold text-slate-300">
-                    Nuevo total propuesto
+                    {T("Nuevo total propuesto")}
                   </p>
                   <p className="mt-1 text-2xl font-black">
                     ${Number(
@@ -3760,18 +3992,18 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <p className="text-sm font-black uppercase tracking-wide text-slate-500">
-                  Motivo
+                  {T("Motivo")}
                 </p>
 
                 <p className="mt-2 font-black text-slate-950">
                   {changeOrderPendiente.reason === "problema_mayor"
-                    ? "El problema es mayor de lo esperado"
+                    ? T("El problema es mayor de lo esperado")
                     : changeOrderPendiente.reason === "trabajo_adicional"
-                    ? "Se necesita trabajo adicional"
+                    ? T("Se necesita trabajo adicional")
                     : changeOrderPendiente.reason === "materiales_adicionales"
                     ? "Se necesitan materiales adicionales"
                     : changeOrderPendiente.reason === "otro"
-                    ? "Otro motivo"
+                    ? T("Otro motivo")
                     : changeOrderPendiente.reason}
                 </p>
 
@@ -3780,7 +4012,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     <div className="my-4 border-t border-slate-200" />
 
                     <p className="text-sm font-black uppercase tracking-wide text-slate-500">
-                      Explicación del profesional
+                      {T("Explicación del profesional")}
                     </p>
 
                     <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">
@@ -3818,7 +4050,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   {respondiendoChangeOrderId ===
                   changeOrderPendiente.id
                     ? "Procesando..."
-                    : "✕ Rechazar cambio"}
+                    : T("✕ Rechazar cambio")}
                 </button>
 
                 <button
@@ -3877,17 +4109,17 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             >
               {ultimoChangeOrder.status ===
               "accepted"
-                ? "✓ Cambio de presupuesto aceptado"
+                ? T("✓ Cambio de presupuesto aceptado")
                 : ultimoChangeOrder.status ===
                   "rejected"
-                ? "✕ Cambio de presupuesto rechazado"
-                : "Cambio de presupuesto cancelado"}
+                ? T("✕ Cambio de presupuesto rechazado")
+                : T("Cambio de presupuesto cancelado")}
             </p>
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-sm text-slate-600">
-                  Adicional solicitado
+                  {T("Adicional solicitado")}
                 </p>
                 <p className="text-xl font-black text-slate-950">
                   ${Number(
@@ -3898,7 +4130,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="sm:text-right">
                 <p className="text-sm text-slate-600">
-                  Nuevo total propuesto
+                  {T("Nuevo total propuesto")}
                 </p>
                 <p className="text-xl font-black text-slate-950">
                   ${Number(
@@ -3914,7 +4146,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 "paid" && (
                 <div className="mt-4 rounded-2xl border border-emerald-200 bg-white/70 p-4">
                   <p className="font-black text-emerald-800">
-                    ✓ Cambio pagado
+                    {T("✓ Cambio pagado")}
                   </p>
                   <p className="mt-1 text-sm font-bold leading-6 text-emerald-800">
                     Stripe confirmó el pago adicional de $
@@ -3932,7 +4164,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 "paid" && (
               <div className="mt-4">
                 <p className="text-sm font-bold leading-6 text-emerald-800">
-                  Tu aprobación quedó registrada. Para completar el cambio, paga ahora el monto adicional mediante Stripe.
+                  {T("Tu aprobación quedó registrada. Para completar el cambio, paga ahora el monto adicional mediante Stripe.")}
                 </p>
 
                 <button
@@ -3951,7 +4183,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 >
                   {pagandoChangeOrderId ===
                   ultimoChangeOrder.id
-                    ? "Abriendo pago seguro..."
+                    ? T("Abriendo pago seguro...")
                     : `💳 Pagar adicional · $${redondearDinero(
                         Number(
                           ultimoChangeOrder.additional_amount
@@ -3972,7 +4204,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             {ultimoChangeOrder.status ===
               "rejected" && (
               <p className="mt-4 text-sm font-bold leading-6 text-red-800">
-                El cambio fue rechazado. El presupuesto anterior permanece sin cambios.
+                {T("El cambio fue rechazado. El presupuesto anterior permanece sin cambios.")}
               </p>
             )}
           </section>
@@ -3984,13 +4216,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           <section className="mt-6 rounded-3xl border-2 border-green-300 bg-green-50 p-7">
 
             <p className="text-sm font-extrabold uppercase tracking-wide text-green-700">
-              ✓ Profesional contratado
+              {T("✓ Profesional contratado")}
             </p>
 
             <h2 className="mt-2 text-2xl font-extrabold text-green-900">
               {ofertaSeleccionada.profesional
                 ?.business_name ||
-                "Profesional RELYDO"}
+                T("Profesional RELYDO")}
             </h2>
 
             <p className="mt-2 text-green-800">
@@ -4035,7 +4267,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <div className="mt-4 border-t border-slate-200 pt-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm font-bold text-slate-600">
-                      Estado del pago
+                      {T("Estado del pago")}
                     </span>
 
                     <span
@@ -4051,14 +4283,14 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {nombreEstadoPagoCliente(payment.status)}
+                      {T(nombreEstadoPagoCliente(payment.status))}
                     </span>
                   </div>
 
                   {Number(payment.refunded_amount || 0) > 0 && (
                     <div className="mt-3 flex items-center justify-between gap-4 rounded-xl bg-emerald-50 px-4 py-3">
                       <span className="font-bold text-emerald-800">
-                        Reembolso al cliente
+                        {T("Reembolso al cliente")}
                       </span>
                       <strong className="text-lg text-emerald-800">
                         ${Number(payment.refunded_amount || 0).toFixed(2)}
@@ -4068,25 +4300,25 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                   {payment.status === "ready_for_payout" && (
                     <p className="mt-3 text-xs leading-5 text-amber-700">
-                      El pago está protegido por RELYDO y todavía no ha sido liberado al profesional.
+                      {T("El pago está protegido por RELYDO y todavía no ha sido liberado al profesional.")}
                     </p>
                   )}
 
                   {payment.status === "paid_out" && (
                     <p className="mt-3 text-xs leading-5 text-blue-700">
-                      El pago fue procesado y liberado de acuerdo con el flujo de RELYDO.
+                      {T("El pago fue procesado y liberado de acuerdo con el flujo de RELYDO.")}
                     </p>
                   )}
 
                   {payment.status === "refunded" && (
                     <p className="mt-3 text-xs leading-5 text-emerald-700">
-                      RELYDO procesó el reembolso correspondiente a este trabajo.
+                      {T("RELYDO procesó el reembolso correspondiente a este trabajo.")}
                     </p>
                   )}
 
                   {payment.status === "partially_refunded" && (
                     <p className="mt-3 text-xs leading-5 text-violet-700">
-                      RELYDO procesó un reembolso parcial para este trabajo.
+                      {T("RELYDO procesó un reembolso parcial para este trabajo.")}
                     </p>
                   )}
                 </div>
@@ -4097,7 +4329,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="rounded-xl bg-white p-4">
                 <p className="text-sm text-green-700">
-                  Llegada estimada
+                  {T("Llegada estimada")}
                 </p>
 
                 <p className="mt-1 font-extrabold text-green-900">
@@ -4109,7 +4341,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="rounded-xl bg-white p-4">
                 <p className="text-sm text-green-700">
-                  Duración estimada
+                  {T("Duración estimada")}
                 </p>
 
                 <p className="mt-1 font-extrabold text-green-900">
@@ -4121,7 +4353,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="rounded-xl bg-white p-4">
                 <p className="text-sm text-green-700">
-                  Valoración
+                  {T("Valoración")}
                 </p>
 
                 <p className="mt-1 font-extrabold text-green-900">
@@ -4149,7 +4381,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               }
               className="mt-5 rounded-xl border-2 border-green-700 px-5 py-3 font-extrabold text-green-800 hover:bg-green-100"
             >
-              Ver perfil del profesional
+              {T("Ver perfil del profesional")}
             </button>
 
             {solicitud.status ===
@@ -4163,7 +4395,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   }
                   className="ml-0 mt-3 rounded-xl bg-green-700 px-5 py-3 font-extrabold text-white hover:bg-green-800 sm:ml-3"
                 >
-                  🔁 Contratar de nuevo
+                  {T("🔁 Contratar de nuevo")}
                 </button>
               )}
 
@@ -4183,7 +4415,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-widest text-blue-300">
-                      🔒 Comunicación protegida
+                      {T("🔒 Comunicación protegida")}
                     </p>
 
                     <h2 className="mt-1 text-2xl font-black">
@@ -4194,7 +4426,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-300">
-                      Los números de teléfono personales permanecen privados.
+                      {T("Los números de teléfono personales permanecen privados.")}
                     </p>
                   </div>
 
@@ -4215,7 +4447,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               <div className="max-h-[430px] min-h-[260px] overflow-y-auto bg-slate-50 p-5">
                 {cargandoChat ? (
                   <div className="flex min-h-[220px] items-center justify-center text-sm font-bold text-slate-500">
-                    Cargando conversación...
+                    {T("Cargando conversación...")}
                   </div>
                 ) : mensajesChat.length === 0 ? (
                   <div className="flex min-h-[220px] flex-col items-center justify-center text-center">
@@ -4224,11 +4456,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     </div>
 
                     <p className="mt-3 font-black text-slate-800">
-                      Todavía no hay mensajes
+                      {T("Todavía no hay mensajes")}
                     </p>
 
                     <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">
-                      Usa este chat para coordinar el servicio sin compartir tu número personal.
+                      {T("Usa este chat para coordinar el servicio sin compartir tu número personal.")}
                     </p>
                   </div>
                 ) : (
@@ -4263,13 +4495,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                                 }`}
                               >
                                 {mio
-                                  ? "Tú"
+                                  ? T("Tú")
                                   : item.sender_role ===
                                     "admin"
                                   ? "RELYDO Admin"
                                   : ofertaSeleccionada.profesional
                                       ?.business_name ||
-                                    "Profesional"}
+                                    T("Profesional")}
                               </p>
 
                               <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6">
@@ -4285,7 +4517,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                               >
                                 {formatearHoraChat(
                                   item.created_at
-                                )}
+                                , language)}
                               </p>
                             </div>
                           </div>
@@ -4323,7 +4555,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                         }}
                         rows={2}
                         maxLength={1500}
-                        placeholder="Escribe un mensaje..."
+                        placeholder={T("Escribe un mensaje...")}
                         className="min-h-[52px] flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500"
                       />
 
@@ -4340,7 +4572,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       >
                         {enviandoMensajeChat
                           ? "Enviando..."
-                          : "Enviar"}
+                          : T("Enviar")}
                       </button>
                     </div>
 
@@ -4348,18 +4580,18 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       "completed" &&
                       solicitud.completed_at && (
                         <p className="mt-2 text-xs font-bold text-amber-700">
-                          ⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.
+                          {T("⏳ El chat permanecerá abierto hasta 12 horas después de que se completó el trabajo.")}
                         </p>
                       )}
 
                     <p className="mt-2 text-xs leading-5 text-slate-500">
-                      🔒 RELYDO mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.
+                      {T("🔒 RELYDO mantiene privados los teléfonos del cliente y del profesional. No compartas datos personales o formas de pago externas en el chat.")}
                     </p>
                   </>
                 ) : (
                   <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                     <p className="font-black text-amber-950">
-                      🔒 Chat bloqueado
+                      {T("🔒 Chat bloqueado")}
                     </p>
 
                     <p className="mt-1 text-sm leading-6 text-amber-900">
@@ -4379,15 +4611,15 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-blue-700">
-                    📸 Evidencia del trabajo terminado
+                    {T("📸 Evidencia del trabajo terminado")}
                   </p>
 
                   <h2 className="mt-2 text-2xl font-black text-slate-950">
-                    Fotos y videos registrados por el profesional
+                    {T("Fotos y videos registrados por el profesional")}
                   </h2>
 
                   <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                    Esta evidencia fue registrada por el profesional al finalizar el servicio y queda asociada a este trabajo para tu protección y la del profesional.
+                    {T("Esta evidencia fue registrada por el profesional al finalizar el servicio y queda asociada a este trabajo para tu protección y la del profesional.")}
                   </p>
                 </div>
 
@@ -4434,14 +4666,14 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                           >
                             <img
                               src={item.signed_url}
-                              alt="Evidencia del trabajo terminado"
+                              alt={T("Evidencia del trabajo terminado")}
                               className="aspect-video w-full bg-slate-100 object-cover transition hover:opacity-95"
                             />
                           </a>
                         )
                       ) : (
                         <div className="flex aspect-video items-center justify-center bg-slate-100 px-5 text-center text-sm font-bold text-slate-500">
-                          No pudimos abrir este archivo de evidencia.
+                          {T("No pudimos abrir este archivo de evidencia.")}
                         </div>
                       )}
 
@@ -4449,12 +4681,12 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                         <span className="text-sm font-black text-slate-800">
                           {item.file_type ===
                           "video"
-                            ? "🎥 Video"
-                            : "📷 Foto"}
+                            ? T("🎥 Video")
+                            : T("📷 Foto")}
                         </span>
 
                         <span className="text-xs font-semibold text-slate-500">
-                          Registrado
+                          {T("Registrado")}
                         </span>
                       </div>
                     </article>
@@ -4464,7 +4696,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
               <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
                 <p className="text-sm font-bold leading-6 text-blue-900">
-                  🔒 Esta evidencia forma parte del registro del trabajo y no puede ser modificada desde esta pantalla.
+                  {T("🔒 Esta evidencia forma parte del registro del trabajo y no puede ser modificada desde esta pantalla.")}
                 </p>
               </div>
             </section>
@@ -4487,11 +4719,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     </div>
 
                     <h2 className="mt-3 text-2xl font-extrabold text-slate-900">
-                      Gracias por tu calificación
+                      {T("Gracias por tu calificación")}
                     </h2>
 
                     <p className="mt-2 text-slate-600">
-                      Ya calificaste este trabajo.
+                      {T("Ya calificaste este trabajo.")}
                     </p>
 
                   </div>
@@ -4499,7 +4731,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   <div className="mt-6 rounded-2xl bg-slate-50 p-6">
 
                     <p className="text-sm font-bold text-slate-500">
-                      Tu calificación
+                      {T("Tu calificación")}
                     </p>
 
                     <div className="mt-2 text-3xl">
@@ -4529,7 +4761,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     {review.comment && (
                       <>
                         <p className="mt-5 text-sm font-bold text-slate-500">
-                          Tu comentario
+                          {T("Tu comentario")}
                         </p>
 
                         <p className="mt-2 leading-7 text-slate-700">
@@ -4545,11 +4777,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <>
 
                   <p className="text-sm font-bold uppercase tracking-wide text-blue-700">
-                    Trabajo completado
+                    {T("Trabajo completado")}
                   </p>
 
                   <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
-                    Calificar profesional
+                    {T("Calificar profesional")}
                   </h2>
 
                   <p className="mt-2 text-slate-600">
@@ -4570,7 +4802,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   >
 
                     <p className="font-bold text-slate-900">
-                      Tu calificación *
+                      {T("Tu calificación *")}
                     </p>
 
                     <div className="mt-3 flex gap-2">
@@ -4616,7 +4848,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     <div className="mt-7">
 
                       <label className="mb-2 block font-bold text-slate-900">
-                        Comentario
+                        {T("Comentario")}
                       </label>
 
                       <textarea
@@ -4632,7 +4864,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                         maxLength={
                           1000
                         }
-                        placeholder="Cuéntanos cómo fue el servicio..."
+                        placeholder={T("Cuéntanos cómo fue el servicio...")}
                         className="w-full resize-none rounded-xl border border-slate-300 p-4 text-slate-900"
                       />
 
@@ -4652,8 +4884,8 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       className="mt-6 w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white hover:bg-blue-800 disabled:opacity-50"
                     >
                       {enviandoReview
-                        ? "Enviando calificación..."
-                        : "Enviar reseña"}
+                        ? T("Enviando calificación...")
+                        : T("Enviar reseña")}
                     </button>
 
                   </form>
@@ -4684,13 +4916,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-red-700">
-                      ⚠️ Problema reportado
+                      {T("⚠️ Problema reportado")}
                     </p>
                     <h2 className="mt-2 text-2xl font-extrabold text-slate-900">
-                      Tu reclamo quedó registrado
+                      {T("Tu reclamo quedó registrado")}
                     </h2>
                     <p className="mt-2 text-slate-600">
-                      RELYDO conserva este reporte asociado al trabajo.
+                      {T("RELYDO conserva este reporte asociado al trabajo.")}
                     </p>
                   </div>
 
@@ -4698,7 +4930,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     {claim.status === "open"
                       ? "Abierto"
                       : claim.status === "reviewing"
-                      ? "En revisión"
+                      ? T("En revisión")
                       : claim.status === "resolved"
                       ? "Resuelto"
                       : "Rechazado"}
@@ -4714,7 +4946,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   {claim.description && (
                     <>
                       <p className="mt-5 text-sm font-bold text-red-700">
-                        Descripción
+                        {T("Descripción")}
                       </p>
                       <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">
                         {claim.description}
@@ -4726,13 +4958,13 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 {claim.status === "resolved" && (
                   <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-6">
                     <p className="text-sm font-black uppercase tracking-wide text-green-700">
-                      ✅ Reclamo resuelto
+                      {T("✅ Reclamo resuelto")}
                     </p>
 
                     <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div className="rounded-xl bg-white p-4">
                         <p className="text-sm font-bold text-slate-500">
-                          Reembolso al cliente
+                          {T("Reembolso al cliente")}
                         </p>
                         <p className="mt-1 text-xl font-black text-green-800">
                           ${Number(
@@ -4743,7 +4975,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                       <div className="rounded-xl bg-white p-4">
                         <p className="text-sm font-bold text-slate-500">
-                          Compensación al profesional
+                          {T("Compensación al profesional")}
                         </p>
                         <p className="mt-1 text-xl font-black text-slate-900">
                           ${Number(
@@ -4756,7 +4988,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     {claim.resolution_notes && (
                       <div className="mt-4 rounded-xl bg-white p-4">
                         <p className="text-sm font-bold text-slate-500">
-                          Resolución de RELYDO
+                          {T("Resolución de RELYDO")}
                         </p>
                         <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">
                           {claim.resolution_notes}
@@ -4769,23 +5001,23 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             ) : solicitud.status === "cancelled" ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
                 <p className="font-extrabold text-slate-900">
-                  Este trabajo está cerrado.
+                  {T("Este trabajo está cerrado.")}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  No se pueden abrir nuevos reclamos después de que el trabajo ha sido cancelado.
+                  {T("No se pueden abrir nuevos reclamos después de que el trabajo ha sido cancelado.")}
                 </p>
               </div>
             ) : !mostrarReclamo ? (
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-black uppercase tracking-wide text-red-700">
-                    ¿Hubo un problema con el servicio?
+                    {T("¿Hubo un problema con el servicio?")}
                   </p>
                   <h2 className="mt-2 text-2xl font-extrabold text-slate-900">
-                    Reportar un problema
+                    {T("Reportar un problema")}
                   </h2>
                   <p className="mt-2 max-w-2xl text-slate-600">
-                    Usa esta opción si el trabajo quedó incompleto, hubo daños, un cobro adicional u otro problema importante.
+                    {T("Usa esta opción si el trabajo quedó incompleto, hubo daños, un cobro adicional u otro problema importante.")}
                   </p>
                 </div>
 
@@ -4798,7 +5030,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   }}
                   className="shrink-0 rounded-xl border-2 border-red-600 bg-white px-6 py-3 font-extrabold text-red-700 hover:bg-red-50"
                 >
-                  ⚠️ Reportar problema
+                  {T("⚠️ Reportar problema")}
                 </button>
               </div>
             ) : (
@@ -4806,10 +5038,10 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-black uppercase tracking-wide text-red-700">
-                      Abrir reclamo
+                      {T("Abrir reclamo")}
                     </p>
                     <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
-                      Cuéntanos qué ocurrió
+                      {T("Cuéntanos qué ocurrió")}
                     </h2>
                   </div>
 
@@ -4831,7 +5063,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                 <div>
                   <label className="mb-2 block font-bold text-slate-900">
-                    Motivo del reclamo *
+                    {T("Motivo del reclamo *")}
                   </label>
                   <select
                     value={motivoReclamo}
@@ -4839,18 +5071,18 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     className="w-full rounded-xl border border-slate-300 bg-white p-4 font-semibold text-slate-900"
                   >
                     <option value="">Selecciona un motivo</option>
-                    <option value="Trabajo incompleto">Trabajo incompleto</option>
-                    <option value="Calidad del trabajo">Calidad del trabajo</option>
-                    <option value="Daños durante el servicio">Daños durante el servicio</option>
-                    <option value="Cobro adicional no acordado">Cobro adicional no acordado</option>
-                    <option value="Conducta del profesional">Conducta del profesional</option>
-                    <option value="Otro problema">Otro problema</option>
+                    <option value="Trabajo incompleto">{T("Trabajo incompleto")}</option>
+                    <option value="Calidad del trabajo">{T("Calidad del trabajo")}</option>
+                    <option value="Daños durante el servicio">{T("Daños durante el servicio")}</option>
+                    <option value="Cobro adicional no acordado">{T("Cobro adicional no acordado")}</option>
+                    <option value="Conducta del profesional">{T("Conducta del profesional")}</option>
+                    <option value="Otro problema">{T("Otro problema")}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-2 block font-bold text-slate-900">
-                    Explica el problema *
+                    {T("Explica el problema *")}
                   </label>
                   <textarea
                     value={descripcionReclamo}
@@ -4869,15 +5101,15 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="font-extrabold text-slate-900">
-                        Fotos o videos
+                        {T("Fotos o videos")}
                       </p>
                       <p className="mt-1 text-sm text-slate-600">
-                        Opcional. Puedes adjuntar hasta 10 fotos y 2 videos como evidencia.
+                        {T("Opcional. Puedes adjuntar hasta 10 fotos y 2 videos como evidencia.")}
                       </p>
                     </div>
 
                     <label className="inline-flex cursor-pointer items-center justify-center rounded-xl border-2 border-blue-700 bg-white px-5 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50">
-                      📎 Adjuntar archivos
+                      {T("📎 Adjuntar archivos")}
                       <input
                         type="file"
                         multiple
@@ -4891,10 +5123,10 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                   <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
                     <p className="font-bold">
-                      Formatos permitidos
+                      {T("Formatos permitidos")}
                     </p>
                     <p className="mt-1">
-                      Fotos: JPG, PNG, WEBP · Videos: MP4, WEBM, MOV · Máximo 50 MB por archivo.
+                      {T("Fotos: JPG, PNG, WEBP · Videos: MP4, WEBM, MOV · Máximo 50 MB por archivo.")}
                     </p>
                   </div>
 
@@ -4929,7 +5161,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                               }
                               className="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-extrabold text-red-700 hover:bg-red-100 disabled:opacity-50"
                             >
-                              Quitar
+                              {T("Quitar")}
                             </button>
                           </div>
                         )
@@ -4954,11 +5186,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                 {evidenciasReclamo.length > 0 && (
                   <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
                     <label className="mb-2 block font-extrabold text-slate-900">
-                      Explicación de la evidencia *
+                      {T("Explicación de la evidencia *")}
                     </label>
 
                     <p className="mb-3 text-sm text-slate-600">
-                      Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar tu reclamo.
+                      {T("Describe qué muestran las fotos o videos y qué debe considerar RELYDO al revisar tu reclamo.")}
                     </p>
 
                     <textarea
@@ -4992,7 +5224,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     }}
                     className="rounded-xl border-2 border-slate-300 bg-white px-5 py-3 font-extrabold text-slate-700 disabled:opacity-50"
                   >
-                    Cancelar
+                    {T("Cancelar")}
                   </button>
 
                   <button
@@ -5007,8 +5239,8 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                     className="rounded-xl bg-red-600 px-5 py-3 font-extrabold text-white hover:bg-red-700 disabled:opacity-50"
                   >
                     {enviandoReclamo
-                      ? "Enviando reclamo..."
-                      : "Enviar reclamo"}
+                      ? T("Enviando reclamo...")
+                      : T("Enviar reclamo")}
                   </button>
                 </div>
               </form>
@@ -5025,11 +5257,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
             <div>
 
               <h2 className="text-3xl font-extrabold text-slate-900">
-                Presupuestos recibidos
+                {T("Presupuestos recibidos")}
               </h2>
 
               <p className="mt-2 text-slate-600">
-                Compara precio, tiempo de llegada, experiencia y valoración antes de elegir.
+                {T("Compara precio, tiempo de llegada, experiencia y valoración antes de elegir.")}
               </p>
 
             </div>
@@ -5058,11 +5290,11 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
               </div>
 
               <h3 className="mt-4 text-2xl font-extrabold text-slate-900">
-                Todavía no tienes presupuestos
+                {T("Todavía no tienes presupuestos")}
               </h3>
 
               <p className="mt-2 text-slate-600">
-                Cuando un profesional envíe un presupuesto aparecerá aquí.
+                {T("Cuando un profesional envíe un presupuesto aparecerá aquí.")}
               </p>
 
             </div>
@@ -5102,24 +5334,24 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                           <div className="flex flex-wrap items-center gap-2">
 
                             <p className="text-sm font-bold uppercase tracking-wide text-blue-700">
-                              Profesional
+                              {T("Profesional")}
                             </p>
 
                             {seleccionada && (
                               <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-extrabold text-green-800">
-                                ✓ Contratado
+                                {T("✓ Contratado")}
                               </span>
                             )}
 
                             {rechazada && (
                               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                                No seleccionada
+                                {T("No seleccionada")}
                               </span>
                             )}
 
                             {oferta.profesional?.verified && (
                               <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-800">
-                                ✓ Verificado
+                                {T("✓ Verificado")}
                               </span>
                             )}
 
@@ -5127,7 +5359,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                           <h3 className="mt-2 text-2xl font-extrabold text-slate-900">
                             {oferta.profesional?.business_name ||
-                              "Profesional RELYDO"}
+                              T("Profesional RELYDO")}
                           </h3>
 
                           <p className="mt-1 font-semibold text-blue-700">
@@ -5142,7 +5374,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                         <div className="rounded-2xl bg-green-50 px-6 py-4 text-center">
 
                           <p className="text-sm font-bold text-green-700">
-                            Presupuesto
+                            {T("Presupuesto")}
                           </p>
 
                           <p className="mt-1 text-3xl font-extrabold text-green-900">
@@ -5173,7 +5405,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                         <div className="rounded-xl bg-slate-50 p-4">
                           <p className="text-sm text-slate-500">
-                            🚗 Puede llegar
+                            {T("🚗 Puede llegar")}
                           </p>
 
                           <p className="mt-1 font-extrabold text-slate-900">
@@ -5185,7 +5417,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                         <div className="rounded-xl bg-slate-50 p-4">
                           <p className="text-sm text-slate-500">
-                            ⏱️ Duración
+                            {T("⏱️ Duración")}
                           </p>
 
                           <p className="mt-1 font-extrabold text-slate-900">
@@ -5197,7 +5429,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                         <div className="rounded-xl bg-slate-50 p-4">
                           <p className="text-sm text-slate-500">
-                            ⭐ Valoración
+                            {T("⭐ Valoración")}
                           </p>
 
                           <p className="mt-1 font-extrabold text-slate-900">
@@ -5212,7 +5444,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
                         <div className="rounded-xl bg-slate-50 p-4">
                           <p className="text-sm text-slate-500">
-                            🛠️ Experiencia
+                            {T("🛠️ Experiencia")}
                           </p>
 
                           <p className="mt-1 font-extrabold text-slate-900">
@@ -5227,7 +5459,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       <div className="mt-4 rounded-xl bg-slate-50 p-4">
 
                         <p className="text-sm text-slate-500">
-                          Trabajos completados en RELYDO
+                          {T("Trabajos completados en RELYDO")}
                         </p>
 
                         <p className="mt-1 font-extrabold text-slate-900">
@@ -5240,12 +5472,12 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                       <div className="mt-5 rounded-2xl border border-slate-200 p-5">
 
                         <p className="text-sm font-bold text-slate-500">
-                          Mensaje del profesional
+                          {T("Mensaje del profesional")}
                         </p>
 
                         <p className="mt-2 leading-7 text-slate-700">
                           {oferta.message ||
-                            "Sin mensaje adicional."}
+                            T("Sin mensaje adicional.")}
                         </p>
 
                       </div>
@@ -5261,7 +5493,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                         }
                         className="mt-5 w-full rounded-xl border-2 border-blue-700 px-6 py-3 font-extrabold text-blue-700 hover:bg-blue-50"
                       >
-                        Ver perfil del profesional
+                        {T("Ver perfil del profesional")}
                       </button>
 
                       {solicitud.status ===
@@ -5283,7 +5515,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                           >
                             {aceptandoId ===
                             oferta.id
-                              ? "Contratando profesional..."
+                              ? T("Contratando profesional...")
                               : paymentSettings
                               ? `Revisar y continuar · Total $${calcularMontosPago(
                                   oferta.price,
