@@ -396,17 +396,17 @@ export default function Home() {
     <main className="min-h-screen overflow-x-hidden bg-white text-slate-950">
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-3 sm:px-5 sm:py-4 lg:px-8">
           <button
             type="button"
             onClick={() => router.push("/")}
             className="flex items-center gap-3"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-xl font-black text-white shadow-lg shadow-blue-600/20">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 text-lg font-black text-white shadow-lg shadow-blue-600/20 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-xl">
               R
             </span>
 
-            <span className="text-2xl font-black tracking-[0.06em] text-slate-950 md:text-3xl">
+            <span className="text-xl font-black tracking-[0.05em] text-slate-950 sm:text-2xl md:text-3xl">
               RELY<span className="text-blue-600">DO</span>
             </span>
           </button>
@@ -445,11 +445,11 @@ export default function Home() {
             </button>
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <button
               type="button"
               onClick={() => router.push("/login-cliente")}
-              className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 transition hover:bg-slate-100 sm:px-5"
+              className="rounded-lg px-2.5 py-2 text-xs font-extrabold text-slate-800 transition hover:bg-slate-100 sm:rounded-xl sm:px-5 sm:text-sm"
             >
               {text.iniciarSesion}
             </button>
@@ -457,7 +457,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => router.push("/registro-cliente")}
-              className="hidden rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700 sm:block"
+              className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-extrabold text-white shadow-md shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700 sm:rounded-xl sm:px-5 sm:py-3 sm:text-sm"
             >
               {text.registrarse}
             </button>
@@ -470,14 +470,14 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(37,99,235,0.36),transparent_28%),radial-gradient(circle_at_85%_15%,rgba(59,130,246,0.22),transparent_24%),linear-gradient(135deg,#020817_0%,#061a42_55%,#03112d_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/20 to-transparent" />
 
-        <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8 lg:py-24">
+        <div className="relative mx-auto grid max-w-[1440px] gap-8 px-5 py-8 sm:gap-12 sm:py-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8 lg:py-24">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-4 py-2 text-xs font-black tracking-[0.18em] text-blue-200 backdrop-blur sm:text-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-3 py-1.5 text-[10px] font-black tracking-[0.16em] text-blue-200 backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
               <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_18px_rgba(96,165,250,0.9)]" />
               {text.badge}
             </div>
 
-            <h1 className="mt-7 text-5xl font-black leading-[0.98] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 text-[2.35rem] font-black leading-[0.98] tracking-[-0.045em] text-white sm:mt-7 sm:text-6xl lg:text-7xl">
               {text.titulo1}
 
               <span className="mt-2 block bg-gradient-to-r from-blue-300 via-blue-500 to-cyan-300 bg-clip-text text-transparent">
@@ -485,11 +485,21 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl">
+            <p className="mt-5 max-w-xl text-[15px] leading-6 text-slate-300 sm:mt-7 sm:text-xl sm:leading-8">
               {text.subtitulo}
             </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            {/* Imagen de impacto exclusiva para móvil */}
+            <div className="relative mt-6 overflow-hidden rounded-[1.6rem] border border-white/15 bg-white/5 p-1.5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] lg:hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent" />
+              <img
+                src={anuncios[1]}
+                alt="RELYDO app"
+                className="relative h-[190px] w-full rounded-[1.25rem] object-cover object-[72%_center] sm:h-[250px]"
+              />
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:mt-9 sm:flex-row">
               <button
                 type="button"
                 onClick={() => router.push("/registro-cliente")}
@@ -507,7 +517,7 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="mt-9 rounded-2xl border border-white/10 bg-white/8 p-2 shadow-2xl backdrop-blur">
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/8 p-2 shadow-2xl backdrop-blur sm:mt-9">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   type="text"
@@ -537,7 +547,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="relative">
+          <div className="relative hidden lg:block">
             <div className="absolute -inset-8 rounded-[3rem] bg-blue-500/15 blur-3xl" />
 
             <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-white/5 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.45)] backdrop-blur">
@@ -641,27 +651,27 @@ export default function Home() {
       {/* BENEFICIOS */}
       <section className="bg-white px-5 py-16 md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
             {beneficios.map((item, index) => (
               <div
                 key={item.title}
-                className="group rounded-[1.75rem] border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+                className="group rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-5 lg:p-6"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-600/20">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-base font-black text-white shadow-md shadow-blue-600/20 sm:h-11 sm:w-11 sm:text-lg">
                     {item.icon}
                   </div>
 
-                  <span className="text-sm font-black text-slate-300">
+                  <span className="text-xs font-black text-slate-300 sm:text-sm">
                     0{index + 1}
                   </span>
                 </div>
 
-                <h3 className="mt-6 text-xl font-black tracking-[-0.02em]">
+                <h3 className="mt-4 text-base font-black tracking-[-0.02em] sm:text-lg lg:text-xl">
                   {item.title}
                 </h3>
 
-                <p className="mt-3 leading-7 text-slate-600">
+                <p className="mt-2 text-sm leading-5 text-slate-600 sm:leading-6 lg:text-[15px]">
                   {item.description}
                 </p>
               </div>
