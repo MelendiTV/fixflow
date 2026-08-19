@@ -2465,13 +2465,13 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10">
+    <main className="min-h-screen bg-slate-100 px-4 py-8">
 
       <div className="mx-auto max-w-6xl">
 
         {/* HEADER */}
 
-        <div className="mb-8 rounded-3xl bg-blue-700 px-8 py-7 text-white shadow-lg">
+        <div className="mb-6 rounded-3xl bg-blue-700 px-8 py-7 text-white shadow-lg">
 
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
 
@@ -2530,121 +2530,6 @@ export default function AdminPage() {
             {mensaje}
           </div>
         )}
-
-        {/* RESUMEN */}
-
-        <section className="mb-10">
-
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-7">
-
-            <TarjetaResumen
-              titulo="Profesionales"
-              valor={
-                todosProviders.length
-              }
-              clase="text-slate-900"
-              onClick={() => {
-                setFiltro("todos");
-                irASeccionAdmin(
-                  "profesionales-admin"
-                );
-              }}
-            />
-
-            <TarjetaResumen
-              titulo="Activos"
-              valor={
-                totalActivos
-              }
-              clase="text-green-700"
-              onClick={() => {
-                setFiltro("activos");
-                irASeccionAdmin(
-                  "profesionales-admin"
-                );
-              }}
-            />
-
-            <TarjetaResumen
-              titulo="Suspendidos"
-              valor={
-                totalSuspendidos
-              }
-              clase="text-red-700"
-              onClick={() => {
-                setFiltro(
-                  "suspendidos"
-                );
-                irASeccionAdmin(
-                  "profesionales-admin"
-                );
-              }}
-            />
-
-            <TarjetaResumen
-              titulo="Pendientes"
-              valor={
-                providers.length
-              }
-              clase="text-amber-700"
-              onClick={() => {
-                setFiltro(
-                  "pendientes"
-                );
-                irASeccionAdmin(
-                  "profesionales-admin"
-                );
-              }}
-            />
-
-            <TarjetaResumen
-              titulo="Reasignaciones"
-              valor={
-                historial.length
-              }
-              clase="text-purple-700"
-              onClick={() =>
-                irASeccionAdmin(
-                  "reasignaciones-admin"
-                )
-              }
-            />
-
-            <TarjetaResumen
-              titulo="Órdenes"
-              valor={
-                solicitudesAdmin.length
-              }
-              clase="text-blue-700"
-              onClick={() => {
-                setFiltroOrden(
-                  "todas"
-                );
-                irASeccionAdmin(
-                  "ordenes-admin"
-                );
-              }}
-            />
-
-            <TarjetaResumen
-              titulo="Reclamos activos"
-              valor={
-                totalReclamosActivos
-              }
-              clase="text-red-700"
-              onClick={() => {
-                setFiltroReclamo(
-                  "todos"
-                );
-                irASeccionAdmin(
-                  "reclamos-admin"
-                );
-              }}
-            />
-
-          </div>
-
-        </section>
 
         {/* ACCESOS ADMINISTRATIVOS */}
 

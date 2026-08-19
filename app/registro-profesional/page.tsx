@@ -18,6 +18,7 @@ export default function RegistroProfesional() {
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [registroCompletado, setRegistroCompletado] = useState(false);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -293,9 +294,13 @@ export default function RegistroProfesional() {
 
       if (!authData.session) {
         setMensaje(
-          T("Cuenta creada correctamente. Revisa tu correo y confirma tu email. Después inicia sesión para completar tu perfil y subir los documentos de verificación.", "Account created successfully. Check your email and confirm your address. Then sign in to complete your profile and upload verification documents.")
+          T(
+            "Registro procesado con éxito. Revisa tu bandeja de entrada y confirma tu correo electrónico. Al confirmar el enlace, RELYDO te llevará automáticamente a la pantalla de inicio de sesión.",
+            "Registration completed successfully. Check your inbox and confirm your email address. After you confirm the link, RELYDO will automatically take you to the sign-in screen."
+          )
         );
 
+        setRegistroCompletado(true);
         return;
       }
 
@@ -307,14 +312,13 @@ export default function RegistroProfesional() {
       */
 
       setMensaje(
-        T("Cuenta creada correctamente. Continúa para completar tu perfil profesional.", "Account created successfully. Continue to complete your professional profile.")
+        T(
+          "Cuenta creada correctamente. Continúa para completar tu perfil profesional.",
+          "Account created successfully. Continue to complete your professional profile."
+        )
       );
 
-      setTimeout(() => {
-        router.replace(
-          "/completar-perfil-profesional"
-        );
-      }, 1200);
+      setRegistroCompletado(true);
     } catch (err) {
       console.error(err);
 
@@ -338,6 +342,77 @@ export default function RegistroProfesional() {
 
   const sectionTitleClass =
     "mb-5 flex items-center gap-2 text-xl font-extrabold text-blue-700";
+
+  if (registroCompletado) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
+        <div className="w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="bg-gradient-to-br from-blue-700 to-blue-600 px-6 py-10 text-center text-white md:px-10 md:py-14">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white text-4xl font-black text-green-600 shadow-lg">
+              ✓
+            </div>
+
+            <p className="mb-3 text-sm font-extrabold uppercase tracking-[0.22em] text-blue-100">
+              RELYDO
+            </p>
+
+            <h1 className="text-3xl font-black tracking-tight md:text-5xl">
+              {T(
+                "¡Registro procesado con éxito!",
+                "Registration completed successfully!"
+              )}
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-blue-50 md:text-xl">
+              {T(
+                "Revisa tu bandeja de entrada. Te enviamos un correo para verificar tu dirección de email.",
+                "Check your inbox. We sent you an email to verify your email address."
+              )}
+            </p>
+          </div>
+
+          <div className="px-6 py-8 text-center md:px-10">
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+              <p className="text-lg font-extrabold text-slate-900">
+                {T(
+                  "Confirma tu correo para continuar",
+                  "Confirm your email to continue"
+                )}
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {mensaje}
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <p className="font-bold text-slate-800">
+                {T(
+                  "Después de confirmar el correo, RELYDO abrirá automáticamente la pantalla de inicio de sesión.",
+                  "After confirming your email, RELYDO will automatically open the sign-in screen."
+                )}
+              </p>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {T(
+                  "Puedes dejar esta ventana abierta o cerrarla.",
+                  "You can leave this window open or close it."
+                )}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.replace("/login-profesional")}
+              className="mt-7 w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800"
+            >
+              {T("Ir a iniciar sesión", "Go to sign in")}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-10">
