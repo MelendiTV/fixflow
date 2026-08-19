@@ -377,7 +377,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-slate-950">
-      {/* HEADER PREMIUM */}
+      {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 lg:px-8">
           <button
@@ -388,24 +388,39 @@ export default function Home() {
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-xl font-black text-white shadow-lg shadow-blue-600/20">
               R
             </span>
+
             <span className="text-2xl font-black tracking-[0.06em] text-slate-950 md:text-3xl">
               RELY<span className="text-blue-600">DO</span>
             </span>
           </button>
 
           <nav className="hidden items-center gap-8 lg:flex">
-            <button onClick={() => router.push("/")} className="text-sm font-bold text-slate-700 transition hover:text-blue-600">
+            <button
+              onClick={() => router.push("/")}
+              className="text-sm font-bold text-slate-700 transition hover:text-blue-600"
+            >
               {text.inicio}
             </button>
-            <button onClick={() => router.push("/servicios")} className="text-sm font-bold text-slate-700 transition hover:text-blue-600">
+
+            <button
+              onClick={() => router.push("/servicios")}
+              className="text-sm font-bold text-slate-700 transition hover:text-blue-600"
+            >
               {text.servicios}
             </button>
-            <button onClick={() => router.push("/profesionales")} className="text-sm font-bold text-slate-700 transition hover:text-blue-600">
+
+            <button
+              onClick={() => router.push("/profesionales")}
+              className="text-sm font-bold text-slate-700 transition hover:text-blue-600"
+            >
               {text.profesionales}
             </button>
+
             <button
               onClick={() =>
-                document.getElementById("como-funciona")?.scrollIntoView({ behavior: "smooth" })
+                document
+                  .getElementById("como-funciona")
+                  ?.scrollIntoView({ behavior: "smooth" })
               }
               className="text-sm font-bold text-slate-700 transition hover:text-blue-600"
             >
@@ -421,6 +436,7 @@ export default function Home() {
             >
               {text.iniciarSesion}
             </button>
+
             <button
               type="button"
               onClick={() => router.push("/registro-cliente")}
@@ -446,6 +462,7 @@ export default function Home() {
 
             <h1 className="mt-7 text-5xl font-black leading-[0.98] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl">
               {text.titulo1}
+
               <span className="mt-2 block bg-gradient-to-r from-blue-300 via-blue-500 to-cyan-300 bg-clip-text text-transparent">
                 {text.titulo2}
               </span>
@@ -463,6 +480,7 @@ export default function Home() {
               >
                 {text.cliente}
               </button>
+
               <button
                 type="button"
                 onClick={() => router.push("/registro-profesional")}
@@ -479,11 +497,14 @@ export default function Home() {
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") buscarServicio();
+                    if (e.key === "Enter") {
+                      buscarServicio();
+                    }
                   }}
                   placeholder={text.placeholder}
                   className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white px-5 py-4 text-slate-950 outline-none placeholder:text-slate-400"
                 />
+
                 <button
                   type="button"
                   onClick={buscarServicio}
@@ -494,11 +515,14 @@ export default function Home() {
               </div>
             </div>
 
-            <p className="mt-4 text-sm font-semibold text-slate-400">{text.categorias}</p>
+            <p className="mt-4 text-sm font-semibold text-slate-400">
+              {text.categorias}
+            </p>
           </div>
 
           <div className="relative">
             <div className="absolute -inset-8 rounded-[3rem] bg-blue-500/15 blur-3xl" />
+
             <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-white/5 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.45)] backdrop-blur">
               <img
                 src={anuncios[1]}
@@ -506,17 +530,12 @@ export default function Home() {
                 className="block h-auto w-full rounded-[1.55rem]"
               />
             </div>
-
-            <div className="absolute -bottom-6 -left-3 hidden rounded-2xl border border-white/15 bg-slate-950/90 px-5 py-4 text-white shadow-2xl backdrop-blur md:block">
-              <p className="text-xs font-black tracking-[0.16em] text-blue-300">RELYDO TRUST</p>
-              <p className="mt-1 text-sm font-bold">Verified • Protected • Connected</p>
-            </div>
           </div>
         </div>
       </section>
 
       {/* TRUST BAR */}
-      <section className="relative z-10 -mt-1 border-b border-slate-200 bg-white">
+      <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-[1440px] divide-y divide-slate-200 px-5 md:grid-cols-4 md:divide-x md:divide-y-0 lg:px-8">
           {[
             [text.verificados, "01"],
@@ -524,49 +543,72 @@ export default function Home() {
             [text.pagos, "03"],
             [text.soporte, "04"],
           ].map(([label, number]) => (
-            <div key={label} className="flex items-center gap-4 px-4 py-6 md:px-6">
-              <span className="text-2xl font-black text-blue-600">{number}</span>
-              <span className="text-sm font-black text-slate-800">{label}</span>
+            <div
+              key={label}
+              className="flex items-center gap-4 px-4 py-6 md:px-6"
+            >
+              <span className="text-2xl font-black text-blue-600">
+                {number}
+              </span>
+
+              <span className="text-sm font-black text-slate-800">
+                {label}
+              </span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* PRESENTACIÓN DE MARCA */}
+      {/* EXPERIENCIA RELYDO */}
       <section className="bg-[#f6f8fc] px-5 py-16 md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-black tracking-[0.22em] text-blue-600">THE RELYDO EXPERIENCE</p>
+            <p className="text-sm font-black tracking-[0.22em] text-blue-600">
+              THE RELYDO EXPERIENCE
+            </p>
+
             <h2 className="mt-3 text-4xl font-black tracking-[-0.035em] text-slate-950 md:text-5xl">
               {text.confianzaTitulo}
             </h2>
-            <p className="mt-5 text-lg leading-8 text-slate-600">{text.confianzaSub}</p>
+
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              {text.confianzaSub}
+            </p>
           </div>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-12">
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 lg:col-span-7">
-              <img src={anuncios[0]} alt="RELYDO presentación" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
+          <div className="mt-12 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70">
+              <img
+                src={anuncios[0]}
+                alt="RELYDO para clientes"
+                className="block h-full min-h-[420px] w-full rounded-[1.6rem] object-cover object-center"
+                loading="lazy"
+              />
             </div>
 
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[#061632] p-2 shadow-xl shadow-slate-200/70 lg:col-span-5">
-              <img src={anuncios[2]} alt="Identidad RELYDO" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
-            </div>
+            <div className="flex flex-col justify-between rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white shadow-2xl shadow-blue-600/20 lg:p-10">
+              <div>
+                <p className="text-sm font-black tracking-[0.18em] text-blue-100">
+                  ONE PLATFORM
+                </p>
 
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70 lg:col-span-5">
-              <img src={anuncios[3]} alt="RELYDO clientes" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
-            </div>
+                <h3 className="mt-3 text-3xl font-black tracking-[-0.025em] md:text-4xl">
+                  {text.dosLados}
+                </h3>
 
-            <div className="rounded-[2rem] bg-gradient-to-br from-blue-600 to-blue-800 p-8 text-white shadow-2xl shadow-blue-600/20 lg:col-span-7 lg:p-10">
-              <p className="text-sm font-black tracking-[0.18em] text-blue-100">ONE PLATFORM</p>
-              <h3 className="mt-3 text-3xl font-black tracking-[-0.025em] md:text-4xl">{text.dosLados}</h3>
-              <p className="mt-4 max-w-2xl text-lg leading-8 text-blue-50">{text.dosLadosSub}</p>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <p className="mt-4 max-w-2xl text-lg leading-8 text-blue-50">
+                  {text.dosLadosSub}
+                </p>
+              </div>
+
+              <div className="mt-8 grid gap-4">
                 <button
                   onClick={() => router.push("/solicitar-trabajo")}
                   className="rounded-2xl bg-white px-6 py-4 font-black text-blue-700 transition hover:bg-blue-50"
                 >
                   {text.solicitarTrabajo}
                 </button>
+
                 <button
                   onClick={() => router.push("/mis-solicitudes")}
                   className="rounded-2xl border border-white/30 bg-white/10 px-6 py-4 font-black text-white transition hover:bg-white/15"
@@ -592,31 +634,50 @@ export default function Home() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-600/20">
                     {item.icon}
                   </div>
-                  <span className="text-sm font-black text-slate-300">0{index + 1}</span>
+
+                  <span className="text-sm font-black text-slate-300">
+                    0{index + 1}
+                  </span>
                 </div>
-                <h3 className="mt-6 text-xl font-black tracking-[-0.02em]">{item.title}</h3>
-                <p className="mt-3 leading-7 text-slate-600">{item.description}</p>
+
+                <h3 className="mt-6 text-xl font-black tracking-[-0.02em]">
+                  {item.title}
+                </h3>
+
+                <p className="mt-3 leading-7 text-slate-600">
+                  {item.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CLIENTES + PROFESIONALES */}
+      {/* CLIENTES / PROFESIONALES */}
       <section className="bg-[#020817] px-5 py-16 text-white md:py-24 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid gap-8 xl:grid-cols-2">
             <article className="overflow-hidden rounded-[2.25rem] border border-white/10 bg-gradient-to-br from-[#08265d] to-[#04122e] shadow-2xl">
               <div className="p-8 md:p-10">
-                <p className="text-sm font-black tracking-[0.2em] text-blue-300">{text.paraClientes}</p>
-                <h2 className="mt-3 text-4xl font-black tracking-[-0.035em]">{text.clienteTitulo}</h2>
-                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">{text.clienteDesc}</p>
+                <p className="text-sm font-black tracking-[0.2em] text-blue-300">
+                  {text.paraClientes}
+                </p>
+
+                <h2 className="mt-3 text-4xl font-black tracking-[-0.035em]">
+                  {text.clienteTitulo}
+                </h2>
+
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">
+                  {text.clienteDesc}
+                </p>
+
                 <div className="mt-7 grid gap-3 text-sm font-bold text-slate-100 sm:grid-cols-2">
                   <p>✓ {text.clientePunto1}</p>
                   <p>✓ {text.clientePunto2}</p>
                   <p>✓ {text.clientePunto3}</p>
                   <p>✓ {text.clientePunto4}</p>
                 </div>
+
                 <button
                   onClick={() => router.push("/registro-cliente")}
                   className="mt-8 rounded-2xl bg-white px-6 py-4 font-black text-blue-700 transition hover:bg-blue-50"
@@ -624,22 +685,38 @@ export default function Home() {
                   {text.crearCliente}
                 </button>
               </div>
-              <div className="border-t border-white/10 bg-black/15 p-3">
-                <img src={anuncios[4]} alt="RELYDO para clientes" className="block h-auto w-full rounded-[1.55rem]" loading="lazy" />
+
+              <div className="h-[360px] border-t border-white/10 bg-black/15 p-3 md:h-[440px]">
+                <img
+                  src={anuncios[4]}
+                  alt="RELYDO cliente"
+                  className="h-full w-full rounded-[1.55rem] object-cover object-top"
+                  loading="lazy"
+                />
               </div>
             </article>
 
             <article className="overflow-hidden rounded-[2.25rem] border border-white/10 bg-gradient-to-br from-slate-900 to-[#07142c] shadow-2xl">
               <div className="p-8 md:p-10">
-                <p className="text-sm font-black tracking-[0.2em] text-blue-400">{text.paraPros}</p>
-                <h2 className="mt-3 text-4xl font-black tracking-[-0.035em]">{text.proTitulo}</h2>
-                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">{text.proDesc}</p>
+                <p className="text-sm font-black tracking-[0.2em] text-blue-400">
+                  {text.paraPros}
+                </p>
+
+                <h2 className="mt-3 text-4xl font-black tracking-[-0.035em]">
+                  {text.proTitulo}
+                </h2>
+
+                <p className="mt-4 max-w-xl text-lg leading-8 text-slate-300">
+                  {text.proDesc}
+                </p>
+
                 <div className="mt-7 grid gap-3 text-sm font-bold text-slate-100 sm:grid-cols-2">
                   <p>✓ {text.proPunto1}</p>
                   <p>✓ {text.proPunto2}</p>
                   <p>✓ {text.proPunto3}</p>
                   <p>✓ {text.proPunto4}</p>
                 </div>
+
                 <button
                   onClick={() => router.push("/registro-profesional")}
                   className="mt-8 rounded-2xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-500"
@@ -647,8 +724,14 @@ export default function Home() {
                   {text.crearPro}
                 </button>
               </div>
-              <div className="border-t border-white/10 bg-black/15 p-3">
-                <img src={anuncios[7]} alt="RELYDO para profesionales" className="block h-auto w-full rounded-[1.55rem]" loading="lazy" />
+
+              <div className="h-[360px] border-t border-white/10 bg-black/15 p-3 md:h-[440px]">
+                <img
+                  src={anuncios[7]}
+                  alt="RELYDO profesional"
+                  className="h-full w-full rounded-[1.55rem] object-cover object-center"
+                  loading="lazy"
+                />
               </div>
             </article>
           </div>
@@ -656,27 +739,79 @@ export default function Home() {
       </section>
 
       {/* CÓMO FUNCIONA */}
-      <section id="como-funciona" className="bg-white px-5 py-16 md:py-24 lg:px-8">
+      <section
+        id="como-funciona"
+        className="bg-white px-5 py-16 md:py-24 lg:px-8"
+      >
         <div className="mx-auto max-w-[1440px]">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
-              <p className="text-sm font-black tracking-[0.2em] text-blue-600">{text.funcionaBadge}</p>
-              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">{text.funcionaTitulo}</h2>
-              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">{text.funcionaSub}</p>
+              <p className="text-sm font-black tracking-[0.2em] text-blue-600">
+                {text.funcionaBadge}
+              </p>
+
+              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">
+                {text.funcionaTitulo}
+              </h2>
+
+              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+                {text.funcionaSub}
+              </p>
             </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               {pasos.map((paso) => (
-                <div key={paso.number} className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6">
-                  <div className="text-4xl font-black text-blue-200">{paso.number}</div>
-                  <h3 className="mt-3 text-xl font-black">{paso.title}</h3>
-                  <p className="mt-3 leading-7 text-slate-600">{paso.description}</p>
+                <div
+                  key={paso.number}
+                  className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-6"
+                >
+                  <div className="text-4xl font-black text-blue-200">
+                    {paso.number}
+                  </div>
+
+                  <h3 className="mt-3 text-xl font-black">
+                    {paso.title}
+                  </h3>
+
+                  <p className="mt-3 leading-7 text-slate-600">
+                    {paso.description}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="mt-12 overflow-hidden rounded-[2.25rem] border border-slate-200 bg-slate-950 p-2 shadow-2xl">
-            <img src={anuncios[5]} alt="RELYDO app" className="block h-auto w-full rounded-[1.85rem]" loading="lazy" />
+          <div className="mt-12 grid gap-6 overflow-hidden rounded-[2.25rem] border border-slate-200 bg-slate-950 shadow-2xl lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="flex flex-col justify-center p-8 text-white md:p-10">
+              <p className="text-sm font-black tracking-[0.18em] text-blue-300">
+                RELYDO FLOW
+              </p>
+
+              <h3 className="mt-3 text-3xl font-black md:text-4xl">
+                {text.funcionaTitulo}
+              </h3>
+
+              <p className="mt-4 max-w-xl leading-7 text-slate-300">
+                {text.funcionaSub}
+              </p>
+
+              <button
+                type="button"
+                onClick={() => router.push("/solicitar-trabajo")}
+                className="mt-7 w-fit rounded-2xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-500"
+              >
+                {text.solicitarTrabajo}
+              </button>
+            </div>
+
+            <div className="h-[360px] p-3 md:h-[460px]">
+              <img
+                src={anuncios[5]}
+                alt="RELYDO app"
+                className="h-full w-full rounded-[1.75rem] object-cover object-center"
+                loading="lazy"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -688,11 +823,17 @@ export default function Home() {
 
         <div className="relative mx-auto grid max-w-[1440px] gap-10 xl:grid-cols-[1fr_0.95fr] xl:items-center">
           <div>
-            <p className="text-sm font-black tracking-[0.2em] text-blue-200">{text.seguridadBadge}</p>
+            <p className="text-sm font-black tracking-[0.2em] text-blue-200">
+              {text.seguridadBadge}
+            </p>
+
             <h2 className="mt-3 max-w-3xl text-4xl font-black tracking-[-0.04em] md:text-6xl">
               {text.seguridadTitulo}
             </h2>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-100">{text.seguridadDesc}</p>
+
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-blue-100">
+              {text.seguridadDesc}
+            </p>
 
             <div className="mt-9 grid gap-4 sm:grid-cols-2">
               {[
@@ -701,17 +842,31 @@ export default function Home() {
                 [text.seguro3, text.seguro3Desc],
                 [text.seguro4, text.seguro4Desc],
               ].map(([title, desc]) => (
-                <div key={title} className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <div
+                  key={title}
+                  className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur"
+                >
                   <div className="mb-4 h-1.5 w-10 rounded-full bg-blue-300" />
-                  <h3 className="font-black">{title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-blue-100/85">{desc}</p>
+
+                  <h3 className="font-black">
+                    {title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-blue-100/85">
+                    {desc}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 p-2 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
-            <img src={anuncios[6]} alt="RELYDO seguridad" className="block h-auto w-full rounded-[1.6rem]" loading="lazy" />
+            <img
+              src={anuncios[6]}
+              alt="RELYDO seguridad"
+              className="block h-auto w-full rounded-[1.6rem]"
+              loading="lazy"
+            />
           </div>
         </div>
       </section>
@@ -721,9 +876,17 @@ export default function Home() {
         <div className="mx-auto max-w-[1440px]">
           <div className="grid overflow-hidden rounded-[2.5rem] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.12)] xl:grid-cols-[0.9fr_1.1fr]">
             <div className="flex flex-col justify-center p-8 md:p-12 xl:p-14">
-              <p className="text-sm font-black tracking-[0.2em] text-blue-600">{text.ctaBadge}</p>
-              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">{text.ctaTitulo}</h2>
-              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">{text.ctaDesc}</p>
+              <p className="text-sm font-black tracking-[0.2em] text-blue-600">
+                {text.ctaBadge}
+              </p>
+
+              <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] md:text-5xl">
+                {text.ctaTitulo}
+              </h2>
+
+              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+                {text.ctaDesc}
+              </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <button
@@ -732,6 +895,7 @@ export default function Home() {
                 >
                   {text.ctaCliente}
                 </button>
+
                 <button
                   onClick={() => router.push("/registro-profesional")}
                   className="rounded-2xl border border-slate-300 bg-white px-7 py-4 font-black text-slate-800 transition hover:border-blue-500 hover:text-blue-700"
@@ -741,15 +905,23 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-[#07152f] p-3">
-              <img src={anuncios[8]} alt="RELYDO" className="block h-full min-h-[320px] w-full rounded-[1.8rem] object-cover object-center" loading="lazy" />
+            <div className="h-[360px] bg-[#07152f] p-3 md:h-[460px]">
+              <img
+                src={anuncios[8]}
+                alt="RELYDO"
+                className="h-full w-full rounded-[1.8rem] object-cover object-center"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer id="contacto" className="border-t border-slate-200 bg-white px-5 py-12 lg:px-8">
+      <footer
+        id="contacto"
+        className="border-t border-slate-200 bg-white px-5 py-12 lg:px-8"
+      >
         <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <button
@@ -759,32 +931,65 @@ export default function Home() {
             >
               RELY<span className="text-blue-600">DO</span>
             </button>
-            <p className="mt-4 max-w-xs leading-7 text-slate-600">{text.footerDesc}</p>
+
+            <p className="mt-4 max-w-xs leading-7 text-slate-600">
+              {text.footerDesc}
+            </p>
           </div>
 
           <div>
-            <h3 className="font-black">{text.footerPlataforma}</h3>
+            <h3 className="font-black">
+              {text.footerPlataforma}
+            </h3>
+
             <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <button onClick={() => router.push("/")}>{text.footerInicio}</button>
-              <button onClick={() => router.push("/servicios")}>{text.footerServicios}</button>
-              <button onClick={() => router.push("/profesionales")}>{text.footerProfesionales}</button>
+              <button onClick={() => router.push("/")}>
+                {text.footerInicio}
+              </button>
+
+              <button onClick={() => router.push("/servicios")}>
+                {text.footerServicios}
+              </button>
+
+              <button onClick={() => router.push("/profesionales")}>
+                {text.footerProfesionales}
+              </button>
             </div>
           </div>
 
           <div>
-            <h3 className="font-black">{text.footerCuenta}</h3>
+            <h3 className="font-black">
+              {text.footerCuenta}
+            </h3>
+
             <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <button onClick={() => router.push("/login-cliente")}>{text.footerLogin}</button>
-              <button onClick={() => router.push("/registro-cliente")}>{text.footerCliente}</button>
-              <button onClick={() => router.push("/registro-profesional")}>{text.footerPro}</button>
+              <button onClick={() => router.push("/login-cliente")}>
+                {text.footerLogin}
+              </button>
+
+              <button onClick={() => router.push("/registro-cliente")}>
+                {text.footerCliente}
+              </button>
+
+              <button onClick={() => router.push("/registro-profesional")}>
+                {text.footerPro}
+              </button>
             </div>
           </div>
 
           <div>
-            <h3 className="font-black">{text.footerLegal}</h3>
+            <h3 className="font-black">
+              {text.footerLegal}
+            </h3>
+
             <div className="mt-4 flex flex-col items-start gap-3 text-slate-600">
-              <span>{text.footerTerminos}</span>
-              <span>{text.footerPrivacidad}</span>
+              <span>
+                {text.footerTerminos}
+              </span>
+
+              <span>
+                {text.footerPrivacidad}
+              </span>
             </div>
           </div>
         </div>
