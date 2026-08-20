@@ -47,6 +47,27 @@ type DocumentRow = {
   document_type: string;
   file_path: string;
   status: string | null;
+  rejection_reason?: string | null;
+  created_at?: string | null;
+  reviewed_at?: string | null;
+  expiration_date?: string | null;
+  approved_at?: string | null;
+  reviewed_by?: string | null;
+};
+
+type ProviderDocumentRequest = {
+  id: string;
+  provider_id: string;
+  requested_by: string | null;
+  request_type: string;
+  document_type: string | null;
+  message: string;
+  status: string;
+  requested_at: string;
+  submitted_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 type ReassignmentHistory = {
@@ -470,6 +491,18 @@ export default function AdminPage() {
     useState<DocumentRow[]>([]);
 
   const [
+    solicitudesDocumentos,
+    setSolicitudesDocumentos,
+  ] =
+    useState<ProviderDocumentRequest[]>([]);
+
+  const [
+    expedientesAbiertos,
+    setExpedientesAbiertos,
+  ] =
+    useState<string[]>([]);
+
+  const [
     historial,
     setHistorial,
   ] =
@@ -843,6 +876,47 @@ export default function AdminPage() {
       setDocuments(
         (documentData ||
           []) as DocumentRow[]
+      );
+
+      /*
+        SOLICITUDES DE DOCUMENTACIÓN
+      */
+
+      const {
+        data: solicitudesDocumentosData,
+        error: solicitudesDocumentosError,
+      } = await supabase
+        .from(
+          "provider_document_requests"
+        )
+        .select(`
+          id,
+          provider_id,
+          requested_by,
+          request_type,
+          document_type,
+          message,
+          status,
+          requested_at,
+          submitted_at,
+          completed_at,
+          created_at,
+          updated_at
+        `)
+        .order(
+          "requested_at",
+          { ascending: false }
+        );
+
+      if (solicitudesDocumentosError) {
+        throw new Error(
+          `Error cargando solicitudes de documentación: ${solicitudesDocumentosError.message}`
+        );
+      }
+
+      setSolicitudesDocumentos(
+        (solicitudesDocumentosData ||
+          []) as ProviderDocumentRequest[]
       );
 
       /*
@@ -1300,6 +1374,93 @@ export default function AdminPage() {
     );
   }
 
+  function solicitudesDocsDelUsuario(
+    userId: string
+  ) {
+    return solicitudesDocumentos.filter(
+      (solicitud) =>
+        solicitud.provider_id ===
+        userId
+    );
+  }
+
+  function toggleExpediente(
+    userId: string
+  ) {
+    setExpedientesAbiertos(
+      (actuales) =>
+        actuales.includes(userId)
+          ? actuales.filter(
+              (id) => id !== userId
+            )
+          : [...actuales, userId]
+    );
+  }
+
+  function nombreTipoDocumento(
+    documentType: string | null
+  ) {
+    if (!documentType) {
+      return "Varios documentos / información adicional";
+    }
+
+    if (documentType === "license") {
+      return "Licencia";
+    }
+
+    if (documentType === "insurance") {
+      return "Seguro";
+    }
+
+    if (documentType === "bond") {
+      return "Bond / Fianza";
+    }
+
+    if (documentType === "other") {
+      return "Otro documento";
+    }
+
+    return documentType;
+  }
+
+  function fechaDocumento(
+    fecha: string | null | undefined
+  ) {
+    if (!fecha) {
+      return "Sin fecha";
+    }
+
+    return new Intl.DateTimeFormat(
+      "es-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }
+    ).format(
+      new Date(`${fecha}T12:00:00`)
+    );
+  }
+
+  function vencimientoDocumento(
+    doc: DocumentRow,
+    provider: Provider
+  ) {
+    if (doc.expiration_date) {
+      return doc.expiration_date;
+    }
+
+    if (doc.document_type === "license") {
+      return provider.license_expiration;
+    }
+
+    if (doc.document_type === "insurance") {
+      return provider.insurance_expiration;
+    }
+
+    return null;
+  }
+
   /*
     ABRIR DOCUMENTO
   */
@@ -1480,6 +1641,8 @@ export default function AdminPage() {
       setSolicitudDocsError(
         ""
       );
+
+      await cargarDatos();
     } catch (err) {
       setSolicitudDocsError(
         err instanceof Error
@@ -3277,6 +3440,30 @@ export default function AdminPage() {
                       provider.user_id
                     );
 
+                  const userDocs =
+                    docsDelUsuario(
+                      provider.user_id
+                    );
+
+                  const userSolicitudes =
+                    solicitudesDocsDelUsuario(
+                      provider.user_id
+                    );
+
+                  const solicitudesPendientes =
+                    userSolicitudes.filter(
+                      (solicitud) =>
+                        solicitud.status ===
+                          "pending" ||
+                        solicitud.status ===
+                          "submitted"
+                    );
+
+                  const expedienteAbierto =
+                    expedientesAbiertos.includes(
+                      provider.user_id
+                    );
+
                   return (
                     <article
                       key={
@@ -3423,6 +3610,202 @@ export default function AdminPage() {
 
                         </div>
                       )}
+
+                      {/* EXPEDIENTE DOCUMENTAL PERMANENTE */}
+
+                      <div className="mt-6 border-t border-slate-200 pt-5">
+
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                          <div>
+                            <p className="text-sm font-bold uppercase tracking-wide text-purple-700">
+                              Expediente de verificación
+                            </p>
+
+                            <p className="mt-1 text-sm text-slate-600">
+                              Documentos, vencimientos y solicitudes de esta cuenta.
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">
+                              {userDocs.length} documentos
+                            </span>
+
+                            {solicitudesPendientes.length > 0 && (
+                              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-extrabold text-amber-800">
+                                {solicitudesPendientes.length} solicitud(es) activa(s)
+                              </span>
+                            )}
+                          </div>
+
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toggleExpediente(
+                              provider.user_id
+                            )
+                          }
+                          className="mt-4 w-full rounded-xl border-2 border-purple-200 bg-purple-50 px-5 py-3 font-extrabold text-purple-800 transition hover:bg-purple-100"
+                        >
+                          {expedienteAbierto
+                            ? "Ocultar expediente documental"
+                            : "📂 Ver expediente documental"}
+                        </button>
+
+                        {expedienteAbierto && (
+                          <div className="mt-5 space-y-5 rounded-2xl border border-purple-100 bg-slate-50 p-5">
+
+                            <div>
+                              <div className="flex items-center justify-between gap-3">
+                                <h4 className="font-extrabold text-slate-900">
+                                  Documentos registrados
+                                </h4>
+
+                                <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${estiloEstadoCuenta(provider)}`}>
+                                  {nombreEstadoCuenta(provider)}
+                                </span>
+                              </div>
+
+                              {userDocs.length === 0 ? (
+                                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                                  No hay documentos registrados para este profesional.
+                                </div>
+                              ) : (
+                                <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                                  {userDocs.map((doc, index) => {
+                                    const vencimiento =
+                                      vencimientoDocumento(
+                                        doc,
+                                        provider
+                                      );
+
+                                    return (
+                                      <div
+                                        key={`${doc.id || doc.file_path}-${index}`}
+                                        className="rounded-xl border border-slate-200 bg-white p-4"
+                                      >
+                                        <div className="flex items-start justify-between gap-3">
+                                          <div>
+                                            <p className="font-extrabold text-slate-900">
+                                              {nombreTipoDocumento(
+                                                doc.document_type
+                                              )}
+                                            </p>
+
+                                            <p className="mt-1 text-xs font-semibold text-slate-500">
+                                              Estado: {doc.status || "pending"}
+                                            </p>
+                                          </div>
+
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              abrirDocumento(
+                                                doc.file_path
+                                              )
+                                            }
+                                            className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white hover:bg-slate-700"
+                                          >
+                                            Ver
+                                          </button>
+                                        </div>
+
+                                        <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+                                          <p>
+                                            <strong>Vence:</strong>{" "}
+                                            {vencimiento
+                                              ? fechaDocumento(vencimiento)
+                                              : "No aplica / sin registrar"}
+                                          </p>
+
+                                          <p>
+                                            <strong>Aprobado:</strong>{" "}
+                                            {doc.approved_at
+                                              ? formatearFecha(doc.approved_at)
+                                              : "Sin registrar"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="border-t border-slate-200 pt-5">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <h4 className="font-extrabold text-slate-900">
+                                  Solicitudes de documentación
+                                </h4>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    abrirSolicitudDocumentos(
+                                      provider
+                                    )
+                                  }
+                                  className="rounded-lg border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-extrabold text-amber-800 hover:bg-amber-100"
+                                >
+                                  📄 Solicitar documentos
+                                </button>
+                              </div>
+
+                              {userSolicitudes.length === 0 ? (
+                                <p className="mt-3 rounded-xl bg-white p-4 text-sm text-slate-600">
+                                  No hay solicitudes de documentación registradas.
+                                </p>
+                              ) : (
+                                <div className="mt-3 space-y-3">
+                                  {userSolicitudes.map(
+                                    (solicitud) => (
+                                      <div
+                                        key={solicitud.id}
+                                        className="rounded-xl border border-slate-200 bg-white p-4"
+                                      >
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                          <div>
+                                            <p className="font-extrabold text-slate-900">
+                                              {nombreTipoDocumento(
+                                                solicitud.document_type
+                                              )}
+                                            </p>
+
+                                            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
+                                              {solicitud.message}
+                                            </p>
+                                          </div>
+
+                                          <span className={`w-fit rounded-full px-3 py-1 text-xs font-extrabold ${
+                                            solicitud.status === "completed"
+                                              ? "bg-green-100 text-green-800"
+                                              : solicitud.status === "cancelled"
+                                              ? "bg-slate-200 text-slate-700"
+                                              : "bg-amber-100 text-amber-800"
+                                          }`}>
+                                            {solicitud.status}
+                                          </span>
+                                        </div>
+
+                                        <p className="mt-3 text-xs text-slate-500">
+                                          Solicitado: {formatearFecha(
+                                            solicitud.requested_at
+                                          )}
+                                        </p>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                          </div>
+                        )}
+
+                      </div>
 
                       {/* CONTROLES ADMIN */}
 
