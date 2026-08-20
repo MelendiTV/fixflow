@@ -192,18 +192,59 @@ export default function RegistroProfesional() {
 
     try {
       /*
-        IMPORTANTE:
+        1. COMPROBAR SI EL EMAIL YA ESTÁ EN USO
 
-        Aquí SOLO creamos el usuario de Auth.
+        Esta RPC revisa tanto Authentication como public.profiles.
+        Así RELYDO puede mostrar un mensaje claro antes de intentar
+        crear una segunda cuenta con el mismo correo.
+      */
 
-        NO insertamos todavía en:
-        profiles
-        provider_profiles
-        provider_documents
+      const {
+        data: emailExiste,
+        error: emailCheckError,
+      } = await supabase.rpc(
+        "relydo_email_exists",
+        {
+          check_email: email,
+        }
+      );
 
-        porque con Confirm Email activado
-        todavía puede no existir una sesión
-        authenticated.
+      if (emailCheckError) {
+        throw new Error(
+          T(
+            `No pudimos comprobar el correo: ${emailCheckError.message}`,
+            `We could not verify the email address: ${emailCheckError.message}`
+          )
+        );
+      }
+
+      if (emailExiste === true) {
+        setError(
+          T(
+            "Este correo ya está asociado a una cuenta en RELYDO. Inicia sesión o utiliza otro correo.",
+            "This email is already associated with a RELYDO account. Sign in or use a different email."
+          )
+        );
+
+        setEnviando(false);
+        return;
+      }
+
+      /*
+        2. CREAR USUARIO EN AUTH
+
+        El trigger de Supabase que instalaremos crea inmediatamente:
+        - profiles
+        - provider_profiles
+        - provider_services (si existe la categoría)
+
+        El profesional queda:
+        verification_status = pending
+        verified = false
+        active = false
+
+        Por eso Admin puede verlo desde el mismo momento del registro,
+        incluso antes de que confirme el correo.
       */
 
       const {
@@ -283,6 +324,29 @@ export default function RegistroProfesional() {
         );
       }
 
+      /*
+        Protección adicional:
+        con Confirm Email activado Supabase puede responder de forma
+        deliberadamente ambigua si el correo ya existía.
+        Una lista identities vacía es una señal de que no se creó
+        una identidad nueva.
+      */
+
+      if (
+        Array.isArray(authData.user.identities) &&
+        authData.user.identities.length === 0
+      ) {
+        setError(
+          T(
+            "Este correo ya está asociado a una cuenta en RELYDO. Inicia sesión o utiliza otro correo.",
+            "This email is already associated with a RELYDO account. Sign in or use a different email."
+          )
+        );
+
+        setEnviando(false);
+        return;
+      }
+
       form.reset();
 
       /*
@@ -323,7 +387,33 @@ export default function RegistroProfesional() {
       console.error(err);
 
       if (err instanceof Error) {
-        setError(err.message);
+        const mensajeError =
+          err.message.toLowerCase();
+
+        if (
+          mensajeError.includes("rate limit") ||
+          mensajeError.includes("email rate limit")
+        ) {
+          setError(
+            T(
+              "Se han enviado demasiados correos en poco tiempo. Espera unos minutos e inténtalo nuevamente.",
+              "Too many emails have been sent in a short period. Wait a few minutes and try again."
+            )
+          );
+        } else if (
+          mensajeError.includes("already registered") ||
+          mensajeError.includes("already exists") ||
+          mensajeError.includes("user already registered")
+        ) {
+          setError(
+            T(
+              "Este correo ya está asociado a una cuenta en RELYDO. Inicia sesión o utiliza otro correo.",
+              "This email is already associated with a RELYDO account. Sign in or use a different email."
+            )
+          );
+        } else {
+          setError(err.message);
+        }
       } else {
         setError(
           T("Ocurrió un error inesperado.", "An unexpected error occurred.")

@@ -96,6 +96,18 @@ export default function LoginProfesional() {
   const [cargando, setCargando] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
 
+  const [
+    estadoCuenta,
+    setEstadoCuenta,
+  ] = useState<
+    "pending" | "rejected" | "suspended" | null
+  >(null);
+
+  const [
+    nombreNegocio,
+    setNombreNegocio,
+  ] = useState("");
+
   /*
     ASEGURAR QUE LA ESPECIALIDAD
     EXISTA EN provider_services
@@ -294,6 +306,7 @@ export default function LoginProfesional() {
           .from("provider_profiles")
           .select(`
             user_id,
+            business_name,
             trade,
             verification_status,
             verified,
@@ -322,6 +335,54 @@ export default function LoginProfesional() {
             "/completar-perfil-profesional"
           );
 
+          return;
+        }
+
+        setNombreNegocio(
+          providerProfile.business_name ||
+            ""
+        );
+
+        /*
+          ESTADO DE LA CUENTA PROFESIONAL
+        */
+
+        if (
+          providerProfile.verification_status ===
+          "pending"
+        ) {
+          setEstadoCuenta("pending");
+          setCargando(false);
+          return;
+        }
+
+        if (
+          providerProfile.verification_status ===
+          "rejected"
+        ) {
+          setEstadoCuenta("rejected");
+          setCargando(false);
+          return;
+        }
+
+        if (
+          providerProfile.verified === true &&
+          providerProfile.active !== true
+        ) {
+          setEstadoCuenta("suspended");
+          setCargando(false);
+          return;
+        }
+
+        const accesoAprobado =
+          providerProfile.verification_status ===
+            "verified" &&
+          providerProfile.verified === true &&
+          providerProfile.active === true;
+
+        if (!accesoAprobado) {
+          setEstadoCuenta("pending");
+          setCargando(false);
           return;
         }
 
@@ -439,6 +500,115 @@ export default function LoginProfesional() {
     } finally {
       setRecuperando(false);
     }
+  }
+
+  async function salirCuentaPendiente() {
+    await supabase.auth.signOut();
+    setEstadoCuenta(null);
+    setPassword("");
+  }
+
+  if (estadoCuenta) {
+    const esPendiente =
+      estadoCuenta === "pending";
+
+    const esRechazada =
+      estadoCuenta === "rejected";
+
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
+        <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="bg-blue-700 px-7 py-9 text-center text-white">
+            <div className="text-2xl font-black">
+              RELYDO
+            </div>
+
+            <h1 className="mt-3 text-3xl font-black">
+              {esPendiente
+                ? language === "es"
+                  ? "Tu cuenta está en revisión"
+                  : "Your account is under review"
+                : esRechazada
+                ? language === "es"
+                  ? "Revisión no aprobada"
+                  : "Review not approved"
+                : language === "es"
+                ? "Cuenta suspendida"
+                : "Account suspended"}
+            </h1>
+
+            {nombreNegocio && (
+              <p className="mt-2 text-blue-100">
+                {nombreNegocio}
+              </p>
+            )}
+          </div>
+
+          <div className="p-7 md:p-9">
+            {esPendiente ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+                <p className="text-lg font-black">
+                  ⏳{" "}
+                  {language === "es"
+                    ? "Pendiente de verificación"
+                    : "Verification pending"}
+                </p>
+
+                <p className="mt-3 leading-7">
+                  {language === "es"
+                    ? "Tu correo fue aceptado y tu registro profesional está en RELYDO. Nuestro equipo debe revisar tu información y documentos antes de habilitar el acceso a trabajos."
+                    : "Your email was accepted and your professional registration is in RELYDO. Our team must review your information and documents before enabling access to jobs."}
+                </p>
+
+                <p className="mt-3 text-sm font-bold">
+                  {language === "es"
+                    ? "No necesitas registrarte nuevamente."
+                    : "You do not need to register again."}
+                </p>
+              </div>
+            ) : esRechazada ? (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-950">
+                <p className="text-lg font-black">
+                  {language === "es"
+                    ? "Tu cuenta profesional no fue aprobada."
+                    : "Your professional account was not approved."}
+                </p>
+
+                <p className="mt-3 leading-7">
+                  {language === "es"
+                    ? "Contacta con RELYDO si necesitas aclarar o actualizar la información de tu verificación."
+                    : "Contact RELYDO if you need to clarify or update your verification information."}
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-300 bg-slate-50 p-5 text-slate-900">
+                <p className="text-lg font-black">
+                  {language === "es"
+                    ? "Tu cuenta está temporalmente suspendida."
+                    : "Your account is temporarily suspended."}
+                </p>
+
+                <p className="mt-3 leading-7 text-slate-700">
+                  {language === "es"
+                    ? "Mientras la cuenta esté suspendida no podrás acceder a nuevos trabajos. Contacta con RELYDO para obtener más información."
+                    : "While the account is suspended, you cannot access new jobs. Contact RELYDO for more information."}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={salirCuentaPendiente}
+              className="mt-6 w-full rounded-xl border-2 border-blue-700 bg-white px-5 py-3.5 font-black text-blue-700 hover:bg-blue-50"
+            >
+              {language === "es"
+                ? "Cerrar sesión"
+                : "Sign out"}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
