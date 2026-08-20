@@ -202,20 +202,36 @@ function nombreOficio(
 }
 
 function formatearFecha(
-  fecha: string
+  fecha: string | null | undefined
 ) {
-  return new Intl.DateTimeFormat(
-    "es-US",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }
-  ).format(
-    new Date(fecha)
-  );
+  if (!fecha) {
+    return "Sin fecha";
+  }
+
+  const valor = String(fecha).trim();
+  if (!valor) {
+    return "Sin fecha";
+  }
+
+  const fechaObj = new Date(valor);
+  if (Number.isNaN(fechaObj.getTime())) {
+    return "Fecha no disponible";
+  }
+
+  try {
+    return new Intl.DateTimeFormat(
+      "es-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }
+    ).format(fechaObj);
+  } catch {
+    return "Fecha no disponible";
+  }
 }
 
 function calcularEstadoPlazoProfesional(
@@ -1540,16 +1556,31 @@ export default function AdminPage() {
       return "Sin fecha";
     }
 
-    return new Intl.DateTimeFormat(
-      "es-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }
-    ).format(
-      new Date(`${fecha}T12:00:00`)
-    );
+    const valor = String(fecha).trim();
+    if (!valor) {
+      return "Sin fecha";
+    }
+
+    const fechaObj = /^\d{4}-\d{2}-\d{2}$/.test(valor)
+      ? new Date(`${valor}T12:00:00`)
+      : new Date(valor);
+
+    if (Number.isNaN(fechaObj.getTime())) {
+      return "Fecha no disponible";
+    }
+
+    try {
+      return new Intl.DateTimeFormat(
+        "es-US",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }
+      ).format(fechaObj);
+    } catch {
+      return "Fecha no disponible";
+    }
   }
 
   function vencimientoDocumento(
@@ -1576,40 +1607,37 @@ export default function AdminPage() {
   */
 
   async function abrirDocumento(
-    filePath: string
+    filePath: string | null | undefined
   ) {
     setError("");
 
-    const {
-      data,
-      error:
-        signedUrlError,
-    } = await supabase.storage
-      .from(
-        "provider-documents"
-      )
-      .createSignedUrl(
-        filePath,
-        60
-      );
+    const ruta = String(filePath || "").trim();
 
-    if (
-      signedUrlError
-    ) {
+    if (!ruta) {
       setError(
-        `No se pudo abrir el documento: ${signedUrlError.message}`
+        "Este documento no tiene una ruta de archivo válida."
       );
-
       return;
     }
 
-    if (
-      !data?.signedUrl
-    ) {
+    const {
+      data,
+      error: signedUrlError,
+    } = await supabase.storage
+      .from("provider-documents")
+      .createSignedUrl(ruta, 60);
+
+    if (signedUrlError) {
+      setError(
+        `No se pudo abrir el documento: ${signedUrlError.message}`
+      );
+      return;
+    }
+
+    if (!data?.signedUrl) {
       setError(
         "No se pudo generar el enlace del documento."
       );
-
       return;
     }
 
