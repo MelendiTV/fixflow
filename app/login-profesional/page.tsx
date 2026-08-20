@@ -361,7 +361,7 @@ export default function LoginProfesional() {
         } = await supabase
           .from("provider_documents")
           .select("id")
-          .eq("provider_id", user.id)
+          .eq("user_id", user.id)
           .limit(1);
 
         if (documentosError) {
