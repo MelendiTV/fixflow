@@ -212,6 +212,9 @@ export default function PanelProfesional() {
   const [documentos, setDocumentos] = useState<DocumentoProfesional[]>([]);
   const [solicitudesDocumentos, setSolicitudesDocumentos] = useState<SolicitudDocumentoProfesional[]>([]);
   const [abriendoDocumento, setAbriendoDocumento] = useState<string | null>(null);
+  const [archivosSolicitud, setArchivosSolicitud] = useState<Record<string, File | null>>({});
+  const [enviandoSolicitud, setEnviandoSolicitud] = useState<string | null>(null);
+  const [mensajeDocumentos, setMensajeDocumentos] = useState("");
   const [loading, setLoading] = useState(true);
   const [actualizando, setActualizando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
@@ -704,6 +707,142 @@ export default function PanelProfesional() {
     }
   }
 
+  function seleccionarArchivoSolicitud(solicitudId: string, file: File | null) {
+    setError("");
+    setMensajeDocumentos("");
+
+    if (!file) {
+      setArchivosSolicitud((actual) => ({ ...actual, [solicitudId]: null }));
+      return;
+    }
+
+    const esImagen = file.type.startsWith("image/");
+    const esPdf = file.type === "application/pdf";
+
+    if (!esImagen && !esPdf) {
+      setError(
+        T(
+          "El documento debe ser una imagen o un archivo PDF.",
+          "The document must be an image or PDF file."
+        )
+      );
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError(
+        T(
+          "El documento no puede superar 10 MB.",
+          "The document cannot exceed 10 MB."
+        )
+      );
+      return;
+    }
+
+    setArchivosSolicitud((actual) => ({ ...actual, [solicitudId]: file }));
+  }
+
+  async function enviarDocumentoSolicitado(solicitud: SolicitudDocumentoProfesional) {
+    const file = archivosSolicitud[solicitud.id];
+    if (!file) {
+      setError(T("Selecciona primero una foto o archivo.", "Select a photo or file first."));
+      return;
+    }
+
+    setError("");
+    setMensajeDocumentos("");
+    setEnviandoSolicitud(solicitud.id);
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error(T("Tu sesión ya no está disponible.", "Your session is no longer available."));
+      }
+
+      const documentType = solicitud.document_type || "other";
+      const extensionOriginal = file.name.split(".").pop()?.toLowerCase();
+      const extension =
+        extensionOriginal && /^[a-z0-9]{1,8}$/.test(extensionOriginal)
+          ? extensionOriginal
+          : file.type === "application/pdf"
+          ? "pdf"
+          : "jpg";
+
+      const ruta = `${user.id}/${documentType}-${Date.now()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("provider-documents")
+        .upload(ruta, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(
+          `${T("No se pudo subir el documento", "Could not upload the document")}: ${uploadError.message}`
+        );
+      }
+
+      const { error: insertError } = await supabase
+        .from("provider_documents")
+        .insert({
+          user_id: user.id,
+          document_type: documentType,
+          file_path: ruta,
+          status: "pending",
+          rejection_reason: null,
+        });
+
+      if (insertError) {
+        await supabase.storage.from("provider-documents").remove([ruta]);
+        throw new Error(
+          `${T("El archivo subió, pero no se pudo registrar", "The file uploaded, but could not be registered")}: ${insertError.message}`
+        );
+      }
+
+      const ahora = new Date().toISOString();
+      const { error: requestError } = await supabase
+        .from("provider_document_requests")
+        .update({
+          status: "submitted",
+          submitted_at: ahora,
+          updated_at: ahora,
+        })
+        .eq("id", solicitud.id)
+        .eq("provider_id", user.id);
+
+      if (requestError) {
+        throw new Error(
+          `${T("El documento se guardó, pero no se pudo actualizar la solicitud", "The document was saved, but the request could not be updated")}: ${requestError.message}`
+        );
+      }
+
+      setArchivosSolicitud((actual) => ({ ...actual, [solicitud.id]: null }));
+      setMensajeDocumentos(
+        T(
+          "Documento enviado correctamente. RELYDO lo revisará y te notificará cuando termine la revisión.",
+          "Document sent successfully. RELYDO will review it and notify you when the review is complete."
+        )
+      );
+
+      await cargarPanel(false);
+      irASeccion("documentacion-profesional");
+    } catch (err) {
+      console.error("Error enviando documento solicitado:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : T("No se pudo enviar el documento.", "Could not send the document.")
+      );
+    } finally {
+      setEnviandoSolicitud(null);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -1162,6 +1301,15 @@ export default function PanelProfesional() {
           </div>
 
           <div className="p-7">
+            {mensajeDocumentos && (
+              <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                <p className="font-black text-emerald-900">
+                  ✅ {T("Documento enviado", "Document sent")}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-emerald-800">{mensajeDocumentos}</p>
+              </div>
+            )}
+
             {requiereAccionDocumental && (
               <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5">
                 <p className="font-black text-red-900">
@@ -1222,13 +1370,43 @@ export default function PanelProfesional() {
                           {T("Acción requerida", "Action required")}
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => router.push("/completar-verificacion")}
-                        className="mt-4 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-black text-white hover:bg-amber-800"
-                      >
-                        {T("Subir documento solicitado →", "Upload requested document →")}
-                      </button>
+                      <div className="mt-4">
+                        <label className="inline-flex cursor-pointer items-center rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-black text-white transition hover:bg-amber-800">
+                          📎 {T("Tomar foto o subir archivo", "Take photo or upload file")}
+                          <input
+                            type="file"
+                            accept="image/*,application/pdf"
+                            className="hidden"
+                            disabled={enviandoSolicitud === solicitud.id}
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] || null;
+                              seleccionarArchivoSolicitud(solicitud.id, file);
+                              event.currentTarget.value = "";
+                            }}
+                          />
+                        </label>
+
+                        {archivosSolicitud[solicitud.id] && (
+                          <div className="mt-3 rounded-xl border border-amber-200 bg-white p-4">
+                            <p className="text-xs font-black uppercase tracking-wide text-amber-700">
+                              {T("Archivo seleccionado", "Selected file")}
+                            </p>
+                            <p className="mt-1 break-all text-sm font-bold text-slate-800">
+                              {archivosSolicitud[solicitud.id]?.name}
+                            </p>
+                            <button
+                              type="button"
+                              disabled={enviandoSolicitud === solicitud.id}
+                              onClick={() => enviarDocumentoSolicitado(solicitud)}
+                              className="mt-3 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-black text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {enviandoSolicitud === solicitud.id
+                                ? T("Enviando...", "Sending...")
+                                : T("Enviar documento a RELYDO", "Send document to RELYDO")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
