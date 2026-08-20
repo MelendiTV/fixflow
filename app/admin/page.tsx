@@ -1374,6 +1374,116 @@ export default function AdminPage() {
     );
   }
 
+
+  function documentosOrdenados(userId: string) {
+    return docsDelUsuario(userId).slice().sort((a, b) =>
+      new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+    );
+  }
+
+  function documentoVigente(userId: string, tipo: string) {
+    return documentosOrdenados(userId).find(
+      (doc) => doc.document_type === tipo && doc.status === "approved"
+    ) || null;
+  }
+
+  function documentosPendientesRevision(userId: string) {
+    return documentosOrdenados(userId).filter(
+      (doc) => doc.status === "pending" || doc.status === "submitted"
+    );
+  }
+
+  function documentosHistoricos(userId: string) {
+    const ordenados = documentosOrdenados(userId);
+    const vigentes = new Set<string>();
+    for (const tipo of ["license", "insurance", "bond", "other"]) {
+      const actual = ordenados.find(
+        (doc) => doc.document_type === tipo && doc.status === "approved"
+      );
+      if (actual?.id) vigentes.add(actual.id);
+    }
+    return ordenados.filter(
+      (doc) => doc.status !== "pending" && doc.status !== "submitted" && (!doc.id || !vigentes.has(doc.id))
+    );
+  }
+
+  async function revisarDocumento(doc: DocumentRow, decision: "approved" | "rejected") {
+    if (!doc.id) {
+      setError("Este documento no tiene un ID válido.");
+      return;
+    }
+
+    let motivo = "";
+    if (decision === "rejected") {
+      const respuesta = window.prompt("Escribe el motivo del rechazo para que el profesional pueda corregirlo:");
+      if (respuesta === null) return;
+      motivo = respuesta.trim();
+      if (!motivo) {
+        setError("Debes escribir el motivo del rechazo.");
+        return;
+      }
+    }
+
+    const confirmar = window.confirm(
+      decision === "approved"
+        ? `¿Aprobar este documento de ${nombreTipoDocumento(doc.document_type)}? Se convertirá en el documento vigente.`
+        : `¿Rechazar este documento de ${nombreTipoDocumento(doc.document_type)}?`
+    );
+    if (!confirmar) return;
+
+    setProcesando(doc.id);
+    setError("");
+    setMensaje("");
+
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error("No pudimos verificar tu sesión de administrador.");
+
+      const ahora = new Date().toISOString();
+      const { error: docError } = await supabase
+        .from("provider_documents")
+        .update({
+          status: decision,
+          rejection_reason: decision === "rejected" ? motivo : null,
+          reviewed_at: ahora,
+          reviewed_by: user.id,
+          approved_at: decision === "approved" ? ahora : null,
+        })
+        .eq("id", doc.id);
+      if (docError) throw new Error(`No se pudo actualizar el documento: ${docError.message}`);
+
+      const solicitudesRelacionadas = solicitudesDocsDelUsuario(doc.user_id).filter(
+        (solicitud) =>
+          (solicitud.status === "submitted" || solicitud.status === "pending") &&
+          (solicitud.document_type === doc.document_type || solicitud.document_type === null)
+      );
+
+      if (solicitudesRelacionadas.length > 0) {
+        const solicitud = solicitudesRelacionadas[0];
+        const { error: solicitudError } = await supabase
+          .from("provider_document_requests")
+          .update(
+            decision === "approved"
+              ? { status: "completed", completed_at: ahora, updated_at: ahora }
+              : { status: "pending", submitted_at: null, completed_at: null, updated_at: ahora }
+          )
+          .eq("id", solicitud.id);
+        if (solicitudError) throw new Error(`El documento cambió, pero no pudimos actualizar la solicitud: ${solicitudError.message}`);
+      }
+
+      setMensaje(
+        decision === "approved"
+          ? `${nombreTipoDocumento(doc.document_type)} aprobado. Ya es el documento vigente.`
+          : `${nombreTipoDocumento(doc.document_type)} rechazado. El profesional deberá enviarlo nuevamente.`
+      );
+      await cargarDatos();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo revisar el documento.");
+    } finally {
+      setProcesando(null);
+    }
+  }
+
   function solicitudesDocsDelUsuario(
     userId: string
   ) {
@@ -3660,78 +3770,84 @@ export default function AdminPage() {
 
                             <div>
                               <div className="flex items-center justify-between gap-3">
-                                <h4 className="font-extrabold text-slate-900">
-                                  Documentos registrados
-                                </h4>
-
+                                <h4 className="font-extrabold text-slate-900">Documentos vigentes</h4>
                                 <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${estiloEstadoCuenta(provider)}`}>
                                   {nombreEstadoCuenta(provider)}
                                 </span>
                               </div>
 
-                              {userDocs.length === 0 ? (
-                                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
-                                  No hay documentos registrados para este profesional.
-                                </div>
-                              ) : (
-                                <div className="mt-3 grid gap-3 lg:grid-cols-2">
-                                  {userDocs.map((doc, index) => {
-                                    const vencimiento =
-                                      vencimientoDocumento(
-                                        doc,
-                                        provider
-                                      );
-
-                                    return (
-                                      <div
-                                        key={`${doc.id || doc.file_path}-${index}`}
-                                        className="rounded-xl border border-slate-200 bg-white p-4"
-                                      >
-                                        <div className="flex items-start justify-between gap-3">
-                                          <div>
-                                            <p className="font-extrabold text-slate-900">
-                                              {nombreTipoDocumento(
-                                                doc.document_type
-                                              )}
-                                            </p>
-
-                                            <p className="mt-1 text-xs font-semibold text-slate-500">
-                                              Estado: {doc.status || "pending"}
-                                            </p>
-                                          </div>
-
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              abrirDocumento(
-                                                doc.file_path
-                                              )
-                                            }
-                                            className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white hover:bg-slate-700"
-                                          >
-                                            Ver
-                                          </button>
+                              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                                {["license", "insurance", "bond", "other"].map((tipo) => {
+                                  const doc = documentoVigente(provider.user_id, tipo);
+                                  const vencimiento = doc ? vencimientoDocumento(doc, provider) : null;
+                                  return (
+                                    <div key={tipo} className="rounded-xl border border-slate-200 bg-white p-4">
+                                      <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                          <p className="font-extrabold text-slate-900">{nombreTipoDocumento(tipo)}</p>
+                                          <span className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-extrabold ${doc ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600"}`}>
+                                            {doc ? "Aprobado" : "Sin documento vigente"}
+                                          </span>
                                         </div>
-
+                                        {doc && (
+                                          <button type="button" onClick={() => abrirDocumento(doc.file_path)} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white hover:bg-slate-700">Ver</button>
+                                        )}
+                                      </div>
+                                      {doc && (
                                         <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
-                                          <p>
-                                            <strong>Vence:</strong>{" "}
-                                            {vencimiento
-                                              ? fechaDocumento(vencimiento)
-                                              : "No aplica / sin registrar"}
-                                          </p>
+                                          <p><strong>Vence:</strong> {vencimiento ? fechaDocumento(vencimiento) : "No aplica / sin registrar"}</p>
+                                          <p><strong>Aprobado:</strong> {doc.approved_at ? formatearFecha(doc.approved_at) : "Sin registrar"}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
 
-                                          <p>
-                                            <strong>Aprobado:</strong>{" "}
-                                            {doc.approved_at
-                                              ? formatearFecha(doc.approved_at)
-                                              : "Sin registrar"}
-                                          </p>
+                              {documentosPendientesRevision(provider.user_id).length > 0 && (
+                                <div className="mt-5 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                      <h4 className="font-extrabold text-amber-950">⚠️ Documentos pendientes de revisión</h4>
+                                      <p className="mt-1 text-sm text-amber-800">Los nuevos archivos no sustituyen al documento vigente hasta que los apruebes.</p>
+                                    </div>
+                                    <span className="rounded-full bg-amber-200 px-3 py-1 text-xs font-extrabold text-amber-900">{documentosPendientesRevision(provider.user_id).length} pendiente(s)</span>
+                                  </div>
+                                  <div className="mt-4 space-y-3">
+                                    {documentosPendientesRevision(provider.user_id).map((doc, index) => (
+                                      <div key={`${doc.id || doc.file_path}-${index}`} className="rounded-xl border border-amber-200 bg-white p-4">
+                                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                          <div>
+                                            <p className="font-extrabold text-slate-900">{nombreTipoDocumento(doc.document_type)}</p>
+                                            <p className="mt-1 text-xs text-slate-500">Enviado: {doc.created_at ? formatearFecha(doc.created_at) : "Sin fecha"}</p>
+                                          </div>
+                                          <div className="flex flex-wrap gap-2">
+                                            <button type="button" onClick={() => abrirDocumento(doc.file_path)} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-extrabold text-white">Ver</button>
+                                            <button type="button" disabled={procesando === doc.id} onClick={() => revisarDocumento(doc, "approved")} className="rounded-lg bg-green-600 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">✓ Aprobar</button>
+                                            <button type="button" disabled={procesando === doc.id} onClick={() => revisarDocumento(doc, "rejected")} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">✕ Rechazar</button>
+                                          </div>
                                         </div>
                                       </div>
-                                    );
-                                  })}
+                                    ))}
+                                  </div>
                                 </div>
+                              )}
+
+                              {documentosHistoricos(provider.user_id).length > 0 && (
+                                <details className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+                                  <summary className="cursor-pointer font-extrabold text-slate-700">Historial de documentos ({documentosHistoricos(provider.user_id).length})</summary>
+                                  <div className="mt-3 space-y-2">
+                                    {documentosHistoricos(provider.user_id).map((doc, index) => (
+                                      <div key={`${doc.id || doc.file_path}-hist-${index}`} className="flex flex-col gap-2 rounded-lg bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                          <p className="font-bold text-slate-800">{nombreTipoDocumento(doc.document_type)}</p>
+                                          <p className="text-xs text-slate-500">Estado: {doc.status || "sin estado"}{doc.rejection_reason ? ` · ${doc.rejection_reason}` : ""}</p>
+                                        </div>
+                                        <button type="button" onClick={() => abrirDocumento(doc.file_path)} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-bold">Ver</button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </details>
                               )}
                             </div>
 
