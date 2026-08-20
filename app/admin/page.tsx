@@ -585,6 +585,48 @@ export default function AdminPage() {
       "todos"
     );
 
+  /*
+    SOLICITAR DOCUMENTOS AL PROFESIONAL
+  */
+
+  const [
+    solicitudDocsProvider,
+    setSolicitudDocsProvider,
+  ] =
+    useState<Provider | null>(
+      null
+    );
+
+  const [
+    solicitudDocsTipo,
+    setSolicitudDocsTipo,
+  ] =
+    useState<
+      | "all"
+      | "license"
+      | "insurance"
+      | "bond"
+      | "other"
+    >("all");
+
+  const [
+    solicitudDocsMensaje,
+    setSolicitudDocsMensaje,
+  ] =
+    useState("");
+
+  const [
+    solicitudDocsError,
+    setSolicitudDocsError,
+  ] =
+    useState("");
+
+  const [
+    solicitandoDocs,
+    setSolicitandoDocs,
+  ] =
+    useState(false);
+
 
   /*
     MODAL DE RESOLUCIÓN PARCIAL
@@ -1305,6 +1347,150 @@ export default function AdminPage() {
       "_blank",
       "noopener,noreferrer"
     );
+  }
+
+  /*
+    SOLICITAR DOCUMENTOS
+  */
+
+  function abrirSolicitudDocumentos(
+    provider: Provider
+  ) {
+    setSolicitudDocsProvider(
+      provider
+    );
+    setSolicitudDocsTipo(
+      "all"
+    );
+    setSolicitudDocsMensaje(
+      ""
+    );
+    setSolicitudDocsError(
+      ""
+    );
+  }
+
+  function cerrarSolicitudDocumentos() {
+    if (solicitandoDocs) {
+      return;
+    }
+
+    setSolicitudDocsProvider(
+      null
+    );
+    setSolicitudDocsTipo(
+      "all"
+    );
+    setSolicitudDocsMensaje(
+      ""
+    );
+    setSolicitudDocsError(
+      ""
+    );
+  }
+
+  async function solicitarDocumentos() {
+    if (!solicitudDocsProvider) {
+      return;
+    }
+
+    const mensajeSolicitud =
+      solicitudDocsMensaje.trim();
+
+    if (!mensajeSolicitud) {
+      setSolicitudDocsError(
+        "Escribe qué documento o información necesita enviar el profesional."
+      );
+      return;
+    }
+
+    setSolicitandoDocs(true);
+    setSolicitudDocsError(
+      ""
+    );
+    setError(
+      ""
+    );
+    setMensaje(
+      ""
+    );
+
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } =
+        await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error(
+          "No pudimos verificar tu sesión de administrador."
+        );
+      }
+
+      const documentType =
+        solicitudDocsTipo ===
+        "all"
+          ? null
+          : solicitudDocsTipo;
+
+      const { error: insertError } =
+        await supabase
+          .from(
+            "provider_document_requests"
+          )
+          .insert({
+            provider_id:
+              solicitudDocsProvider.user_id,
+            requested_by:
+              user.id,
+            request_type:
+              "manual",
+            document_type:
+              documentType,
+            message:
+              mensajeSolicitud,
+            status:
+              "pending",
+          });
+
+      if (insertError) {
+        throw new Error(
+          `No se pudo crear la solicitud de documentos: ${insertError.message}`
+        );
+      }
+
+      const nombre =
+        solicitudDocsProvider.business_name ||
+        "el profesional";
+
+      setMensaje(
+        `Solicitud de documentos enviada correctamente a ${nombre}.`
+      );
+
+      setSolicitudDocsProvider(
+        null
+      );
+      setSolicitudDocsTipo(
+        "all"
+      );
+      setSolicitudDocsMensaje(
+        ""
+      );
+      setSolicitudDocsError(
+        ""
+      );
+    } catch (err) {
+      setSolicitudDocsError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo enviar la solicitud de documentos."
+      );
+    } finally {
+      setSolicitandoDocs(
+        false
+      );
+    }
   }
 
   /*
@@ -3250,8 +3436,8 @@ export default function AdminPage() {
                               Control de cuenta
                             </p>
 
-                            {provider.active ===
-                            true ? (
+                            <div className="space-y-3">
+
                               <button
                                 type="button"
                                 disabled={
@@ -3259,39 +3445,59 @@ export default function AdminPage() {
                                   provider.user_id
                                 }
                                 onClick={() =>
-                                  cambiarActivo(
-                                    provider,
-                                    false
+                                  abrirSolicitudDocumentos(
+                                    provider
                                   )
                                 }
-                                className="w-full rounded-xl border-2 border-red-600 bg-white px-5 py-3 font-extrabold text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+                                className="w-full rounded-xl border-2 border-amber-500 bg-amber-50 px-5 py-3 font-extrabold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
                               >
-                                {procesando ===
-                                provider.user_id
-                                  ? "Procesando..."
-                                  : "⛔ Suspender profesional"}
+                                📄 Solicitar documentos
                               </button>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={
-                                  procesando ===
+
+                              {provider.active ===
+                              true ? (
+                                <button
+                                  type="button"
+                                  disabled={
+                                    procesando ===
+                                    provider.user_id
+                                  }
+                                  onClick={() =>
+                                    cambiarActivo(
+                                      provider,
+                                      false
+                                    )
+                                  }
+                                  className="w-full rounded-xl border-2 border-red-600 bg-white px-5 py-3 font-extrabold text-red-700 transition hover:bg-red-50 disabled:opacity-50"
+                                >
+                                  {procesando ===
                                   provider.user_id
-                                }
-                                onClick={() =>
-                                  cambiarActivo(
-                                    provider,
-                                    true
-                                  )
-                                }
-                                className="w-full rounded-xl bg-green-600 px-5 py-3 font-extrabold text-white transition hover:bg-green-700 disabled:opacity-50"
-                              >
-                                {procesando ===
-                                provider.user_id
-                                  ? "Procesando..."
-                                  : "✅ Reactivar profesional"}
-                              </button>
-                            )}
+                                    ? "Procesando..."
+                                    : "⛔ Suspender profesional"}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={
+                                    procesando ===
+                                    provider.user_id
+                                  }
+                                  onClick={() =>
+                                    cambiarActivo(
+                                      provider,
+                                      true
+                                    )
+                                  }
+                                  className="w-full rounded-xl bg-green-600 px-5 py-3 font-extrabold text-white transition hover:bg-green-700 disabled:opacity-50"
+                                >
+                                  {procesando ===
+                                  provider.user_id
+                                    ? "Procesando..."
+                                    : "✅ Reactivar profesional"}
+                                </button>
+                              )}
+
+                            </div>
 
                           </div>
                         )}
@@ -3597,9 +3803,9 @@ export default function AdminPage() {
 
                       </div>
 
-                      {/* APROBAR / RECHAZAR */}
+                      {/* APROBAR / SOLICITAR DOCUMENTOS / RECHAZAR */}
 
-                      <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 p-6 sm:flex-row">
+                      <div className="grid gap-3 border-t border-slate-200 bg-slate-50 p-6 md:grid-cols-3">
 
                         <button
                           type="button"
@@ -3615,7 +3821,7 @@ export default function AdminPage() {
                               "verified"
                             )
                           }
-                          className="flex-1 rounded-xl bg-green-600 px-5 py-3 font-extrabold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-xl bg-green-600 px-5 py-3 font-extrabold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           {procesando ===
                           provider.user_id
@@ -3633,12 +3839,28 @@ export default function AdminPage() {
                             provider.user_id
                           }
                           onClick={() =>
+                            abrirSolicitudDocumentos(
+                              provider
+                            )
+                          }
+                          className="rounded-xl border-2 border-amber-500 bg-amber-50 px-5 py-3 font-extrabold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          📄 Solicitar documentos
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={
+                            procesando ===
+                            provider.user_id
+                          }
+                          onClick={() =>
                             cambiarEstado(
                               provider.user_id,
                               "rejected"
                             )
                           }
-                          className="flex-1 rounded-xl bg-red-600 px-5 py-3 font-extrabold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded-xl bg-red-600 px-5 py-3 font-extrabold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {procesando ===
                           provider.user_id
@@ -3856,6 +4078,162 @@ export default function AdminPage() {
         )}
 
       </div>
+
+      {solicitudDocsProvider && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4"
+          onMouseDown={(e) => {
+            if (
+              e.target ===
+              e.currentTarget
+            ) {
+              cerrarSolicitudDocumentos();
+            }
+          }}
+        >
+
+          <div className="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+
+            <div className="bg-amber-500 px-7 py-6 text-slate-950">
+
+              <div className="flex items-start justify-between gap-4">
+
+                <div>
+                  <p className="text-sm font-black uppercase tracking-wider">
+                    RELYDO · Verificación
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-black">
+                    Solicitar documentos
+                  </h2>
+
+                  <p className="mt-2 text-sm font-semibold text-amber-950/80">
+                    {solicitudDocsProvider.business_name ||
+                      "Profesional"}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={solicitandoDocs}
+                  onClick={cerrarSolicitudDocumentos}
+                  className="rounded-lg bg-white/40 px-3 py-2 font-black hover:bg-white/60 disabled:opacity-50"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+
+              </div>
+
+            </div>
+
+            <div className="space-y-5 p-7">
+
+              <div>
+                <label className="mb-2 block text-sm font-extrabold text-slate-700">
+                  Documento solicitado
+                </label>
+
+                <select
+                  value={solicitudDocsTipo}
+                  disabled={solicitandoDocs}
+                  onChange={(e) =>
+                    setSolicitudDocsTipo(
+                      e.target.value as
+                        | "all"
+                        | "license"
+                        | "insurance"
+                        | "bond"
+                        | "other"
+                    )
+                  }
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-900 outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100"
+                >
+                  <option value="all">
+                    Varios documentos / información adicional
+                  </option>
+                  <option value="license">
+                    Licencia
+                  </option>
+                  <option value="insurance">
+                    Seguro
+                  </option>
+                  <option value="bond">
+                    Bond / Fianza
+                  </option>
+                  <option value="other">
+                    Otro documento
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-extrabold text-slate-700">
+                  Explica exactamente qué necesita RELYDO
+                </label>
+
+                <textarea
+                  value={solicitudDocsMensaje}
+                  disabled={solicitandoDocs}
+                  onChange={(e) =>
+                    setSolicitudDocsMensaje(
+                      e.target.value
+                    )
+                  }
+                  rows={6}
+                  maxLength={1500}
+                  placeholder="Ejemplo: La copia de la licencia está borrosa. Sube una imagen o PDF legible donde se vea el número y la fecha de vencimiento."
+                  className="w-full resize-none rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100 disabled:bg-slate-100"
+                />
+
+                <div className="mt-2 text-right text-xs font-semibold text-slate-400">
+                  {solicitudDocsMensaje.length}/1500
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
+                El profesional podrá ver esta solicitud en RELYDO. En el siguiente paso conectaremos su panel para que pueda responder y subir únicamente la documentación solicitada.
+              </div>
+
+              {solicitudDocsError && (
+                <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm font-bold text-red-700">
+                  {solicitudDocsError}
+                </div>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+
+                <button
+                  type="button"
+                  disabled={solicitandoDocs}
+                  onClick={cerrarSolicitudDocumentos}
+                  className="rounded-xl border-2 border-slate-300 bg-white px-5 py-3 font-extrabold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  disabled={
+                    solicitandoDocs ||
+                    !solicitudDocsMensaje.trim()
+                  }
+                  onClick={solicitarDocumentos}
+                  className="rounded-xl bg-amber-500 px-5 py-3 font-extrabold text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {solicitandoDocs
+                    ? "Enviando..."
+                    : "📄 Enviar solicitud"}
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
       {reclamoParcial && (
         <div
