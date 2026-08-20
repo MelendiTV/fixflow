@@ -344,8 +344,47 @@ export default function LoginProfesional() {
         );
 
         /*
-          ESTADO DE LA CUENTA PROFESIONAL
+          COMPROBAR DOCUMENTOS DE VERIFICACIÓN
+
+          Un profesional con estado "pending" NO debe
+          aparecer como "en revisión" si todavía no ha
+          subido ningún documento.
+
+          Flujo correcto:
+          0 documentos -> completar-verificacion
+          documentos + pending -> cuenta en revisión
         */
+
+        const {
+          data: documentos,
+          error: documentosError,
+        } = await supabase
+          .from("provider_documents")
+          .select("id")
+          .eq("provider_id", user.id)
+          .limit(1);
+
+        if (documentosError) {
+          throw new Error(
+            `${text.noComprobarCuenta}: ${documentosError.message}`
+          );
+        }
+
+        const tieneDocumentos =
+          Array.isArray(documentos) &&
+          documentos.length > 0;
+
+        if (
+          providerProfile.verification_status ===
+            "pending" &&
+          !tieneDocumentos
+        ) {
+          router.replace(
+            "/completar-verificacion"
+          );
+
+          return;
+        }
 
         if (
           providerProfile.verification_status ===
