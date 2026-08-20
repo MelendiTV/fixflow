@@ -89,6 +89,35 @@ type ReclamoProfesional = {
   created_at: string;
 };
 
+type DocumentoProfesional = {
+  id: string;
+  user_id: string;
+  document_type: string;
+  file_path: string;
+  status: string | null;
+  rejection_reason: string | null;
+  created_at: string | null;
+  reviewed_at: string | null;
+  expiration_date: string | null;
+  approved_at: string | null;
+  reviewed_by: string | null;
+};
+
+type SolicitudDocumentoProfesional = {
+  id: string;
+  provider_id: string;
+  requested_by: string | null;
+  request_type: string;
+  document_type: string | null;
+  message: string;
+  status: string;
+  requested_at: string;
+  submitted_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 function nombreOficio(trade: string | null, language: "es" | "en") {
   const nombresEs: Record<string, string> = {
     plumbing: "Plomería",
@@ -180,6 +209,9 @@ export default function PanelProfesional() {
   const [email, setEmail] = useState("");
   const [trabajosContratados, setTrabajosContratados] = useState<TrabajoConOferta[]>([]);
   const [reclamos, setReclamos] = useState<ReclamoProfesional[]>([]);
+  const [documentos, setDocumentos] = useState<DocumentoProfesional[]>([]);
+  const [solicitudesDocumentos, setSolicitudesDocumentos] = useState<SolicitudDocumentoProfesional[]>([]);
+  const [abriendoDocumento, setAbriendoDocumento] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [actualizando, setActualizando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
@@ -235,6 +267,28 @@ export default function PanelProfesional() {
           if (mounted) {
             await cargarPanel(false);
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "provider_documents",
+        },
+        async () => {
+          if (mounted) await cargarPanel(false);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "provider_document_requests",
+        },
+        async () => {
+          if (mounted) await cargarPanel(false);
         }
       )
       .subscribe((status) => {
@@ -310,6 +364,57 @@ export default function PanelProfesional() {
       }
 
       setProfile(providerProfile as ProviderProfile);
+
+      const { data: documentosData, error: documentosError } = await supabase
+        .from("provider_documents")
+        .select(`
+          id,
+          user_id,
+          document_type,
+          file_path,
+          status,
+          rejection_reason,
+          created_at,
+          reviewed_at,
+          expiration_date,
+          approved_at,
+          reviewed_by
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (documentosError) {
+        console.error("Error cargando documentos del profesional:", documentosError);
+        setDocumentos([]);
+      } else {
+        setDocumentos((documentosData || []) as DocumentoProfesional[]);
+      }
+
+      const { data: solicitudesDocsData, error: solicitudesDocsError } = await supabase
+        .from("provider_document_requests")
+        .select(`
+          id,
+          provider_id,
+          requested_by,
+          request_type,
+          document_type,
+          message,
+          status,
+          requested_at,
+          submitted_at,
+          completed_at,
+          created_at,
+          updated_at
+        `)
+        .eq("provider_id", user.id)
+        .order("requested_at", { ascending: false });
+
+      if (solicitudesDocsError) {
+        console.error("Error cargando solicitudes de documentos:", solicitudesDocsError);
+        setSolicitudesDocumentos([]);
+      } else {
+        setSolicitudesDocumentos((solicitudesDocsData || []) as SolicitudDocumentoProfesional[]);
+      }
 
       const estaVerificado =
         providerProfile.verification_status === "verified" &&
@@ -542,6 +647,63 @@ export default function PanelProfesional() {
     window.location.href = "/login-profesional";
   }
 
+  function nombreTipoDocumento(documentType: string | null) {
+    if (!documentType) return T("Varios documentos", "Multiple documents");
+    if (documentType === "license") return T("Licencia", "License");
+    if (documentType === "insurance") return T("Seguro", "Insurance");
+    if (documentType === "bond") return T("Bond / Fianza", "Bond");
+    if (documentType === "other") return T("Otro documento", "Other document");
+    return documentType;
+  }
+
+  function fechaCorta(fecha: string | null) {
+    if (!fecha) return T("Sin registrar", "Not registered");
+    return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(new Date(`${fecha}T12:00:00`));
+  }
+
+  function vencimientoDocumento(doc: DocumentoProfesional) {
+    if (doc.expiration_date) return doc.expiration_date;
+    if (doc.document_type === "license") return profile?.license_expiration || null;
+    if (doc.document_type === "insurance") return profile?.insurance_expiration || null;
+    return null;
+  }
+
+  function diasParaVencer(fecha: string | null) {
+    if (!fecha) return null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const vence = new Date(`${fecha}T12:00:00`);
+    vence.setHours(0, 0, 0, 0);
+    return Math.ceil((vence.getTime() - hoy.getTime()) / 86400000);
+  }
+
+  async function abrirDocumento(doc: DocumentoProfesional) {
+    setError("");
+    setAbriendoDocumento(doc.id);
+
+    try {
+      const { data, error: signedUrlError } = await supabase.storage
+        .from("provider-documents")
+        .createSignedUrl(doc.file_path, 60);
+
+      if (signedUrlError || !data?.signedUrl) {
+        throw new Error(
+          signedUrlError?.message || T("No se pudo generar el enlace del documento.", "Could not generate the document link.")
+        );
+      }
+
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : T("No se pudo abrir el documento.", "Could not open the document."));
+    } finally {
+      setAbriendoDocumento(null);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -668,6 +830,31 @@ export default function PanelProfesional() {
     trabajosActivos.length +
     trabajosCompletados.length +
     trabajosCancelados.length;
+
+  const solicitudesDocsActivas = solicitudesDocumentos.filter((solicitud) =>
+    ["pending", "open", "requested"].includes(solicitud.status)
+  );
+
+  const documentosRechazados = documentos.filter((doc) => doc.status === "rejected");
+  const documentosVencidos = documentos.filter((doc) => {
+    const dias = diasParaVencer(vencimientoDocumento(doc));
+    return dias !== null && dias < 0;
+  });
+  const documentosPorVencer = documentos.filter((doc) => {
+    const dias = diasParaVencer(vencimientoDocumento(doc));
+    return dias !== null && dias >= 0 && dias <= 30;
+  });
+
+  const requiereAccionDocumental =
+    solicitudesDocsActivas.length > 0 ||
+    documentosRechazados.length > 0 ||
+    documentosVencidos.length > 0;
+
+  const estadoDocumentos = requiereAccionDocumental
+    ? T("Acción", "Action")
+    : documentosPorVencer.length > 0
+    ? T("Por vencer", "Expiring")
+    : T("Al día", "Up to date");
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-10">
@@ -816,7 +1003,7 @@ export default function PanelProfesional() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
             <ResumenCard
               titulo={T("Activos", "Active")}
               valor={String(trabajosActivos.length)}
@@ -869,6 +1056,15 @@ export default function PanelProfesional() {
               icono="↺"
               fondo="bg-violet-50"
               onClick={() => irASeccion("historial-completo")}
+            />
+
+            <ResumenCard
+              titulo={T("Documentos", "Documents")}
+              valor={estadoDocumentos}
+              clase={requiereAccionDocumental ? "text-red-700 text-xl" : documentosPorVencer.length > 0 ? "text-amber-700 text-xl" : "text-emerald-700 text-xl"}
+              icono="📄"
+              fondo={requiereAccionDocumental ? "bg-red-50" : documentosPorVencer.length > 0 ? "bg-amber-50" : "bg-emerald-50"}
+              onClick={() => irASeccion("documentacion-profesional")}
             />
           </div>
         </section>
@@ -923,6 +1119,211 @@ export default function PanelProfesional() {
             <span className={`w-fit rounded-full px-5 py-2 font-bold ${estado.badge}`}>
               {estado.textoBadge}
             </span>
+          </div>
+        </section>
+
+        {/* DOCUMENTACIÓN PROFESIONAL */}
+
+        <section
+          id="documentacion-profesional"
+          className={`mt-6 scroll-mt-6 overflow-hidden rounded-[30px] border bg-white shadow-sm ${
+            requiereAccionDocumental
+              ? "border-red-200"
+              : documentosPorVencer.length > 0
+              ? "border-amber-200"
+              : "border-emerald-200"
+          }`}
+        >
+          <div className="border-b border-slate-100 bg-slate-50/70 px-7 py-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-purple-700">
+                  {T("Documentación y verificación", "Documents and verification")}
+                </p>
+                <h2 className="mt-1 text-2xl font-black text-slate-950">
+                  {T("Mis documentos", "My documents")}
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  {T(
+                    "Consulta tus documentos, vencimientos y cualquier solicitud enviada por RELYDO.",
+                    "Review your documents, expiration dates, and any request sent by RELYDO."
+                  )}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => router.push("/completar-verificacion")}
+                className="w-fit rounded-xl bg-blue-700 px-5 py-3 font-black text-white transition hover:bg-blue-800"
+              >
+                {T("📤 Subir o renovar documentos", "📤 Upload or renew documents")}
+              </button>
+            </div>
+          </div>
+
+          <div className="p-7">
+            {requiereAccionDocumental && (
+              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5">
+                <p className="font-black text-red-900">
+                  ⚠️ {T("Necesitas realizar una acción", "Action required")}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-red-800">
+                  {T(
+                    "RELYDO necesita que revises o actualices parte de tu documentación. Lee la solicitud de abajo y sube el documento correspondiente.",
+                    "RELYDO needs you to review or update part of your documentation. Read the request below and upload the corresponding document."
+                  )}
+                </p>
+              </div>
+            )}
+
+            {!requiereAccionDocumental && documentosPorVencer.length > 0 && (
+              <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                <p className="font-black text-amber-900">
+                  ⏳ {T("Documento próximo a vencer", "Document expiring soon")}
+                </p>
+                <p className="mt-1 text-sm text-amber-800">
+                  {T("Tienes documentación que vence dentro de los próximos 30 días.", "You have documentation expiring within the next 30 days.")}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-700">
+                {documentos.length} {T("documentos", "documents")}
+              </span>
+              {solicitudesDocsActivas.length > 0 && (
+                <span className="rounded-full bg-red-100 px-3 py-1.5 text-xs font-black text-red-800">
+                  {solicitudesDocsActivas.length} {T("solicitud(es) activa(s)", "active request(s)")}
+                </span>
+              )}
+            </div>
+
+            {solicitudesDocsActivas.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-black text-slate-950">
+                  {T("Solicitudes de RELYDO", "Requests from RELYDO")}
+                </h3>
+                <div className="mt-3 space-y-3">
+                  {solicitudesDocsActivas.map((solicitud) => (
+                    <div key={solicitud.id} className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="font-black text-amber-950">
+                            {nombreTipoDocumento(solicitud.document_type)}
+                          </p>
+                          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-900">
+                            {solicitud.message}
+                          </p>
+                          <p className="mt-3 text-xs font-semibold text-amber-700">
+                            {T("Solicitado", "Requested")}: {formatearFecha(solicitud.requested_at, language)}
+                          </p>
+                        </div>
+                        <span className="w-fit rounded-full bg-amber-200 px-3 py-1 text-xs font-black text-amber-900">
+                          {T("Acción requerida", "Action required")}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => router.push("/completar-verificacion")}
+                        className="mt-4 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-black text-white hover:bg-amber-800"
+                      >
+                        {T("Subir documento solicitado →", "Upload requested document →")}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <h3 className="font-black text-slate-950">
+                {T("Documentos registrados", "Registered documents")}
+              </h3>
+
+              {documentos.length === 0 ? (
+                <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
+                  <p className="font-bold text-slate-700">
+                    {T("Todavía no tienes documentos registrados.", "You do not have any registered documents yet.")}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-3 grid gap-4 lg:grid-cols-2">
+                  {documentos.map((doc) => {
+                    const vencimiento = vencimientoDocumento(doc);
+                    const dias = diasParaVencer(vencimiento);
+                    const vencido = dias !== null && dias < 0;
+                    const porVencer = dias !== null && dias >= 0 && dias <= 30;
+                    const rechazado = doc.status === "rejected";
+
+                    return (
+                      <article
+                        key={doc.id}
+                        className={`rounded-2xl border p-5 ${
+                          rechazado || vencido
+                            ? "border-red-200 bg-red-50/50"
+                            : porVencer
+                            ? "border-amber-200 bg-amber-50/50"
+                            : "border-slate-200 bg-white"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-lg font-black text-slate-950">
+                              {nombreTipoDocumento(doc.document_type)}
+                            </p>
+                            <span className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-black ${
+                              rechazado
+                                ? "bg-red-100 text-red-800"
+                                : doc.status === "approved"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}>
+                              {rechazado
+                                ? T("Rechazado", "Rejected")
+                                : doc.status === "approved"
+                                ? T("Aprobado", "Approved")
+                                : T("Pendiente", "Pending")}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            disabled={abriendoDocumento === doc.id}
+                            onClick={() => abrirDocumento(doc)}
+                            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white hover:bg-slate-700 disabled:opacity-50"
+                          >
+                            {abriendoDocumento === doc.id ? T("Abriendo...", "Opening...") : T("Ver", "View")}
+                          </button>
+                        </div>
+
+                        <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-wide text-slate-400">{T("Vencimiento", "Expiration")}</p>
+                            <p className={`mt-1 font-bold ${vencido ? "text-red-700" : porVencer ? "text-amber-700" : "text-slate-800"}`}>
+                              {vencimiento ? fechaCorta(vencimiento) : T("No aplica / sin registrar", "Not applicable / not registered")}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-black uppercase tracking-wide text-slate-400">{T("Aprobado", "Approved")}</p>
+                            <p className="mt-1 font-bold text-slate-800">
+                              {doc.approved_at ? formatearFecha(doc.approved_at, language) : T("Sin registrar", "Not registered")}
+                            </p>
+                          </div>
+                        </div>
+
+                        {doc.rejection_reason && (
+                          <div className="mt-4 rounded-xl border border-red-200 bg-white p-4">
+                            <p className="text-xs font-black uppercase tracking-wide text-red-600">
+                              {T("Motivo / acción necesaria", "Reason / required action")}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-red-800">{doc.rejection_reason}</p>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
