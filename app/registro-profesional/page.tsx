@@ -84,6 +84,10 @@ export default function RegistroProfesional() {
       formData.get("zip_code") || ""
     ).trim();
 
+    const address = String(
+      formData.get("address") || ""
+    ).trim();
+
     const licenseRequired =
       formData.get("license_required") === "yes";
 
@@ -136,7 +140,8 @@ export default function RegistroProfesional() {
       !bio ||
       !city ||
       !state ||
-      !zipCode
+      !zipCode ||
+      !address
     ) {
       setError(
         T("Completa todos los campos obligatorios.", "Complete all required fields.")
@@ -286,6 +291,7 @@ export default function RegistroProfesional() {
             city,
             state,
             zip_code: zipCode,
+            address,
 
             license_required:
               licenseRequired,
@@ -957,6 +963,31 @@ export default function RegistroProfesional() {
 
                       </div>
 
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        {T("Dirección completa *", "Full address *")}
+                      </label>
+
+                      <input
+                        name="address"
+                        required
+                        type="text"
+                        autoComplete="street-address"
+                        placeholder={T(
+                          "Ej: 1234 Main St, Apt 5",
+                          "Example: 1234 Main St, Apt 5"
+                        )}
+                        className={inputClass}
+                      />
+
+                      <p className="mt-2 text-xs leading-5 text-slate-500">
+                        {T(
+                          "Usa la dirección física donde RELYDO pueda localizarte si fuera necesario.",
+                          "Enter the physical address where RELYDO can locate you if necessary."
+                        )}
+                      </p>
                     </div>
 
                   </div>
