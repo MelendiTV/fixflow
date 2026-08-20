@@ -37,6 +37,12 @@ type ProviderProfile = {
   active: boolean | null;
 };
 
+type ProviderDocument = {
+  id: string;
+  document_type: string;
+  status: string | null;
+};
+
 type DocumentType =
   | "license"
   | "insurance"
@@ -52,189 +58,336 @@ export default function CompletarVerificacion() {
       ? {
           cuentaNoEncontrada:
             "No pudimos encontrar tu cuenta de RELYDO.",
+
           perfilIncompleto:
             "Tu perfil profesional todavía no está completo.",
+
           soloArchivos:
             "solo se permiten archivos PDF, JPG o PNG.",
+
           maximoArchivo:
             "el archivo no puede superar 10 MB.",
+
           usuarioNoAutenticado:
             "No hay un usuario autenticado.",
+
           errorSubida:
             "No se pudo subir",
+
           errorRegistroArchivo:
             "El archivo se subió, pero no pudo registrarse en la base de datos",
+
           perfilNoIdentificado:
             "No pudimos identificar tu perfil profesional.",
+
           licenciaObligatoria:
             "Tu perfil indica que necesitas licencia. Debes subir una copia de tu licencia.",
+
           seguroObligatorio:
             "Tu perfil indica que tienes seguro. Debes subir un comprobante de seguro.",
+
           bondObligatorio:
             "Tu perfil indica que tienes bond/fianza. Debes subir un comprobante.",
+
           documentoMinimo:
             "Debes subir al menos un documento para solicitar la verificación.",
+
           actualizarEstado:
             "Los documentos se enviaron, pero no se pudo actualizar tu estado",
-          documentosEnviados:
-            "Documentos enviados correctamente. Tu cuenta está pendiente de revisión.",
+
           errorInesperado:
             "Ocurrió un error inesperado.",
+
           comprobandoSesion:
             "Comprobando sesión...",
+
           noCargarVerificacion:
             "No pudimos cargar la verificación",
+
           cerrarSesion:
             "Cerrar sesión",
+
           completarVerificacion:
             "Completar verificación profesional",
+
           subirDocumentos:
             "Sube tus documentos para solicitar la revisión de tu cuenta.",
+
           volverPanel:
             "Volver al panel",
+
           cuenta:
             "Cuenta",
+
           documentosRequeridos:
             "Documentos requeridos",
+
           licencia:
             "Licencia",
+
           requerida:
             "Requerida",
+
           noRequerida:
             "No requerida",
+
           seguro:
             "Seguro",
+
           requerido:
             "Requerido",
+
           noRequerido:
             "No requerido",
+
           bondFianza:
             "Bond/Fianza",
+
           licenciaProfesional:
             "Licencia profesional",
+
           licenciaDescripcionSi:
             "Este documento es obligatorio según la información de tu perfil.",
+
           licenciaDescripcionNo:
             "Sube este documento si corresponde a tu actividad.",
+
           seguroDescripcionSi:
             "Tu perfil indica que tienes seguro. Debes subir un comprobante vigente.",
+
           seguroDescripcionNo:
             "Sube el comprobante si tienes seguro de responsabilidad.",
+
           bondDescripcionSi:
             "Tu perfil indica que tienes bond/fianza. Debes subir el comprobante.",
+
           bondDescripcionNo:
             "Sube este documento si corresponde.",
+
           otroDocumento:
             "Otro documento de verificación",
+
           otroDocumentoDescripcion:
             "Si tu actividad no requiere licencia, seguro o bond/fianza, puedes enviar otro documento relacionado con tu negocio o actividad profesional para revisión.",
+
           verificacionRequerida:
             "Verificación requerida",
+
           avisoVerificacion:
             "Enviar documentos no significa que tu cuenta ya esté verificada. Tu estado permanecerá pendiente hasta que RELYDO complete la revisión.",
+
           formatosPermitidos:
             "Formatos permitidos: PDF, JPG y PNG. Máximo 10 MB por archivo.",
+
           subiendo:
-            "Subiendo documentos...",
+            "Enviando documentos...",
+
           enviar:
             "Enviar documentos para verificación",
+
+          // PANTALLA FINAL
+          documentacionEnviada:
+            "Documentación enviada con éxito",
+
+          documentosRecibidos:
+            "Hemos recibido correctamente tus documentos de verificación.",
+
+          estadoRevision:
+            "Tu cuenta está en revisión",
+
+          revisionDescripcion:
+            "RELYDO revisará la información y los documentos que enviaste.",
+
+          notificacionDescripcion:
+            "Te notificaremos cuando tu cuenta haya sido aprobada o si necesitamos información o documentación adicional.",
+
+          accesoTrabajos:
+            "Mientras tu cuenta esté en revisión, todavía no tendrás acceso a los trabajos disponibles.",
+
+          noReenviar:
+            "No necesitas enviar los documentos nuevamente.",
+
+          cerrarVentana:
+            "Ya puedes cerrar esta ventana de forma segura.",
+
+          salir:
+            "Cerrar sesión",
+
+          documentosRegistrados:
+            "Documentos recibidos",
+
+          enRevision:
+            "En revisión",
         }
       : {
           cuentaNoEncontrada:
             "We could not find your RELYDO account.",
+
           perfilIncompleto:
             "Your professional profile is not complete yet.",
+
           soloArchivos:
             "only PDF, JPG, or PNG files are allowed.",
+
           maximoArchivo:
             "the file cannot exceed 10 MB.",
+
           usuarioNoAutenticado:
             "There is no authenticated user.",
+
           errorSubida:
             "Could not upload",
+
           errorRegistroArchivo:
             "The file was uploaded, but it could not be saved in the database",
+
           perfilNoIdentificado:
             "We could not identify your professional profile.",
+
           licenciaObligatoria:
             "Your profile indicates that a license is required. You must upload a copy of your license.",
+
           seguroObligatorio:
             "Your profile indicates that you are insured. You must upload proof of insurance.",
+
           bondObligatorio:
             "Your profile indicates that you are bonded. You must upload proof of bond.",
+
           documentoMinimo:
             "You must upload at least one document to request verification.",
+
           actualizarEstado:
             "The documents were submitted, but we could not update your status",
-          documentosEnviados:
-            "Documents submitted successfully. Your account is pending review.",
+
           errorInesperado:
             "An unexpected error occurred.",
+
           comprobandoSesion:
             "Checking session...",
+
           noCargarVerificacion:
             "We couldn't load verification",
+
           cerrarSesion:
             "Sign out",
+
           completarVerificacion:
             "Complete professional verification",
+
           subirDocumentos:
             "Upload your documents to request an account review.",
+
           volverPanel:
             "Back to dashboard",
+
           cuenta:
             "Account",
+
           documentosRequeridos:
             "Required documents",
+
           licencia:
             "License",
+
           requerida:
             "Required",
+
           noRequerida:
             "Not required",
+
           seguro:
             "Insurance",
+
           requerido:
             "Required",
+
           noRequerido:
             "Not required",
+
           bondFianza:
             "Bond",
+
           licenciaProfesional:
             "Professional license",
+
           licenciaDescripcionSi:
             "This document is required based on your profile information.",
+
           licenciaDescripcionNo:
             "Upload this document if it applies to your work.",
+
           seguroDescripcionSi:
             "Your profile indicates that you are insured. You must upload valid proof of insurance.",
+
           seguroDescripcionNo:
             "Upload proof if you carry liability insurance.",
+
           bondDescripcionSi:
             "Your profile indicates that you are bonded. You must upload proof of bond.",
+
           bondDescripcionNo:
             "Upload this document if applicable.",
+
           otroDocumento:
             "Other verification document",
+
           otroDocumentoDescripcion:
             "If your work does not require a license, insurance, or bond, you may submit another document related to your business or professional activity for review.",
+
           verificacionRequerida:
             "Verification required",
+
           avisoVerificacion:
             "Submitting documents does not mean your account is verified. Your status will remain pending until RELYDO completes the review.",
+
           formatosPermitidos:
             "Allowed formats: PDF, JPG, and PNG. Maximum 10 MB per file.",
+
           subiendo:
-            "Uploading documents...",
+            "Submitting documents...",
+
           enviar:
             "Submit documents for verification",
+
+          // FINAL SCREEN
+          documentacionEnviada:
+            "Documents submitted successfully",
+
+          documentosRecibidos:
+            "We have successfully received your verification documents.",
+
+          estadoRevision:
+            "Your account is under review",
+
+          revisionDescripcion:
+            "RELYDO will review the information and documents you submitted.",
+
+          notificacionDescripcion:
+            "We will notify you when your account has been approved or if we need additional information or documentation.",
+
+          accesoTrabajos:
+            "While your account is under review, you will not yet have access to available jobs.",
+
+          noReenviar:
+            "You do not need to submit your documents again.",
+
+          cerrarVentana:
+            "You may now safely close this window.",
+
+          salir:
+            "Sign out",
+
+          documentosRegistrados:
+            "Documents received",
+
+          enRevision:
+            "Under review",
         };
 
   const [loading, setLoading] = useState(true);
   const [subiendo, setSubiendo] = useState(false);
 
   const [error, setError] = useState("");
-  const [mensaje, setMensaje] = useState("");
 
   const [userId, setUserId] =
     useState<string | null>(null);
@@ -243,6 +396,12 @@ export default function CompletarVerificacion() {
 
   const [profile, setProfile] =
     useState<ProviderProfile | null>(null);
+
+  const [documents, setDocuments] =
+    useState<ProviderDocument[]>([]);
+
+  const [documentacionEnviada, setDocumentacionEnviada] =
+    useState(false);
 
   useEffect(() => {
     cargarUsuario();
@@ -289,6 +448,7 @@ export default function CompletarVerificacion() {
       setError(
         text.cuentaNoEncontrada
       );
+
       setLoading(false);
       return;
     }
@@ -325,13 +485,84 @@ export default function CompletarVerificacion() {
       setError(
         text.perfilIncompleto
       );
+
       setLoading(false);
       return;
     }
 
+    /*
+      IMPORTANTE:
+
+      provider_documents usa user_id.
+      No usamos provider_id porque esa columna
+      no existe en esta tabla.
+    */
+
+    const {
+      data: providerDocuments,
+      error: documentsError,
+    } = await supabase
+      .from("provider_documents")
+      .select(`
+        id,
+        document_type,
+        status
+      `)
+      .eq("user_id", user.id);
+
+    if (documentsError) {
+      console.error(
+        "Error cargando documentos:",
+        documentsError
+      );
+
+      setError(
+        documentsError.message
+      );
+
+      setLoading(false);
+      return;
+    }
+
+    const docs =
+      (providerDocuments || []) as ProviderDocument[];
+
     setUserId(user.id);
     setEmail(user.email || "");
     setProfile(providerProfile);
+    setDocuments(docs);
+
+    /*
+      Si ya tiene documentos registrados
+      y todavía no está verificado/activo,
+      NO debe volver a ver el formulario.
+
+      Se muestra directamente la pantalla
+      "Documentación enviada / En revisión".
+    */
+
+    if (
+      docs.length > 0 &&
+      providerProfile.verified !== true
+    ) {
+      setDocumentacionEnviada(true);
+    }
+
+    /*
+      Si por alguna razón llega aquí
+      estando completamente aprobado,
+      lo mandamos al panel profesional.
+    */
+
+    if (
+      providerProfile.verified === true &&
+      providerProfile.active === true &&
+      providerProfile.verification_status ===
+        "verified"
+    ) {
+      router.replace("/panel-profesional");
+      return;
+    }
 
     setLoading(false);
   }
@@ -384,7 +615,7 @@ export default function CompletarVerificacion() {
       La primera carpeta SIEMPRE es el UID.
 
       Esto coincide con las políticas RLS
-      que configuramos en Storage.
+      configuradas en Storage.
     */
 
     const filePath =
@@ -410,6 +641,7 @@ export default function CompletarVerificacion() {
     }
 
     const {
+      data: insertedDocument,
       error: documentError,
     } = await supabase
       .from("provider_documents")
@@ -418,13 +650,21 @@ export default function CompletarVerificacion() {
         document_type: documentType,
         file_path: filePath,
         status: "pending",
-      });
+      })
+      .select(`
+        id,
+        document_type,
+        status
+      `)
+      .single();
 
     if (documentError) {
       throw new Error(
         `${text.errorRegistroArchivo}: ${documentError.message}`
       );
     }
+
+    return insertedDocument as ProviderDocument;
   }
 
   async function handleSubmit(
@@ -432,18 +672,32 @@ export default function CompletarVerificacion() {
   ) {
     e.preventDefault();
 
+    /*
+      Protección adicional:
+      si ya se está enviando o ya fueron enviados,
+      no hacemos absolutamente nada.
+    */
+
+    if (
+      subiendo ||
+      documentacionEnviada
+    ) {
+      return;
+    }
+
     if (!profile || !userId) {
       setError(
         text.perfilNoIdentificado
       );
+
       return;
     }
 
     setError("");
-    setMensaje("");
     setSubiendo(true);
 
     const form = e.currentTarget;
+
     const formData =
       new FormData(form);
 
@@ -476,23 +730,23 @@ export default function CompletarVerificacion() {
         : null;
 
     const tieneLicencia =
-      licenseFile &&
+      !!licenseFile &&
       licenseFile.size > 0;
 
     const tieneSeguro =
-      insuranceFile &&
+      !!insuranceFile &&
       insuranceFile.size > 0;
 
     const tieneBond =
-      bondFile &&
+      !!bondFile &&
       bondFile.size > 0;
 
     const tieneOtro =
-      otherFile &&
+      !!otherFile &&
       otherFile.size > 0;
 
     /*
-      REQUISITOS SEGÚN EL PERFIL
+      REQUISITOS SEGÚN PERFIL
     */
 
     if (
@@ -502,6 +756,7 @@ export default function CompletarVerificacion() {
       setError(
         text.licenciaObligatoria
       );
+
       setSubiendo(false);
       return;
     }
@@ -513,6 +768,7 @@ export default function CompletarVerificacion() {
       setError(
         text.seguroObligatorio
       );
+
       setSubiendo(false);
       return;
     }
@@ -524,17 +780,13 @@ export default function CompletarVerificacion() {
       setError(
         text.bondObligatorio
       );
+
       setSubiendo(false);
       return;
     }
 
     /*
-      RELYDO necesita al menos UN documento
-      para verificar manualmente una cuenta.
-
-      Si el profesional no requiere licencia,
-      seguro ni bond, puede utilizar
-      "Otro documento".
+      RELYDO necesita al menos un documento.
     */
 
     if (
@@ -546,48 +798,75 @@ export default function CompletarVerificacion() {
       setError(
         text.documentoMinimo
       );
+
       setSubiendo(false);
       return;
     }
 
     try {
-      if (tieneLicencia) {
-        await subirDocumento(
-          licenseFile,
-          "license"
-        );
+      const nuevosDocumentos:
+        ProviderDocument[] = [];
+
+      if (
+        tieneLicencia &&
+        licenseFile
+      ) {
+        const doc =
+          await subirDocumento(
+            licenseFile,
+            "license"
+          );
+
+        nuevosDocumentos.push(doc);
       }
 
-      if (tieneSeguro) {
-        await subirDocumento(
-          insuranceFile,
-          "insurance"
-        );
+      if (
+        tieneSeguro &&
+        insuranceFile
+      ) {
+        const doc =
+          await subirDocumento(
+            insuranceFile,
+            "insurance"
+          );
+
+        nuevosDocumentos.push(doc);
       }
 
-      if (tieneBond) {
-        await subirDocumento(
-          bondFile,
-          "bond"
-        );
+      if (
+        tieneBond &&
+        bondFile
+      ) {
+        const doc =
+          await subirDocumento(
+            bondFile,
+            "bond"
+          );
+
+        nuevosDocumentos.push(doc);
       }
 
-      if (tieneOtro) {
-        await subirDocumento(
-          otherFile,
-          "other"
-        );
+      if (
+        tieneOtro &&
+        otherFile
+      ) {
+        const doc =
+          await subirDocumento(
+            otherFile,
+            "other"
+          );
+
+        nuevosDocumentos.push(doc);
       }
 
       /*
-        SI ENVÍA O REENVÍA DOCUMENTOS:
+        DOCUMENTOS ENVIADOS:
 
         pending
         verified = false
         active = false
 
-        Solo Admin podrá volver a activarlo
-        al aprobar la verificación.
+        Solo Admin podrá aprobar la cuenta.
       */
 
       const {
@@ -615,17 +894,31 @@ export default function CompletarVerificacion() {
 
       setProfile({
         ...profile,
+
         verification_status:
           "pending",
+
         verified: false,
+
         active: false,
       });
 
+      setDocuments(
+        nuevosDocumentos
+      );
+
+      /*
+        ÉXITO.
+
+        A partir de aquí desaparece completamente
+        el formulario y el profesional entra
+        en la pantalla de revisión.
+      */
+
+      setDocumentacionEnviada(true);
+
       form.reset();
 
-      setMensaje(
-        text.documentosEnviados
-      );
     } catch (err) {
       console.error(err);
 
@@ -636,6 +929,7 @@ export default function CompletarVerificacion() {
           text.errorInesperado
         );
       }
+
     } finally {
       setSubiendo(false);
     }
@@ -649,22 +943,36 @@ export default function CompletarVerificacion() {
     );
   }
 
+  /*
+    LOADING
+  */
+
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+
         <div className="rounded-2xl bg-white px-8 py-7 shadow-lg">
+
           <p className="font-semibold text-slate-700">
             {text.comprobandoSesion}
           </p>
+
         </div>
+
       </main>
     );
   }
 
+  /*
+    ERROR DE CARGA
+  */
+
   if (error && !profile) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+
         <div className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-xl">
+
           <h1 className="text-2xl font-extrabold text-red-700">
             {text.noCargarVerificacion}
           </h1>
@@ -680,13 +988,176 @@ export default function CompletarVerificacion() {
           >
             {text.cerrarSesion}
           </button>
+
         </div>
+
       </main>
     );
   }
 
+  /*
+    =====================================================
+    DOCUMENTOS YA ENVIADOS
+    =====================================================
+
+    El profesional NO tiene acceso al formulario
+    mientras esté pendiente de revisión.
+  */
+
+  if (
+    documentacionEnviada &&
+    profile
+  ) {
+    return (
+      <main className="min-h-screen bg-slate-100 px-4 py-10">
+
+        <div className="mx-auto max-w-2xl">
+
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+
+            {/* HEADER */}
+
+            <div className="bg-blue-700 px-8 py-8 text-white">
+
+              <div className="text-2xl font-black">
+                RELYDO
+              </div>
+
+              <h1 className="mt-3 text-3xl font-extrabold">
+                {text.documentacionEnviada}
+              </h1>
+
+              <p className="mt-2 text-blue-100">
+                {text.documentosRecibidos}
+              </p>
+
+            </div>
+
+            <div className="p-8 sm:p-10">
+
+              {/* CHECK */}
+
+              <div className="flex justify-center">
+
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-100 text-5xl">
+                  ✓
+                </div>
+
+              </div>
+
+              {/* ESTADO */}
+
+              <div className="mt-7 text-center">
+
+                <div className="inline-flex rounded-full bg-amber-100 px-5 py-2 text-sm font-extrabold text-amber-800">
+                  ⏳ {text.enRevision}
+                </div>
+
+                <h2 className="mt-5 text-2xl font-extrabold text-slate-900">
+                  {text.estadoRevision}
+                </h2>
+
+                {profile.business_name && (
+                  <p className="mt-2 font-semibold text-slate-600">
+                    {profile.business_name}
+                  </p>
+                )}
+
+              </div>
+
+              {/* INFORMACIÓN */}
+
+              <div className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-6">
+
+                <p className="font-semibold leading-7 text-slate-800">
+                  {text.revisionDescripcion}
+                </p>
+
+                <p className="mt-3 leading-7 text-slate-700">
+                  {text.notificacionDescripcion}
+                </p>
+
+              </div>
+
+              {/* DOCUMENTOS RECIBIDOS */}
+
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+
+                <div className="flex items-center justify-between gap-4">
+
+                  <div>
+
+                    <p className="font-extrabold text-slate-900">
+                      {text.documentosRegistrados}
+                    </p>
+
+                    <p className="mt-1 text-sm text-slate-600">
+                      {email}
+                    </p>
+
+                  </div>
+
+                  <div className="rounded-xl bg-white px-4 py-2 text-xl font-black text-blue-700 shadow-sm">
+                    {documents.length}
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* ACCESO BLOQUEADO */}
+
+              <div className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-6">
+
+                <p className="font-bold leading-7 text-amber-900">
+                  {text.accesoTrabajos}
+                </p>
+
+                <p className="mt-3 leading-7 text-amber-800">
+                  {text.noReenviar}
+                </p>
+
+              </div>
+
+              {/* CERRAR VENTANA */}
+
+              <div className="mt-8 text-center">
+
+                <p className="text-lg font-extrabold text-slate-900">
+                  {text.cerrarVentana}
+                </p>
+
+              </div>
+
+              {/* LOGOUT */}
+
+              <button
+                type="button"
+                onClick={cerrarSesion}
+                className="mt-7 w-full rounded-xl border-2 border-blue-700 bg-white px-6 py-4 text-lg font-extrabold text-blue-700 transition hover:bg-blue-50"
+              >
+                {text.salir}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+    );
+  }
+
+  /*
+    =====================================================
+    FORMULARIO PARA QUIEN TODAVÍA NO HA ENVIADO DOCUMENTOS
+    =====================================================
+  */
+
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-10">
+
       <div className="mx-auto max-w-3xl">
 
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
@@ -698,6 +1169,7 @@ export default function CompletarVerificacion() {
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
 
               <div>
+
                 <div className="text-2xl font-black">
                   RELYDO
                 </div>
@@ -709,6 +1181,7 @@ export default function CompletarVerificacion() {
                 <p className="mt-2 text-blue-100">
                   {text.subirDocumentos}
                 </p>
+
               </div>
 
               <button
@@ -813,7 +1286,8 @@ export default function CompletarVerificacion() {
                   name="license_file"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900"
+                  disabled={subiendo}
+                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 />
 
               </section>
@@ -838,7 +1312,8 @@ export default function CompletarVerificacion() {
                   name="insurance_file"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900"
+                  disabled={subiendo}
+                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 />
 
               </section>
@@ -863,7 +1338,8 @@ export default function CompletarVerificacion() {
                   name="bond_file"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900"
+                  disabled={subiendo}
+                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 />
 
               </section>
@@ -886,7 +1362,8 @@ export default function CompletarVerificacion() {
                   name="other_file"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900"
+                  disabled={subiendo}
+                  className="w-full rounded-xl border border-slate-300 bg-white p-4 text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 />
 
               </section>
@@ -909,21 +1386,22 @@ export default function CompletarVerificacion() {
 
               </div>
 
+              {/* ERROR */}
+
               {error && (
                 <div className="rounded-xl border border-red-300 bg-red-50 p-4 font-medium text-red-700">
                   {error}
                 </div>
               )}
 
-              {mensaje && (
-                <div className="rounded-xl border border-green-300 bg-green-50 p-4 font-medium text-green-700">
-                  {mensaje}
-                </div>
-              )}
+              {/* BOTÓN */}
 
               <button
                 type="submit"
-                disabled={subiendo}
+                disabled={
+                  subiendo ||
+                  documentacionEnviada
+                }
                 className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {subiendo
@@ -938,6 +1416,7 @@ export default function CompletarVerificacion() {
         </div>
 
       </div>
+
     </main>
   );
 }
