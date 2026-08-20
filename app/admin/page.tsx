@@ -519,6 +519,11 @@ export default function AdminPage() {
     useState<string[]>([]);
 
   const [
+    gestionProfesionalesAbierta,
+    setGestionProfesionalesAbierta,
+  ] = useState(false);
+
+  const [
     historial,
     setHistorial,
   ] =
@@ -2598,6 +2603,16 @@ export default function AdminPage() {
     }, 50);
   }
 
+  function abrirGestionProfesionales() {
+    if (gestionProfesionalesAbierta) {
+      setGestionProfesionalesAbierta(false);
+      return;
+    }
+
+    setGestionProfesionalesAbierta(true);
+    irASeccionAdmin("profesionales-admin");
+  }
+
   /*
     CERRAR SESIÓN
   */
@@ -2645,6 +2660,17 @@ export default function AdminPage() {
         provider.verification_status ===
         "pending"
     ).length;
+
+
+  const totalDocumentosPendientesRevision =
+    documents.filter(
+      (doc) =>
+        doc.status === "pending" ||
+        doc.status === "submitted"
+    ).length;
+
+  const totalAlertasProfesionales =
+    totalPendientes + totalDocumentosPendientesRevision;
 
   const profesionalesPorOficio = [
     "plumbing",
@@ -3232,11 +3258,7 @@ export default function AdminPage() {
 
             <button
               type="button"
-              onClick={() =>
-                irASeccionAdmin(
-                  "profesionales-admin"
-                )
-              }
+              onClick={abrirGestionProfesionales}
               className="rounded-3xl border border-purple-200 bg-white p-6 text-left shadow transition hover:-translate-y-0.5 hover:border-purple-400 hover:shadow-lg"
             >
               <div className="flex items-start justify-between gap-4">
@@ -3244,9 +3266,16 @@ export default function AdminPage() {
                   🧰
                 </div>
 
-                <span className="text-xl font-black text-purple-700">
-                  →
-                </span>
+                <div className="flex items-center gap-2">
+                  {totalAlertasProfesionales > 0 && (
+                    <span className="rounded-full bg-red-600 px-2.5 py-1 text-xs font-black text-white shadow-sm">
+                      {totalAlertasProfesionales} pendiente{totalAlertasProfesionales === 1 ? "" : "s"}
+                    </span>
+                  )}
+                  <span className="text-xl font-black text-purple-700">
+                    →
+                  </span>
+                </div>
               </div>
 
               <h3 className="mt-5 text-xl font-black text-slate-950">
@@ -3275,8 +3304,14 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {totalAlertasProfesionales > 0 && (
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-black text-red-700">
+                  🔔 {totalAlertasProfesionales} elemento{totalAlertasProfesionales === 1 ? "" : "s"} requiere{totalAlertasProfesionales === 1 ? "" : "n"} revisión
+                </div>
+              )}
+
               <p className="mt-5 text-sm font-black text-purple-700">
-                Ver red profesional
+                {gestionProfesionalesAbierta ? "Ocultar gestión profesional" : "Abrir gestión profesional"}
               </p>
             </button>
 
@@ -3340,6 +3375,8 @@ export default function AdminPage() {
           </div>
         </section>
 
+        {gestionProfesionalesAbierta && (
+          <>
         {/* CONTROL PROFESIONALES */}
 
         <section id="profesionales-admin" className="mb-10 scroll-mt-6">
@@ -4406,6 +4443,8 @@ export default function AdminPage() {
           )}
 
         </section>
+          </>
+        )}
 
         {/* HISTORIAL */}
 
