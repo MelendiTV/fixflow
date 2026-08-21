@@ -282,6 +282,22 @@ export default function PanelProfesional() {
   const [error, setError] = useState("");
   const [panelActivo, setPanelActivo] = useState<PanelResumen | null>(null);
   const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
+  const [esMovil, setEsMovil] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+
+    const actualizarModo = () => {
+      setEsMovil(media.matches);
+    };
+
+    actualizarModo();
+    media.addEventListener("change", actualizarModo);
+
+    return () => {
+      media.removeEventListener("change", actualizarModo);
+    };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -1131,7 +1147,9 @@ export default function PanelProfesional() {
       <div className="sticky top-0 z-[160] -mx-4 mb-3 flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950 px-4 text-white shadow-lg md:hidden">
         <button type="button" onClick={() => setMenuMovilAbierto(true)} className="flex h-10 w-10 items-center justify-center rounded-xl text-2xl font-black active:bg-white/10" aria-label={T("Abrir menú", "Open menu")}>☰</button>
         <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="text-xl font-black tracking-tight"><span className="text-blue-500">R</span> RELYDO</button>
-        <div className="relative z-[170]"><NotificationsBell modo="profesional" /></div>
+        <div className="relative z-[170]">
+          {esMovil && <NotificationsBell modo="profesional" />}
+        </div>
       </div>
 
       <div className="mx-auto max-w-6xl">
@@ -1222,9 +1240,11 @@ export default function PanelProfesional() {
               </div>
 
               <div className="relative z-[100] flex w-full items-start gap-3 md:w-auto md:items-center">
-                <div className="relative z-[110] hidden md:block">
-                  <NotificationsBell modo="profesional" />
-                </div>
+                {!esMovil && (
+                  <div className="relative z-[110] hidden md:block">
+                    <NotificationsBell modo="profesional" />
+                  </div>
+                )}
 
                 <div className="w-full rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-sm md:w-auto md:p-4">
                   <p className="text-xs font-black uppercase tracking-wide text-blue-200">
