@@ -46,6 +46,11 @@ type ReleasedJob = {
   request_id: string;
 };
 
+type ProviderOfferStatus = {
+  request_id: string;
+  status: string;
+};
+
 export default function TrabajosPage() {
   const { language } = useLanguage();
 
@@ -60,6 +65,9 @@ export default function TrabajosPage() {
 
   const [error, setError] =
     useState("");
+
+  const [offerStatuses, setOfferStatuses] =
+    useState<Record<string, string>>({});
 
   /*
     CARGA INICIAL + REALTIME
@@ -85,6 +93,21 @@ export default function TrabajosPage() {
           event: "*",
           schema: "public",
           table: "service_requests",
+        },
+        async () => {
+          if (mounted) {
+            await comprobarUsuarioYCargarTrabajos(
+              false
+            );
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "offers",
         },
         async () => {
           if (mounted) {
@@ -419,6 +442,51 @@ export default function TrabajosPage() {
           }
         );
 
+      const visibleRequestIds =
+        visibles.map(
+          (trabajo) => trabajo.id
+        );
+
+      let statuses: Record<string, string> = {};
+
+      if (visibleRequestIds.length > 0) {
+        const {
+          data: providerOffersData,
+          error: providerOffersError,
+        } = await supabase
+          .from("offers")
+          .select(`
+            request_id,
+            status
+          `)
+          .eq(
+            "professional_id",
+            user.id
+          )
+          .in(
+            "request_id",
+            visibleRequestIds
+          );
+
+        if (providerOffersError) {
+          console.error(
+            "No se pudieron cargar los estados de los presupuestos del profesional:",
+            providerOffersError
+          );
+        } else {
+          statuses = Object.fromEntries(
+            ((providerOffersData || []) as ProviderOfferStatus[]).map(
+              (item) => [
+                item.request_id,
+                item.status,
+              ]
+            )
+          );
+        }
+      }
+
+      setOfferStatuses(statuses);
+
       setTrabajos(
         visibles as Trabajo[]
       );
@@ -523,7 +591,17 @@ export default function TrabajosPage() {
           trabajos.length > 0 && (
             <div className="space-y-6">
               {trabajos.map(
-                (trabajo) => (
+                (trabajo) => {
+                  const offerStatus =
+                    offerStatuses[
+                      trabajo.id
+                    ];
+
+                  const rechazadoPorCliente =
+                    offerStatus ===
+                    "rejected";
+
+                  return (
                   <div
                     key={trabajo.id}
                     className="rounded-2xl bg-white p-6 shadow-md"
@@ -539,11 +617,22 @@ export default function TrabajosPage() {
                         </p>
                       </div>
 
-                      <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-                        {T(
-                          "Abierto",
-                          "Open"
-                        )}
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
+                          rechazadoPorCliente
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {rechazadoPorCliente
+                          ? T(
+                              "Rechazado por cliente",
+                              "Rejected by customer"
+                            )
+                          : T(
+                              "Abierto",
+                              "Open"
+                            )}
                       </span>
                     </div>
 
@@ -617,16 +706,26 @@ export default function TrabajosPage() {
                     <div className="mt-6">
                       <a
                         href={`/trabajos/${trabajo.id}`}
-                        className="inline-block rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                        className={`inline-block rounded-xl px-6 py-3 font-semibold text-white ${
+                          rechazadoPorCliente
+                            ? "bg-slate-700 hover:bg-slate-800"
+                            : "bg-blue-600 hover:bg-blue-700"
+                        }`}
                       >
-                        {T(
-                          "Ver trabajo y enviar presupuesto",
-                          "View job and send quote"
-                        )}
+                        {rechazadoPorCliente
+                          ? T(
+                              "Ver trabajo",
+                              "View job"
+                            )
+                          : T(
+                              "Ver trabajo y enviar presupuesto",
+                              "View job and send quote"
+                            )}
                       </a>
                     </div>
                   </div>
-                )
+                  );
+                }
               )}
             </div>
           )}
