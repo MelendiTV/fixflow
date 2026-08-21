@@ -15,12 +15,23 @@ self.addEventListener("push", function (event) {
 
   const options = {
     body: data.body || "Tienes una nueva notificación.",
-    icon: "/icon-192.png",
-    badge: "/badge-72.png",
+
+    // Icono principal que aparece en la notificación
+    icon: "/icons/notification-icon.png",
+
+    // Badge pequeño del sistema
+    badge: "/icons/notification-icon.png",
+
     data: {
       url: data.url || "/",
     },
+
     vibrate: [200, 100, 200],
+
+    // Evita que varias notificaciones iguales se amontonen
+    tag: data.tag || "relydo-notification",
+
+    renotify: true,
   };
 
   event.waitUntil(
@@ -38,20 +49,22 @@ self.addEventListener("notificationclick", function (event) {
     event.notification.data?.url || "/";
 
   event.waitUntil(
-    clients.matchAll({
-      type: "window",
-      includeUncontrolled: true,
-    }).then((clientList) => {
-      for (const client of clientList) {
-        if ("focus" in client) {
-          client.navigate(url);
-          return client.focus();
+    clients
+      .matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if ("focus" in client) {
+            client.navigate(url);
+            return client.focus();
+          }
         }
-      }
 
-      if (clients.openWindow) {
-        return clients.openWindow(url);
-      }
-    })
+        if (clients.openWindow) {
+          return clients.openWindow(url);
+        }
+      })
   );
 });
