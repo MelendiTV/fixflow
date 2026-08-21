@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { LanguageProvider } from "@/app/components/LanguageProvider";
 import { AccountModeProvider } from "@/app/components/AccountModeProvider";
@@ -15,8 +15,57 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RELYDO",
-  description: "Find trusted local professionals for the services you need.",
+  title: {
+    default: "RELYDO",
+    template: "%s | RELYDO",
+  },
+
+  description:
+    "Find trusted local professionals for the services you need.",
+
+  applicationName: "RELYDO",
+
+  manifest: "/manifest.json",
+
+  icons: {
+    icon: [
+      {
+        url: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+
+    apple: [
+      {
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
+
+  appleWebApp: {
+    capable: true,
+    title: "RELYDO",
+    statusBarStyle: "black-translucent",
+  },
+
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#07152f",
 };
 
 export default function RootLayout({
