@@ -280,7 +280,7 @@ export default function PanelProfesional() {
   const [actualizando, setActualizando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [error, setError] = useState("");
-  const [panelActivo, setPanelActivo] = useState<PanelResumen>("active");
+  const [panelActivo, setPanelActivo] = useState<PanelResumen | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -746,13 +746,17 @@ export default function PanelProfesional() {
   }
 
   function abrirPanel(panel: PanelResumen) {
-    setPanelActivo(panel);
-    window.setTimeout(() => {
-      document.getElementById("contenido-resumen")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 50);
+    const seVaACerrar = panelActivo === panel;
+    setPanelActivo(seVaACerrar ? null : panel);
+
+    if (!seVaACerrar) {
+      window.setTimeout(() => {
+        document.getElementById("contenido-resumen")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 50);
+    }
   }
 
   async function cerrarSesion() {
@@ -2279,7 +2283,7 @@ export default function PanelProfesional() {
 
         {/* CANCELADOS */}
 
-        {panelActivo === "cancelled" && estaVerificado && trabajosCancelados.length > 0 && (
+        {panelActivo === "cancelled" && estaVerificado && (
           <section
             id="trabajos-cancelados"
             className="mt-6 scroll-mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow"
@@ -2287,7 +2291,7 @@ export default function PanelProfesional() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-bold uppercase tracking-wide text-red-700">
-                  Historial
+                  {T("Historial", "History")}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
@@ -2300,68 +2304,88 @@ export default function PanelProfesional() {
               </span>
             </div>
 
-            <div className="mt-6 space-y-4">
-              {trabajosCancelados.map((trabajo) => (
-                <article
-                  key={trabajo.id}
-                  className="rounded-2xl border border-red-200 bg-red-50/40 p-6"
-                >
-                  <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-extrabold text-red-800">
-                    ✕ {T("Cancelado", "Cancelled")}
-                  </span>
-
-                  <h3 className="mt-3 text-xl font-extrabold text-slate-900">
-                    {trabajo.title}
-                  </h3>
-
-                  <p className="mt-2 text-slate-600">{trabajo.description}</p>
-
-                  {trabajo.cancellation_reason && (
-                    <div className="mt-4 rounded-xl border border-red-200 bg-white p-4">
-                      <p className="text-sm font-bold text-red-700">
-                        {T("Motivo de cancelación", "Cancellation reason")}
-                      </p>
-
-                      <p className="mt-1 font-semibold text-slate-800">
-                        {trabajo.cancellation_reason}
-                      </p>
-
-                      {trabajo.cancelled_at && (
-                        <p className="mt-2 text-xs text-slate-500">
-                          {formatearFecha(trabajo.cancelled_at, language)}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {trabajo.pago ? (
-                    <div className="mt-3 rounded-xl border border-red-200 bg-white p-4">
-                      <p className="text-sm font-bold text-red-800">
-                        {T("Precio acordado", "Agreed price")}: ${Number(
-                          trabajo.pago.job_amount
-                        ).toFixed(2)}
-                      </p>
-
-                      <p className="mt-1 text-xs text-slate-500">
-                        {T("El trabajo fue cancelado. El tratamiento de reembolsos y comisiones se definirá en la fase de cancelaciones del sistema de pagos.", "The job was cancelled. Refund and fee handling will be defined in the cancellation phase of the payment system.")}
-                      </p>
-                    </div>
-                  ) : trabajo.oferta ? (
-                    <p className="mt-3 font-bold text-red-800">
-                      {T("Precio acordado", "Agreed price")}: ${Number(trabajo.oferta.price).toFixed(2)}
-                    </p>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/trabajos/${trabajo.id}`)}
-                    className="mt-5 rounded-xl border-2 border-red-600 px-5 py-3 font-extrabold text-red-700 hover:bg-red-50"
+            {trabajosCancelados.length === 0 ? (
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+                <p className="font-bold text-slate-700">
+                  {T("No tienes trabajos cancelados.", "You have no cancelled jobs.")}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-4">
+                {trabajosCancelados.map((trabajo) => (
+                  <article
+                    key={trabajo.id}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-6"
                   >
-                    {T("Ver detalles", "View details")}
-                  </button>
-                </article>
-              ))}
-            </div>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-sm font-extrabold text-red-800">
+                          ✕ {T("Cancelado", "Cancelled")}
+                        </span>
+
+                        <h3 className="mt-3 text-xl font-extrabold text-slate-900">
+                          {trabajo.title}
+                        </h3>
+
+                        <p className="mt-2 text-slate-600">{trabajo.description}</p>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                          {trabajo.city}, {trabajo.state} {trabajo.zip_code}
+                        </p>
+                      </div>
+
+                      {trabajo.pago ? (
+                        <div className="shrink-0 rounded-xl border border-red-200 bg-white px-4 py-3 text-right">
+                          <p className="text-xs font-bold text-red-700">
+                            {T("Precio acordado", "Agreed price")}
+                          </p>
+
+                          <p className="mt-1 text-xl font-black text-red-800">
+                            ${Number(trabajo.pago.job_amount).toFixed(2)}
+                          </p>
+                        </div>
+                      ) : trabajo.oferta ? (
+                        <div className="shrink-0 rounded-xl border border-red-200 bg-white px-4 py-3 text-right">
+                          <p className="text-xs font-bold text-red-700">
+                            {T("Precio acordado", "Agreed price")}
+                          </p>
+
+                          <p className="mt-1 text-xl font-black text-red-800">
+                            ${Number(trabajo.oferta.price).toFixed(2)}
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {trabajo.cancellation_reason && (
+                      <div className="mt-4 border-t border-slate-200 pt-4">
+                        <p className="text-xs font-black uppercase tracking-wide text-red-700">
+                          {T("Motivo de cancelación", "Cancellation reason")}
+                        </p>
+
+                        <p className="mt-1 font-semibold text-slate-700">
+                          {trabajo.cancellation_reason}
+                        </p>
+
+                        {trabajo.cancelled_at && (
+                          <p className="mt-2 text-xs text-slate-500">
+                            {formatearFecha(trabajo.cancelled_at, language)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/trabajos/${trabajo.id}`)}
+                      className="mt-5 rounded-xl border-2 border-blue-700 px-5 py-3 font-extrabold text-blue-700 transition hover:bg-blue-50"
+                    >
+                      {T("Ver detalles", "View details")}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
