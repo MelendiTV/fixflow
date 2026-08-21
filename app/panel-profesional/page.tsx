@@ -127,6 +127,16 @@ type ReassignmentHistory = {
   created_at: string;
 };
 
+type PanelResumen =
+  | "active"
+  | "completed"
+  | "cancelled"
+  | "reassigned"
+  | "claims"
+  | "rating"
+  | "history"
+  | "documents";
+
 function nombreOficio(trade: string | null, language: "es" | "en") {
   const nombresEs: Record<string, string> = {
     plumbing: "Plomería",
@@ -270,6 +280,7 @@ export default function PanelProfesional() {
   const [actualizando, setActualizando] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [error, setError] = useState("");
+  const [panelActivo, setPanelActivo] = useState<PanelResumen>("active");
 
   useEffect(() => {
     let mounted = true;
@@ -728,6 +739,16 @@ export default function PanelProfesional() {
   function irASeccion(id: string) {
     window.setTimeout(() => {
       document.getElementById(id)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 50);
+  }
+
+  function abrirPanel(panel: PanelResumen) {
+    setPanelActivo(panel);
+    window.setTimeout(() => {
+      document.getElementById("contenido-resumen")?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
@@ -1260,7 +1281,7 @@ export default function PanelProfesional() {
               icono="⚡"
               fondo="bg-blue-50 text-blue-700"
               textoAccion={T("Ver activos", "View active")}
-              onClick={() => irASeccion("trabajos-activos")}
+              onClick={() => abrirPanel("active")}
             />
 
             <ResumenCard
@@ -1270,7 +1291,7 @@ export default function PanelProfesional() {
               icono="✓"
               fondo="bg-emerald-50 text-emerald-700"
               textoAccion={T("Ver completados", "View completed")}
-              onClick={() => irASeccion("trabajos-completados")}
+              onClick={() => abrirPanel("completed")}
             />
 
             <ResumenCard
@@ -1280,7 +1301,7 @@ export default function PanelProfesional() {
               icono="×"
               fondo="bg-red-50 text-red-700"
               textoAccion={T("Ver cancelados", "View cancelled")}
-              onClick={() => irASeccion("trabajos-cancelados")}
+              onClick={() => abrirPanel("cancelled")}
             />
 
             <ResumenCard
@@ -1290,7 +1311,7 @@ export default function PanelProfesional() {
               icono="⇄"
               fondo="bg-violet-50 text-violet-700"
               textoAccion={T("Ver reasignadas", "View reassigned")}
-              onClick={() => irASeccion("trabajos-reasignados")}
+              onClick={() => abrirPanel("reassigned")}
             />
 
             <ResumenCard
@@ -1300,7 +1321,7 @@ export default function PanelProfesional() {
               icono="⚠"
               fondo="bg-orange-50 text-orange-600"
               textoAccion={T("Ver reclamos", "View claims")}
-              onClick={() => irASeccion("reclamos-profesional")}
+              onClick={() => abrirPanel("claims")}
             />
 
             <ResumenCard
@@ -1314,7 +1335,7 @@ export default function PanelProfesional() {
                 "jobs"
               )}`}
               textoAccion={T("Ver calificación", "View rating")}
-              onClick={() => irASeccion("perfil-profesional")}
+              onClick={() => abrirPanel("rating")}
             />
 
             <ResumenCard
@@ -1324,7 +1345,7 @@ export default function PanelProfesional() {
               icono="↺"
               fondo="bg-violet-50 text-violet-700"
               textoAccion={T("Ver historial", "View history")}
-              onClick={() => irASeccion("historial-completo")}
+              onClick={() => abrirPanel("history")}
             />
 
             <ResumenCard
@@ -1346,7 +1367,7 @@ export default function PanelProfesional() {
                   : "bg-emerald-50 text-emerald-700"
               }
               textoAccion={T("Ver documentos", "View documents")}
-              onClick={() => irASeccion("documentacion-profesional")}
+              onClick={() => abrirPanel("documents")}
             />
           </div>
 
@@ -1358,7 +1379,7 @@ export default function PanelProfesional() {
               valorClase="text-blue-700"
               icono="⚡"
               fondo="bg-blue-50 text-blue-700"
-              onClick={() => irASeccion("trabajos-activos")}
+              onClick={() => abrirPanel("active")}
             />
             <ResumenMovilPrincipal
               titulo={T("Completados", "Completed")}
@@ -1366,7 +1387,7 @@ export default function PanelProfesional() {
               valorClase="text-emerald-700"
               icono="✓"
               fondo="bg-emerald-50 text-emerald-700"
-              onClick={() => irASeccion("trabajos-completados")}
+              onClick={() => abrirPanel("completed")}
             />
             <ResumenMovilPrincipal
               titulo={T("Cancelados", "Cancelled")}
@@ -1374,7 +1395,7 @@ export default function PanelProfesional() {
               valorClase="text-red-700"
               icono="×"
               fondo="bg-red-50 text-red-700"
-              onClick={() => irASeccion("trabajos-cancelados")}
+              onClick={() => abrirPanel("cancelled")}
             />
             <ResumenMovilPrincipal
               titulo={T("Reasignadas", "Reassigned")}
@@ -1382,7 +1403,7 @@ export default function PanelProfesional() {
               valorClase="text-violet-700"
               icono="⇄"
               fondo="bg-violet-50 text-violet-700"
-              onClick={() => irASeccion("trabajos-reasignados")}
+              onClick={() => abrirPanel("reassigned")}
             />
           </div>
 
@@ -1394,7 +1415,7 @@ export default function PanelProfesional() {
               valorClase="text-orange-600"
               icono="⚠"
               fondo="bg-orange-50 text-orange-600"
-              onClick={() => irASeccion("reclamos-profesional")}
+              onClick={() => abrirPanel("claims")}
             />
             <ResumenMovilFila
               titulo={T("Calificación", "Rating")}
@@ -1406,7 +1427,7 @@ export default function PanelProfesional() {
                 "trabajos",
                 "jobs"
               )}`}
-              onClick={() => irASeccion("perfil-profesional")}
+              onClick={() => abrirPanel("rating")}
             />
             <ResumenMovilFila
               titulo={T("Historial", "History")}
@@ -1414,7 +1435,7 @@ export default function PanelProfesional() {
               valorClase="text-violet-700"
               icono="↺"
               fondo="bg-violet-50 text-violet-700"
-              onClick={() => irASeccion("historial-completo")}
+              onClick={() => abrirPanel("history")}
             />
             <ResumenMovilFila
               titulo={T("Documentos", "Documents")}
@@ -1434,7 +1455,7 @@ export default function PanelProfesional() {
                   ? "bg-amber-50 text-amber-700"
                   : "bg-emerald-50 text-emerald-700"
               }
-              onClick={() => irASeccion("documentacion-profesional")}
+              onClick={() => abrirPanel("documents")}
               ultimo
             />
           </div>
@@ -1450,6 +1471,8 @@ export default function PanelProfesional() {
               : T("↻ Actualizar", "↻ Refresh")}
           </button>
         </section>
+
+        <div id="contenido-resumen" className="scroll-mt-6" />
 
         {/* ALERTA TRABAJO ACTIVO */}
 
@@ -1474,7 +1497,7 @@ export default function PanelProfesional() {
 
               <button
                 type="button"
-                onClick={() => irASeccion("trabajos-activos")}
+                onClick={() => abrirPanel("active")}
                 className="shrink-0 rounded-xl bg-blue-700 px-5 py-3 font-extrabold text-white transition hover:bg-blue-800"
               >
                 {trabajosActivos.length === 1
@@ -1504,6 +1527,8 @@ export default function PanelProfesional() {
           </div>
         </section>
 
+        {panelActivo === "documents" && (
+          <>
         {/* DOCUMENTACIÓN PROFESIONAL */}
 
         <section
@@ -1748,6 +1773,9 @@ export default function PanelProfesional() {
           </div>
         </section>
 
+          </>
+        )}
+
         {/* VERIFICACIÓN */}
 
         {!estaVerificado && !estaSuspendido && (
@@ -1808,7 +1836,7 @@ export default function PanelProfesional() {
 
         {/* RECLAMOS */}
 
-        {estaVerificado && (
+        {panelActivo === "claims" && estaVerificado && (
           <section
             id="reclamos-profesional"
             className="mt-6 scroll-mt-6 rounded-3xl border border-rose-200 bg-white p-7 shadow-sm"
@@ -1908,107 +1936,39 @@ export default function PanelProfesional() {
           </section>
         )}
 
-        {/* PERFIL */}
+        {/* CALIFICACIÓN */}
 
-        <section
-          id="perfil-profesional"
-          className="mt-6 scroll-mt-6 overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-sm"
-        >
-          <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/60 px-7 py-6">
-            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-blue-700 shadow-lg shadow-blue-700/20">
-                  {profile.company_logo_url ? (
-                    <img
-                      src={profile.company_logo_url}
-                      alt={`Logo de ${profile.business_name || "la compañía"}`}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-3xl font-black text-white">
-                      {(profile.business_name || "F").charAt(0).toUpperCase()}
-                    </div>
+        {panelActivo === "rating" && (
+          <section
+            id="calificacion-profesional"
+            className="mt-6 scroll-mt-6 rounded-3xl border border-amber-200 bg-white p-7 shadow-sm"
+          >
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wide text-amber-700">
+                  {T("Reputación", "Reputation")}
+                </p>
+                <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
+                  {T("Tu calificación", "Your rating")}
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  {T(
+                    "Aquí ves tu calificación actual y el total de trabajos completados.",
+                    "Here you can see your current rating and total completed jobs."
                   )}
-                </div>
-
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.15em] text-blue-700">
-                    {T("Perfil profesional", "Professional profile")}
-                  </p>
-
-                  <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">
-                    {profile.business_name || T("Profesional RELYDO", "RELYDO Professional")}
-                  </h2>
-
-                  <p className="mt-1 font-bold text-slate-500">
-                    {nombreOficio(profile.trade, language)}
-                  </p>
-                </div>
-              </div>
-
-              {estaVerificado && (
-                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-800">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[11px] text-white">
-                    ✓
-                  </span>
-                  {T("Profesional verificado", "Verified professional")}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="p-7">
-            {profile.bio && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                  {T("Sobre tu negocio", "About your business")}
-                </p>
-
-                <p className="mt-2 whitespace-pre-wrap leading-7 text-slate-700">
-                  {profile.bio}
                 </p>
               </div>
-            )}
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <DatoPerfil
-                titulo={T("Especialidad", "Specialty")}
-                valor={nombreOficio(profile.trade, language)}
-                icono="🛠️"
-              />
-
-              <DatoPerfil
-                titulo={T("Experiencia", "Experience")}
-                valor={`${profile.years_experience ?? 0} ${T("años", "years")}`}
-                icono="🏅"
-              />
-
-              <DatoPerfil
-                titulo={T("Radio de servicio", "Service radius")}
-                valor={`${profile.service_radius_miles ?? 0} ${T("millas", "miles")}`}
-                icono="📍"
-              />
-
-              <DatoPerfil
-                titulo={T("Trabajos completados", "Completed jobs")}
-                valor={String(profile.completed_jobs ?? 0)}
-                icono="✅"
-              />
-
-              <DatoPerfil
-                titulo={T("Calificación", "Rating")}
-                valor={`⭐ ${Number(profile.average_rating || 0).toFixed(1)}`}
-                icono="⭐"
-              />
-
-              <DatoPerfil
-                titulo={T("Cuenta", "Account")}
-                valor={profile.active ? T("Activa", "Active") : T("Suspendida", "Suspended")}
-                icono="🛡️"
-              />
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-7 py-5 text-center">
+                <p className="text-4xl font-black text-amber-600">
+                  ★ {Number(profile.average_rating || 0).toFixed(1)}
+                </p>
+                <p className="mt-1 text-sm font-bold text-amber-800">
+                  {profile.completed_jobs ?? trabajosCompletados.length} {T("trabajos completados", "completed jobs")}
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* OPORTUNIDADES */}
 
@@ -2052,7 +2012,7 @@ export default function PanelProfesional() {
 
         {/* ACTIVOS */}
 
-        {estaVerificado && (
+        {panelActivo === "active" && estaVerificado && (
           <section
             id="trabajos-activos"
             className="mt-6 scroll-mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow"
@@ -2227,7 +2187,7 @@ export default function PanelProfesional() {
 
         {/* COMPLETADOS */}
 
-        {estaVerificado && trabajosCompletados.length > 0 && (
+        {panelActivo === "completed" && estaVerificado && trabajosCompletados.length > 0 && (
           <section
             id="trabajos-completados"
             className="mt-6 scroll-mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow"
@@ -2319,7 +2279,7 @@ export default function PanelProfesional() {
 
         {/* CANCELADOS */}
 
-        {estaVerificado && trabajosCancelados.length > 0 && (
+        {panelActivo === "cancelled" && estaVerificado && trabajosCancelados.length > 0 && (
           <section
             id="trabajos-cancelados"
             className="mt-6 scroll-mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow"
@@ -2407,7 +2367,7 @@ export default function PanelProfesional() {
 
         {/* REASIGNADOS */}
 
-        {estaVerificado && (
+        {panelActivo === "reassigned" && estaVerificado && (
           <section
             id="trabajos-reasignados"
             className="mt-6 scroll-mt-6 rounded-3xl border border-violet-200 bg-white p-7 shadow-sm"
@@ -2506,7 +2466,7 @@ export default function PanelProfesional() {
 
         {/* HISTORIAL COMPLETO */}
 
-        {estaVerificado && (
+        {panelActivo === "history" && estaVerificado && (
           <section
             id="historial-completo"
             className="mt-6 scroll-mt-6 rounded-3xl border border-violet-200 bg-white p-7 shadow-sm"
@@ -2716,31 +2676,6 @@ function InfoBox({
         {titulo}
       </p>
       <p className="mt-1.5 font-extrabold text-slate-900">{valor}</p>
-    </div>
-  );
-}
-
-function DatoPerfil({
-  titulo,
-  valor,
-  icono,
-}: {
-  titulo: string;
-  valor: string;
-  icono: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg">
-          {icono}
-        </div>
-
-        <div>
-          <p className="text-sm font-medium text-slate-500">{titulo}</p>
-          <p className="mt-1 font-black text-slate-950">{valor}</p>
-        </div>
-      </div>
     </div>
   );
 }
