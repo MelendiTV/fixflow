@@ -2137,39 +2137,52 @@ export default function MisSolicitudDetallePage() {
 
     try {
       const {
-        data: ofertaActualizada,
-        error: updateError,
-      } = await supabase
-        .from("offers")
-        .update({
-          status: "rejected",
-        })
-        .eq("id", oferta.id)
-        .eq(
-          "request_id",
-          solicitud.id
-        )
-        .eq(
-          "status",
-          "pending"
-        )
-        .select(`
-          id,
-          status
-        `)
-        .maybeSingle();
+        data: sessionData,
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (updateError) {
+      if (
+        sessionError ||
+        !sessionData.session
+      ) {
         throw new Error(
-          updateError.message
+          T(
+            "No pudimos verificar tu sesión de cliente."
+          )
         );
       }
 
-      if (!ofertaActualizada) {
+      const response =
+        await fetch(
+          "/api/customer/reject-offer",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization:
+                `Bearer ${sessionData.session.access_token}`,
+            },
+            body: JSON.stringify({
+              requestId:
+                solicitud.id,
+              offerId:
+                oferta.id,
+            }),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(() => null);
+
+      if (!response.ok) {
         throw new Error(
-          T(
-            "Este presupuesto ya no está disponible."
-          )
+          result?.error ||
+            T(
+              "No se pudo rechazar el presupuesto."
+            )
         );
       }
 
