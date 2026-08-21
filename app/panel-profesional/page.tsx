@@ -186,16 +186,57 @@ function mostrarMinutos(minutos: number | null, language: "es" | "en") {
   return `${horas} h ${restantes} min`;
 }
 
-function formatearFecha(fecha: string | null, language: "es" | "en") {
-  if (!fecha) return language === "es" ? "No disponible" : "Not available";
+function crearFechaSegura(fecha: string | null | undefined) {
+  if (!fecha) return null;
 
-  return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(fecha));
+  const valor = String(fecha).trim();
+
+  if (
+    !valor ||
+    valor.toLowerCase() === "null" ||
+    valor.toLowerCase() === "undefined" ||
+    valor.toLowerCase() === "invalid date"
+  ) {
+    return null;
+  }
+
+  // Si Supabase devuelve solamente YYYY-MM-DD, usamos mediodía local para
+  // evitar cambios de día por zona horaria. Si trae timestamp completo,
+  // lo dejamos tal cual.
+  const valorNormalizado = /^\d{4}-\d{2}-\d{2}$/.test(valor)
+    ? `${valor}T12:00:00`
+    : valor;
+
+  const fechaParseada = new Date(valorNormalizado);
+
+  if (Number.isNaN(fechaParseada.getTime())) {
+    return null;
+  }
+
+  return fechaParseada;
+}
+
+function formatearFecha(
+  fecha: string | null | undefined,
+  language: "es" | "en"
+) {
+  const fechaValida = crearFechaSegura(fecha);
+
+  if (!fechaValida) {
+    return language === "es" ? "No disponible" : "Not available";
+  }
+
+  try {
+    return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(fechaValida);
+  } catch {
+    return language === "es" ? "No disponible" : "Not available";
+  }
 }
 
 export default function PanelProfesional() {
@@ -659,13 +700,22 @@ export default function PanelProfesional() {
     return documentType;
   }
 
-  function fechaCorta(fecha: string | null) {
-    if (!fecha) return T("Sin registrar", "Not registered");
-    return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(new Date(`${fecha}T12:00:00`));
+  function fechaCorta(fecha: string | null | undefined) {
+    const fechaValida = crearFechaSegura(fecha);
+
+    if (!fechaValida) {
+      return T("Sin registrar", "Not registered");
+    }
+
+    try {
+      return new Intl.DateTimeFormat(language === "es" ? "es-US" : "en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(fechaValida);
+    } catch {
+      return T("Sin registrar", "Not registered");
+    }
   }
 
   function vencimientoDocumento(doc: DocumentoProfesional) {
@@ -675,12 +725,15 @@ export default function PanelProfesional() {
     return null;
   }
 
-  function diasParaVencer(fecha: string | null) {
-    if (!fecha) return null;
+  function diasParaVencer(fecha: string | null | undefined) {
+    const vence = crearFechaSegura(fecha);
+
+    if (!vence) return null;
+
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    const vence = new Date(`${fecha}T12:00:00`);
     vence.setHours(0, 0, 0, 0);
+
     return Math.ceil((vence.getTime() - hoy.getTime()) / 86400000);
   }
 
