@@ -1,5 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
+
+import {
+  createClient,
+} from "@supabase/supabase-js";
+
+import {
+  sendRelydoNotification,
+} from "../../../lib/serverNotifications";
 
 export const runtime = "nodejs";
 
@@ -23,6 +33,10 @@ export async function POST(
   request: NextRequest
 ) {
   try {
+    /*
+      1. VALIDAR SESIÓN DEL CLIENTE
+    */
+
     const authorization =
       request.headers.get(
         "authorization"
@@ -92,6 +106,10 @@ export async function POST(
       );
     }
 
+    /*
+      2. LEER IDS
+    */
+
     const body =
       (await request.json()) as Body;
 
@@ -116,13 +134,21 @@ export async function POST(
       );
     }
 
+    /*
+      3. COMPROBAR QUE LA SOLICITUD
+         PERTENECE AL CLIENTE
+    */
+
     const {
       data: serviceRequest,
       error: requestError,
     } = await supabaseAdmin
-      .from("service_requests")
+      .from(
+        "service_requests"
+      )
       .select(`
         id,
+        title,
         customer_id,
         status
       `)
@@ -177,11 +203,17 @@ export async function POST(
       );
     }
 
+    /*
+      4. BUSCAR EL PRESUPUESTO
+    */
+
     const {
       data: offer,
       error: offerError,
     } = await supabaseAdmin
-      .from("offers")
+      .from(
+        "offers"
+      )
       .select(`
         id,
         request_id,
@@ -228,11 +260,18 @@ export async function POST(
       );
     }
 
+    /*
+      5. RECHAZAR ÚNICAMENTE
+         ESTE PRESUPUESTO
+    */
+
     const {
       data: updatedOffer,
       error: updateError,
     } = await supabaseAdmin
-      .from("offers")
+      .from(
+        "offers"
+      )
       .update({
         status: "rejected",
       })
@@ -280,9 +319,58 @@ export async function POST(
       );
     }
 
+    /*
+      6. NOTIFICAR AL PROFESIONAL
+
+      IMPORTANTE:
+      Si la notificación falla,
+      NO deshacemos el rechazo.
+    */
+
+    let notificationResult:
+      unknown = null;
+
+    try {
+      notificationResult =
+        await sendRelydoNotification({
+          userId:
+            updatedOffer.professional_id,
+
+          type:
+            "offer_rejected",
+
+          title:
+            "Presupuesto rechazado",
+
+          message:
+            `${serviceRequest.title || "Trabajo RELYDO"}: el cliente rechazó tu presupuesto. Puedes seguir revisando otros trabajos disponibles.`,
+
+          requestId,
+
+          url:
+            `/trabajos/${requestId}`,
+        });
+    } catch (
+      notificationError
+    ) {
+      console.warn(
+        "RELYDO: el presupuesto fue rechazado, pero no pudimos notificar al profesional:",
+        notificationError
+      );
+    }
+
+    /*
+      7. RESPUESTA
+    */
+
     return NextResponse.json({
       success: true,
-      offer: updatedOffer,
+
+      offer:
+        updatedOffer,
+
+      notification:
+        notificationResult,
     });
   } catch (error) {
     console.error(
