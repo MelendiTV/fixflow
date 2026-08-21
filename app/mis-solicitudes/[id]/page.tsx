@@ -294,6 +294,11 @@ const DETAIL_TRANSLATIONS_EN: Record<string, string> = {
   "Mensaje del profesional": "Professional's message",
   "Sin mensaje adicional.": "No additional message.",
   "Contratando profesional...": "Hiring professional...",
+  "Rechazar presupuesto": "Reject offer",
+  "Rechazando presupuesto...": "Rejecting offer...",
+  "¿Confirmas que deseas rechazar este presupuesto? Tu solicitud continuará abierta y podrás revisar otros presupuestos.": "Are you sure you want to reject this offer? Your request will remain open and you can review other offers.",
+  "Presupuesto rechazado. Tu solicitud continúa abierta y puedes elegir otro presupuesto.": "Offer rejected. Your request remains open and you can choose another offer.",
+  "No se pudo rechazar el presupuesto.": "The offer could not be rejected.",
   "Tú": "You",
   "Escribe un mensaje...": "Write a message...",
   "Enviar": "Send",
@@ -791,6 +796,14 @@ export default function MisSolicitudDetallePage() {
   const [
     aceptandoId,
     setAceptandoId,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const [
+    rechazandoId,
+    setRechazandoId,
   ] =
     useState<string | null>(
       null
@@ -2074,6 +2087,132 @@ export default function MisSolicitudDetallePage() {
     router.push(
       `/checkout/${solicitud.id}?offer=${encodeURIComponent(oferta.id)}`
     );
+  }
+
+  /*
+    RECHAZAR OFERTA
+
+    Solo rechazamos este presupuesto.
+    La solicitud permanece abierta y el cliente
+    puede seguir revisando otras ofertas.
+  */
+
+  async function rechazarOferta(
+    oferta: OfertaConProfesional
+  ) {
+    if (!solicitud) {
+      return;
+    }
+
+    if (solicitud.status !== "open") {
+      setError(
+        T("Esta solicitud ya tiene un profesional contratado.")
+      );
+      return;
+    }
+
+    if (oferta.status !== "pending") {
+      setError(
+        T("Este presupuesto ya no está disponible.")
+      );
+      return;
+    }
+
+    const confirmar =
+      window.confirm(
+        T(
+          "¿Confirmas que deseas rechazar este presupuesto? Tu solicitud continuará abierta y podrás revisar otros presupuestos."
+        )
+      );
+
+    if (!confirmar) {
+      return;
+    }
+
+    setRechazandoId(
+      oferta.id
+    );
+    setError("");
+    setMensaje("");
+
+    try {
+      const {
+        data: ofertaActualizada,
+        error: updateError,
+      } = await supabase
+        .from("offers")
+        .update({
+          status: "rejected",
+        })
+        .eq("id", oferta.id)
+        .eq(
+          "request_id",
+          solicitud.id
+        )
+        .eq(
+          "status",
+          "pending"
+        )
+        .select(`
+          id,
+          status
+        `)
+        .maybeSingle();
+
+      if (updateError) {
+        throw new Error(
+          updateError.message
+        );
+      }
+
+      if (!ofertaActualizada) {
+        throw new Error(
+          T(
+            "Este presupuesto ya no está disponible."
+          )
+        );
+      }
+
+      setOfertas(
+        (actuales) =>
+          actuales.map(
+            (item) =>
+              item.id === oferta.id
+                ? {
+                    ...item,
+                    status: "rejected",
+                  }
+                : item
+          )
+      );
+
+      setMensaje(
+        T(
+          "Presupuesto rechazado. Tu solicitud continúa abierta y puedes elegir otro presupuesto."
+        )
+      );
+    } catch (err) {
+      console.error(
+        "Error rechazando presupuesto:",
+        err
+      );
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : T(
+              "No se pudo rechazar el presupuesto."
+            )
+      );
+
+      await cargarDetalle(
+        false
+      );
+    } finally {
+      setRechazandoId(
+        null
+      );
+    }
   }
 
   /*
@@ -3386,6 +3525,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
   const profesionalLiberoTrabajo =
     solicitud.status ===
       "open" &&
+    Boolean(payment) &&
     !ofertaSeleccionada &&
     ofertas.some(
       (oferta) =>
@@ -5658,33 +5798,58 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
                         "open" &&
                         oferta.status ===
                           "pending" && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              aceptarOferta(
-                                oferta
-                              )
-                            }
-                            disabled={
-                              aceptandoId !==
-                              null
-                            }
-                            className="mt-3 w-full rounded-xl bg-green-600 px-6 py-4 text-lg font-extrabold text-white hover:bg-green-700 disabled:opacity-50"
-                          >
-                            {aceptandoId ===
-                            oferta.id
-                              ? T("Contratando profesional...")
-                              : paymentSettings
-                              ? `Revisar y continuar · Total $${calcularMontosPago(
-                                  oferta.price,
-                                  paymentSettings
-                                ).customerTotalAmount.toFixed(2)}`
-                              : `Contratar por $${Number(
-                                  oferta.price
-                                ).toFixed(
-                                  2
-                                )}`}
-                          </button>
+                          <>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                aceptarOferta(
+                                  oferta
+                                )
+                              }
+                              disabled={
+                                aceptandoId !==
+                                  null ||
+                                rechazandoId !==
+                                  null
+                              }
+                              className="mt-3 w-full rounded-xl bg-green-600 px-6 py-4 text-lg font-extrabold text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                              {aceptandoId ===
+                              oferta.id
+                                ? T("Contratando profesional...")
+                                : paymentSettings
+                                ? `Revisar y continuar · Total $${calcularMontosPago(
+                                    oferta.price,
+                                    paymentSettings
+                                  ).customerTotalAmount.toFixed(2)}`
+                                : `Contratar por $${Number(
+                                    oferta.price
+                                  ).toFixed(
+                                    2
+                                  )}`}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                rechazarOferta(
+                                  oferta
+                                )
+                              }
+                              disabled={
+                                aceptandoId !==
+                                  null ||
+                                rechazandoId !==
+                                  null
+                              }
+                              className="mt-3 w-full rounded-xl border-2 border-red-200 bg-white px-6 py-3.5 font-extrabold text-red-700 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {rechazandoId ===
+                              oferta.id
+                                ? T("Rechazando presupuesto...")
+                                : T("Rechazar presupuesto")}
+                            </button>
+                          </>
                         )}
 
                     </article>
