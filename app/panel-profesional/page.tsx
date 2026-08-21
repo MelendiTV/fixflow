@@ -281,6 +281,7 @@ export default function PanelProfesional() {
   const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [error, setError] = useState("");
   const [panelActivo, setPanelActivo] = useState<PanelResumen | null>(null);
+  const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -1125,25 +1126,32 @@ export default function PanelProfesional() {
     : T("Al día", "Up to date");
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10">
+    <main className="min-h-screen bg-slate-100 px-4 pb-28 pt-0 md:py-10">
+      {/* BARRA SUPERIOR MÓVIL */}
+      <div className="sticky top-0 z-[160] -mx-4 mb-3 flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950 px-4 text-white shadow-lg md:hidden">
+        <button type="button" onClick={() => setMenuMovilAbierto(true)} className="flex h-10 w-10 items-center justify-center rounded-xl text-2xl font-black active:bg-white/10" aria-label={T("Abrir menú", "Open menu")}>☰</button>
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="text-xl font-black tracking-tight"><span className="text-blue-500">R</span> RELYDO</button>
+        <div className="relative z-[170]"><NotificationsBell modo="profesional" /></div>
+      </div>
+
       <div className="mx-auto max-w-6xl">
 
         {/* HEADER */}
 
         <section className="relative z-30 overflow-visible rounded-[32px] border border-blue-500/20 bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-700 text-white shadow-xl shadow-blue-900/10">
-          <div className="relative px-7 py-8 md:px-10 md:py-10">
+          <div className="relative px-4 py-5 md:px-10 md:py-10">
             <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
             <div className="pointer-events-none absolute -bottom-24 left-10 h-52 w-52 rounded-full bg-cyan-300/10 blur-3xl" />
 
             <div className="relative flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-100">
+                <div className="hidden md:inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-blue-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-300" />
                   {T("Panel profesional", "Professional dashboard")}
                 </div>
 
                 <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <div className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-lg">
+                  <div className="group relative h-16 w-16 md:h-20 md:w-20 shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-lg">
                     {profile.company_logo_url ? (
                       <img
                         src={profile.company_logo_url}
@@ -1175,7 +1183,7 @@ export default function PanelProfesional() {
                   />
 
                   <div>
-                    <h1 className="text-3xl font-black tracking-tight md:text-5xl">
+                    <h1 className="text-xl font-black tracking-tight sm:text-2xl md:text-5xl">
                       {profile.business_name || T("Profesional RELYDO", "RELYDO Professional")}
                     </h1>
 
@@ -1194,7 +1202,7 @@ export default function PanelProfesional() {
                   </div>
                 </div>
 
-                <p className="mt-4 max-w-xl text-base leading-7 text-blue-100 md:text-lg">
+                <p className="mt-4 hidden max-w-xl text-base leading-7 text-blue-100 md:block md:text-lg">
                   {T("Administra tus oportunidades, trabajos activos, reputación y estado de cuenta desde un solo lugar.", "Manage your opportunities, active jobs, reputation, and account status from one place.")}
                 </p>
 
@@ -1213,12 +1221,12 @@ export default function PanelProfesional() {
                 </div>
               </div>
 
-              <div className="relative z-[100] flex items-start gap-3 md:items-center">
-                <div className="relative z-[110]">
+              <div className="relative z-[100] flex w-full items-start gap-3 md:w-auto md:items-center">
+                <div className="relative z-[110] hidden md:block">
                   <NotificationsBell modo="profesional" />
                 </div>
 
-                <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-sm">
+                <div className="w-full rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-sm md:w-auto md:p-4">
                   <p className="text-xs font-black uppercase tracking-wide text-blue-200">
                     {T("Cuenta", "Account")}
                   </p>
@@ -2555,8 +2563,54 @@ export default function PanelProfesional() {
         )}
 
       </div>
+
+      {/* MENÚ COMPLETO MÓVIL */}
+      {menuMovilAbierto && (
+        <div className="fixed inset-0 z-[220] md:hidden">
+          <button type="button" aria-label={T("Cerrar menú", "Close menu")} onClick={() => setMenuMovilAbierto(false)} className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]" />
+          <aside className="absolute inset-y-0 left-0 w-[86%] max-w-[340px] overflow-y-auto bg-white p-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div><p className="text-xl font-black text-blue-700">RELYDO</p><p className="text-xs font-bold text-slate-400">{T("Panel profesional", "Professional dashboard")}</p></div>
+              <button type="button" onClick={() => setMenuMovilAbierto(false)} className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-xl font-black text-slate-700">×</button>
+            </div>
+            <div className="mt-4 space-y-1">
+              <MenuMovilItem icono="⌂" texto={T("Resumen", "Summary")} onClick={() => { setMenuMovilAbierto(false); setPanelActivo(null); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+              <MenuMovilItem icono="▣" texto={T("Mis trabajos", "My jobs")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("active"); }} />
+              <MenuMovilItem icono="⌕" texto={T("Trabajos disponibles", "Available jobs")} onClick={() => { setMenuMovilAbierto(false); router.push("/trabajos"); }} />
+              <MenuMovilItem icono="✓" texto={T("Completados", "Completed")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("completed"); }} />
+              <MenuMovilItem icono="⇄" texto={T("Reasignadas", "Reassigned")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("reassigned"); }} />
+              <MenuMovilItem icono="⚠" texto={T("Reclamos", "Claims")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("claims"); }} />
+              <MenuMovilItem icono="★" texto={T("Reputación", "Reputation")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("rating"); }} />
+              <MenuMovilItem icono="▤" texto={T("Documentos", "Documents")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("documents"); }} />
+              <MenuMovilItem icono="↺" texto={T("Historial", "History")} onClick={() => { setMenuMovilAbierto(false); abrirPanel("history"); }} />
+            </div>
+            <div className="mt-5 border-t border-slate-100 pt-4">
+              <button type="button" onClick={cerrarSesion} className="w-full rounded-xl bg-slate-950 px-4 py-3 font-black text-white">{T("Cerrar sesión", "Sign out")}</button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* NAVEGACIÓN INFERIOR MÓVIL */}
+      <nav className="fixed inset-x-0 bottom-0 z-[180] border-t border-slate-200 bg-white/95 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur md:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-5">
+          <NavMovilItem icono="⌂" texto={T("Resumen", "Summary")} activo={panelActivo === null} onClick={() => { setPanelActivo(null); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+          <NavMovilItem icono="▣" texto={T("Mis trabajos", "My jobs")} activo={panelActivo === "active"} onClick={() => abrirPanel("active")} />
+          <NavMovilItem icono="✉" texto={T("Mensajes", "Messages")} onClick={() => router.push("/mensajes")} />
+          <NavMovilItem icono="▱" texto={T("Pagos", "Payments")} onClick={() => router.push("/pagos")} />
+          <NavMovilItem icono="•••" texto={T("Más", "More")} onClick={() => setMenuMovilAbierto(true)} />
+        </div>
+      </nav>
     </main>
   );
+}
+
+function MenuMovilItem({ icono, texto, onClick }: { icono: string; texto: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-bold text-slate-800 transition active:bg-blue-50"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-lg">{icono}</span><span className="flex-1">{texto}</span><span className="text-slate-300">›</span></button>;
+}
+
+function NavMovilItem({ icono, texto, activo = false, onClick }: { icono: string; texto: string; activo?: boolean; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-black ${activo ? "text-blue-700" : "text-slate-600"}`}><span className={`flex h-7 min-w-7 items-center justify-center rounded-lg px-1 text-lg ${activo ? "bg-blue-50 text-blue-700" : "text-slate-700"}`}>{icono}</span><span className="truncate">{texto}</span></button>;
 }
 
 function ResumenCard({
