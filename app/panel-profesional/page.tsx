@@ -118,6 +118,15 @@ type SolicitudDocumentoProfesional = {
   updated_at: string;
 };
 
+type ReassignmentHistory = {
+  id: string;
+  request_id: string;
+  provider_id: string | null;
+  action: string;
+  reason: string | null;
+  created_at: string;
+};
+
 function nombreOficio(trade: string | null, language: "es" | "en") {
   const nombresEs: Record<string, string> = {
     plumbing: "Plomería",
@@ -252,6 +261,7 @@ export default function PanelProfesional() {
   const [reclamos, setReclamos] = useState<ReclamoProfesional[]>([]);
   const [documentos, setDocumentos] = useState<DocumentoProfesional[]>([]);
   const [solicitudesDocumentos, setSolicitudesDocumentos] = useState<SolicitudDocumentoProfesional[]>([]);
+  const [historialReasignaciones, setHistorialReasignaciones] = useState<ReassignmentHistory[]>([]);
   const [abriendoDocumento, setAbriendoDocumento] = useState<string | null>(null);
   const [archivosSolicitud, setArchivosSolicitud] = useState<Record<string, File | null>>({});
   const [enviandoSolicitud, setEnviandoSolicitud] = useState<string | null>(null);
@@ -330,6 +340,17 @@ export default function PanelProfesional() {
           event: "*",
           schema: "public",
           table: "provider_document_requests",
+        },
+        async () => {
+          if (mounted) await cargarPanel(false);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "job_reassignment_history",
         },
         async () => {
           if (mounted) await cargarPanel(false);
@@ -468,6 +489,7 @@ export default function PanelProfesional() {
       if (!estaVerificado) {
         setTrabajosContratados([]);
         setReclamos([]);
+        setHistorialReasignaciones([]);
         return;
       }
 
@@ -491,6 +513,32 @@ export default function PanelProfesional() {
         setReclamos([]);
       } else {
         setReclamos((reclamosData || []) as ReclamoProfesional[]);
+      }
+
+      const { data: historialReasignacionesData, error: historialReasignacionesError } = await supabase
+        .from("job_reassignment_history")
+        .select(`
+          id,
+          request_id,
+          provider_id,
+          action,
+          reason,
+          created_at
+        `)
+        .eq("provider_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      if (historialReasignacionesError) {
+        console.error(
+          "Error cargando historial de reasignaciones del profesional:",
+          historialReasignacionesError
+        );
+        setHistorialReasignaciones([]);
+      } else {
+        setHistorialReasignaciones(
+          (historialReasignacionesData || []) as ReassignmentHistory[]
+        );
       }
 
       const { data: trabajosData, error: trabajosError } = await supabase
@@ -1018,10 +1066,13 @@ export default function PanelProfesional() {
       reclamo.status === "in_review"
   );
 
-  const totalHistorial =
-    trabajosActivos.length +
-    trabajosCompletados.length +
-    trabajosCancelados.length;
+  const idsReasignados = new Set(
+    historialReasignaciones.map((item) => item.request_id)
+  );
+
+  const reasignadas = idsReasignados.size;
+
+  const totalHistorial = trabajosContratados.length;
 
   const solicitudesDocsActivas = solicitudesDocumentos.filter((solicitud) =>
     ["pending", "open", "requested"].includes(solicitud.status)
@@ -1170,7 +1221,7 @@ export default function PanelProfesional() {
         {/* RESUMEN */}
 
         <section className="relative z-10 mt-7">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
                 {T("Resumen", "Summary")}
@@ -1181,7 +1232,10 @@ export default function PanelProfesional() {
               </h2>
 
               <p className="mt-2 text-slate-600">
-                {T("Una vista rápida de tus trabajos y reputación.", "A quick view of your jobs and reputation.")}
+                {T(
+                  "Una vista rápida de tus trabajos y reputación.",
+                  "A quick view of your jobs and reputation."
+                )}
               </p>
             </div>
 
@@ -1189,19 +1243,23 @@ export default function PanelProfesional() {
               type="button"
               onClick={() => cargarPanel(false)}
               disabled={actualizando}
-              className="w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 font-black text-slate-800 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="hidden w-fit rounded-xl border border-slate-300 bg-white px-5 py-3 font-black text-slate-800 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50 md:inline-flex"
             >
-              {actualizando ? T("Actualizando...", "Updating...") : T("↻ Actualizar", "↻ Refresh")}
+              {actualizando
+                ? T("Actualizando...", "Updating...")
+                : T("↻ Actualizar", "↻ Refresh")}
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+          {/* DESKTOP / TABLET: 8 tarjetas, 4 por fila */}
+          <div className="hidden gap-4 md:grid md:grid-cols-4">
             <ResumenCard
               titulo={T("Activos", "Active")}
               valor={String(trabajosActivos.length)}
               clase="text-blue-700"
               icono="⚡"
-              fondo="bg-blue-50"
+              fondo="bg-blue-50 text-blue-700"
+              textoAccion={T("Ver activos", "View active")}
               onClick={() => irASeccion("trabajos-activos")}
             />
 
@@ -1210,7 +1268,8 @@ export default function PanelProfesional() {
               valor={String(profile.completed_jobs ?? trabajosCompletados.length)}
               clase="text-emerald-700"
               icono="✓"
-              fondo="bg-emerald-50"
+              fondo="bg-emerald-50 text-emerald-700"
+              textoAccion={T("Ver completados", "View completed")}
               onClick={() => irASeccion("trabajos-completados")}
             />
 
@@ -1219,25 +1278,42 @@ export default function PanelProfesional() {
               valor={String(trabajosCancelados.length)}
               clase="text-red-700"
               icono="×"
-              fondo="bg-red-50"
+              fondo="bg-red-50 text-red-700"
+              textoAccion={T("Ver cancelados", "View cancelled")}
               onClick={() => irASeccion("trabajos-cancelados")}
+            />
+
+            <ResumenCard
+              titulo={T("Reasignadas", "Reassigned")}
+              valor={String(reasignadas)}
+              clase="text-violet-700"
+              icono="⇄"
+              fondo="bg-violet-50 text-violet-700"
+              textoAccion={T("Ver reasignadas", "View reassigned")}
+              onClick={() => irASeccion("trabajos-reasignados")}
             />
 
             <ResumenCard
               titulo={T("Reclamos", "Claims")}
               valor={String(reclamosActivos.length)}
-              clase="text-rose-700"
+              clase="text-orange-600"
               icono="⚠"
-              fondo="bg-rose-50"
+              fondo="bg-orange-50 text-orange-600"
+              textoAccion={T("Ver reclamos", "View claims")}
               onClick={() => irASeccion("reclamos-profesional")}
             />
 
             <ResumenCard
               titulo={T("Calificación", "Rating")}
               valor={Number(profile.average_rating || 0).toFixed(1)}
-              clase="text-amber-700"
+              clase="text-amber-600"
               icono="★"
-              fondo="bg-amber-50"
+              fondo="bg-amber-50 text-amber-600"
+              detalle={`${profile.completed_jobs ?? trabajosCompletados.length} ${T(
+                "trabajos",
+                "jobs"
+              )}`}
+              textoAccion={T("Ver calificación", "View rating")}
               onClick={() => irASeccion("perfil-profesional")}
             />
 
@@ -1246,19 +1322,133 @@ export default function PanelProfesional() {
               valor={String(totalHistorial)}
               clase="text-violet-700"
               icono="↺"
-              fondo="bg-violet-50"
+              fondo="bg-violet-50 text-violet-700"
+              textoAccion={T("Ver historial", "View history")}
               onClick={() => irASeccion("historial-completo")}
             />
 
             <ResumenCard
               titulo={T("Documentos", "Documents")}
               valor={estadoDocumentos}
-              clase={requiereAccionDocumental ? "text-red-700 text-xl" : documentosPorVencer.length > 0 ? "text-amber-700 text-xl" : "text-emerald-700 text-xl"}
-              icono="📄"
-              fondo={requiereAccionDocumental ? "bg-red-50" : documentosPorVencer.length > 0 ? "bg-amber-50" : "bg-emerald-50"}
+              clase={
+                requiereAccionDocumental
+                  ? "text-red-700 text-2xl"
+                  : documentosPorVencer.length > 0
+                  ? "text-amber-700 text-2xl"
+                  : "text-emerald-700 text-2xl"
+              }
+              icono="▤"
+              fondo={
+                requiereAccionDocumental
+                  ? "bg-red-50 text-red-700"
+                  : documentosPorVencer.length > 0
+                  ? "bg-amber-50 text-amber-700"
+                  : "bg-emerald-50 text-emerald-700"
+              }
+              textoAccion={T("Ver documentos", "View documents")}
               onClick={() => irASeccion("documentacion-profesional")}
             />
           </div>
+
+          {/* MÓVIL: 4 métricas principales en 2x2 */}
+          <div className="grid grid-cols-2 gap-3 md:hidden">
+            <ResumenMovilPrincipal
+              titulo={T("Activos", "Active")}
+              valor={String(trabajosActivos.length)}
+              valorClase="text-blue-700"
+              icono="⚡"
+              fondo="bg-blue-50 text-blue-700"
+              onClick={() => irASeccion("trabajos-activos")}
+            />
+            <ResumenMovilPrincipal
+              titulo={T("Completados", "Completed")}
+              valor={String(profile.completed_jobs ?? trabajosCompletados.length)}
+              valorClase="text-emerald-700"
+              icono="✓"
+              fondo="bg-emerald-50 text-emerald-700"
+              onClick={() => irASeccion("trabajos-completados")}
+            />
+            <ResumenMovilPrincipal
+              titulo={T("Cancelados", "Cancelled")}
+              valor={String(trabajosCancelados.length)}
+              valorClase="text-red-700"
+              icono="×"
+              fondo="bg-red-50 text-red-700"
+              onClick={() => irASeccion("trabajos-cancelados")}
+            />
+            <ResumenMovilPrincipal
+              titulo={T("Reasignadas", "Reassigned")}
+              valor={String(reasignadas)}
+              valorClase="text-violet-700"
+              icono="⇄"
+              fondo="bg-violet-50 text-violet-700"
+              onClick={() => irASeccion("trabajos-reasignados")}
+            />
+          </div>
+
+          {/* MÓVIL: información secundaria compacta */}
+          <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:hidden">
+            <ResumenMovilFila
+              titulo={T("Reclamos", "Claims")}
+              valor={String(reclamosActivos.length)}
+              valorClase="text-orange-600"
+              icono="⚠"
+              fondo="bg-orange-50 text-orange-600"
+              onClick={() => irASeccion("reclamos-profesional")}
+            />
+            <ResumenMovilFila
+              titulo={T("Calificación", "Rating")}
+              valor={Number(profile.average_rating || 0).toFixed(1)}
+              valorClase="text-amber-600"
+              icono="★"
+              fondo="bg-amber-50 text-amber-600"
+              detalle={`${profile.completed_jobs ?? trabajosCompletados.length} ${T(
+                "trabajos",
+                "jobs"
+              )}`}
+              onClick={() => irASeccion("perfil-profesional")}
+            />
+            <ResumenMovilFila
+              titulo={T("Historial", "History")}
+              valor={String(totalHistorial)}
+              valorClase="text-violet-700"
+              icono="↺"
+              fondo="bg-violet-50 text-violet-700"
+              onClick={() => irASeccion("historial-completo")}
+            />
+            <ResumenMovilFila
+              titulo={T("Documentos", "Documents")}
+              valor={estadoDocumentos}
+              valorClase={
+                requiereAccionDocumental
+                  ? "text-red-700"
+                  : documentosPorVencer.length > 0
+                  ? "text-amber-700"
+                  : "text-emerald-700"
+              }
+              icono="▤"
+              fondo={
+                requiereAccionDocumental
+                  ? "bg-red-50 text-red-700"
+                  : documentosPorVencer.length > 0
+                  ? "bg-amber-50 text-amber-700"
+                  : "bg-emerald-50 text-emerald-700"
+              }
+              onClick={() => irASeccion("documentacion-profesional")}
+              ultimo
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => cargarPanel(false)}
+            disabled={actualizando}
+            className="mt-3 flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3.5 font-black text-blue-700 shadow-sm transition active:scale-[0.99] disabled:opacity-50 md:hidden"
+          >
+            {actualizando
+              ? T("Actualizando...", "Updating...")
+              : T("↻ Actualizar", "↻ Refresh")}
+          </button>
         </section>
 
         {/* ALERTA TRABAJO ACTIVO */}
@@ -2215,6 +2405,105 @@ export default function PanelProfesional() {
           </section>
         )}
 
+        {/* REASIGNADOS */}
+
+        {estaVerificado && (
+          <section
+            id="trabajos-reasignados"
+            className="mt-6 scroll-mt-6 rounded-3xl border border-violet-200 bg-white p-7 shadow-sm"
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wide text-violet-700">
+                  {T("Historial de reasignaciones", "Reassignment history")}
+                </p>
+                <h2 className="mt-1 text-2xl font-extrabold text-slate-900">
+                  {T("Trabajos reasignados", "Reassigned jobs")}
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  {T(
+                    "Aquí quedan registradas las órdenes en las que RELYDO realizó una reasignación relacionada contigo.",
+                    "Orders where RELYDO made a reassignment related to you are recorded here."
+                  )}
+                </p>
+              </div>
+
+              <span className="w-fit rounded-full bg-violet-100 px-4 py-2 font-extrabold text-violet-800">
+                {reasignadas}
+              </span>
+            </div>
+
+            {historialReasignaciones.length === 0 ? (
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+                <p className="font-bold text-slate-700">
+                  {T(
+                    "No tienes reasignaciones registradas.",
+                    "You have no recorded reassignments."
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-3">
+                {Array.from(idsReasignados).map((requestId) => {
+                  const eventos = historialReasignaciones.filter(
+                    (item) => item.request_id === requestId
+                  );
+                  const ultimoEvento = eventos[0];
+                  const trabajo = trabajosContratados.find(
+                    (item) => item.id === requestId
+                  );
+
+                  return (
+                    <article
+                      key={requestId}
+                      className="rounded-2xl border border-violet-200 bg-violet-50/40 p-5"
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-black text-violet-800">
+                              ⇄ {T("Reasignada", "Reassigned")}
+                            </span>
+                            <span className="text-xs font-bold text-slate-400">
+                              {eventos.length} {T("evento(s)", "event(s)")}
+                            </span>
+                          </div>
+
+                          <h3 className="mt-3 font-black text-slate-900">
+                            {trabajo?.title || `${T("Orden", "Order")} ${requestId.slice(0, 8)}`}
+                          </h3>
+
+                          {ultimoEvento?.reason && (
+                            <p className="mt-2 text-sm text-slate-600">
+                              {ultimoEvento.reason}
+                            </p>
+                          )}
+
+                          <p className="mt-2 text-xs font-semibold text-slate-400">
+                            {ultimoEvento
+                              ? formatearFecha(ultimoEvento.created_at, language)
+                              : ""}
+                          </p>
+                        </div>
+
+                        {trabajo && (
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/trabajos/${requestId}`)}
+                            className="shrink-0 rounded-xl border-2 border-violet-600 px-4 py-2.5 text-sm font-black text-violet-700 transition hover:bg-violet-50"
+                          >
+                            {T("Ver trabajo", "View job")}
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* HISTORIAL COMPLETO */}
 
         {estaVerificado && (
@@ -2292,11 +2581,60 @@ function ResumenCard({
   clase,
   icono,
   fondo,
+  textoAccion,
+  detalle,
   onClick,
 }: {
   titulo: string;
   valor: string;
   clase: string;
+  icono: string;
+  fondo: string;
+  textoAccion: string;
+  detalle?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group min-h-[165px] w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-100"
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl font-black ${fondo}`}
+        >
+          {icono}
+        </div>
+        <p className="font-black text-slate-800">{titulo}</p>
+      </div>
+
+      <div className="mt-4">
+        <p className={`text-4xl font-black tracking-tight ${clase}`}>{valor}</p>
+        {detalle && (
+          <p className="mt-1 text-xs font-bold text-slate-500">{detalle}</p>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center gap-1 text-sm font-bold text-blue-700">
+        <span>{textoAccion}</span>
+        <span className="transition group-hover:translate-x-1">→</span>
+      </div>
+    </button>
+  );
+}
+
+function ResumenMovilPrincipal({
+  titulo,
+  valor,
+  valorClase,
+  icono,
+  fondo,
+  onClick,
+}: {
+  titulo: string;
+  valor: string;
+  valorClase: string;
   icono: string;
   fondo: string;
   onClick: () => void;
@@ -2305,27 +2643,56 @@ function ResumenCard({
     <button
       type="button"
       onClick={onClick}
-      className="group w-full cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-100"
+      className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition active:scale-[0.98]"
     >
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-bold text-slate-500 transition group-hover:text-slate-800">
-          {titulo}
-        </p>
-
-        <div className={`flex h-9 w-9 items-center justify-center rounded-xl text-lg ${fondo}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className={`flex h-9 w-9 items-center justify-center rounded-xl font-black ${fondo}`}>
           {icono}
         </div>
+        <span className="text-slate-300">›</span>
       </div>
+      <p className="mt-3 text-xs font-black text-slate-700">{titulo}</p>
+      <p className={`mt-1 text-3xl font-black ${valorClase}`}>{valor}</p>
+    </button>
+  );
+}
 
-      <div className="mt-3 flex items-end justify-between gap-3">
-        <p className={`text-3xl font-black tracking-tight ${clase}`}>
-          {valor}
-        </p>
-
-        <span className="text-lg font-black text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600">
-          →
-        </span>
+function ResumenMovilFila({
+  titulo,
+  valor,
+  valorClase,
+  icono,
+  fondo,
+  detalle,
+  ultimo = false,
+  onClick,
+}: {
+  titulo: string;
+  valor: string;
+  valorClase: string;
+  icono: string;
+  fondo: string;
+  detalle?: string;
+  ultimo?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition active:bg-slate-50 ${
+        ultimo ? "" : "border-b border-slate-100"
+      }`}
+    >
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-black ${fondo}`}>
+        {icono}
       </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-black text-slate-800">{titulo}</p>
+        {detalle && <p className="mt-0.5 text-[11px] font-bold text-slate-400">{detalle}</p>}
+      </div>
+      <p className={`shrink-0 font-black ${valorClase}`}>{valor}</p>
+      <span className="shrink-0 text-xl text-slate-300">›</span>
     </button>
   );
 }
