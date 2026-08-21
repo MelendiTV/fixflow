@@ -4018,7 +4018,9 @@ export default function TrabajoDetallePage() {
 
                 <span
                   className={`rounded-lg px-4 py-2 text-xs font-black uppercase tracking-wide ${
-                    cancelado
+                    oferta?.status === "rejected"
+                      ? "bg-slate-200 text-slate-700"
+                      : cancelado
                       ? "bg-red-600 text-white"
                       : trabajo.status ===
                         "completed"
@@ -4029,7 +4031,9 @@ export default function TrabajoDetallePage() {
                       : "bg-blue-700 text-white"
                   }`}
                 >
-                  {cancelado
+                  {oferta?.status === "rejected"
+                    ? T("Cerrado", "Closed")
+                    : cancelado
                     ? T("Cancelado", "Cancelled")
                     : trabajo.status ===
                       "completed"
