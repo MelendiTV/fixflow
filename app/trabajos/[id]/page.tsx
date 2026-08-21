@@ -5239,8 +5239,29 @@ export default function TrabajoDetallePage() {
                           <p className="text-sm font-semibold text-slate-600">
                             {T("Precio estimado", "Estimated price")}
                           </p>
-                          <p className="mt-1 text-xs text-slate-400">
-                            {T("Pendiente de aceptación del cliente", "Pending customer acceptance")}
+                          <p
+                            className={`mt-1 text-xs font-bold ${
+                              oferta.status === "rejected"
+                                ? "text-red-600"
+                                : oferta.status === "selected"
+                                ? "text-green-600"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            {oferta.status === "rejected"
+                              ? T(
+                                  "Rechazado por el cliente",
+                                  "Rejected by customer"
+                                )
+                              : oferta.status === "selected"
+                              ? T(
+                                  "Aceptado por el cliente",
+                                  "Accepted by customer"
+                                )
+                              : T(
+                                  "Pendiente de aceptación del cliente",
+                                  "Pending customer acceptance"
+                                )}
                           </p>
                         </div>
                         <p className="text-2xl font-black text-slate-950">
@@ -5289,25 +5310,59 @@ export default function TrabajoDetallePage() {
                     <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
                       ❌{" "}
                       {canceladoPorRelydo
-                        ? T("Trabajo cancelado por resolución de RELYDO.", "Job cancelled by RELYDO resolution.")
-                        : T("El cliente canceló este trabajo.", "The customer cancelled this job.")}
+                        ? T(
+                            "Trabajo cancelado por resolución de RELYDO.",
+                            "Job cancelled by RELYDO resolution."
+                          )
+                        : T(
+                            "El cliente canceló este trabajo.",
+                            "The customer cancelled this job."
+                          )}
                     </div>
                   ) : !pago ? (
-                    <div
-                      className={`mt-4 rounded-xl border p-4 text-sm font-bold ${
-                        oferta.status === "selected"
-                          ? "border-green-200 bg-green-50 text-green-800"
-                          : oferta.status === "rejected"
-                          ? "border-slate-200 bg-slate-50 text-slate-600"
-                          : "border-blue-200 bg-blue-50 text-blue-800"
-                      }`}
-                    >
-                      {oferta.status === "selected"
-                        ? T("✅ Presupuesto aceptado por el cliente.", "✅ Quote accepted by the customer.")
-                        : oferta.status === "rejected"
-                        ? T("Este presupuesto no fue seleccionado.", "This quote was not selected.")
-                        : T("✓ Presupuesto enviado. Esperando decisión del cliente.", "✓ Quote sent. Waiting for the customer’s decision.")}
-                    </div>
+                    oferta.status === "rejected" ? (
+                      <div className="mt-4 rounded-2xl border-2 border-red-300 bg-red-50 p-5">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-xl">
+                            ❌
+                          </div>
+
+                          <div>
+                            <p className="text-base font-black text-red-900">
+                              {T(
+                                "Presupuesto rechazado",
+                                "Quote rejected"
+                              )}
+                            </p>
+
+                            <p className="mt-1 text-sm font-semibold leading-6 text-red-700">
+                              {T(
+                                "El cliente rechazó tu presupuesto.",
+                                "The customer rejected your quote."
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className={`mt-4 rounded-xl border p-4 text-sm font-bold ${
+                          oferta.status === "selected"
+                            ? "border-green-200 bg-green-50 text-green-800"
+                            : "border-blue-200 bg-blue-50 text-blue-800"
+                        }`}
+                      >
+                        {oferta.status === "selected"
+                          ? T(
+                              "✅ Presupuesto aceptado por el cliente.",
+                              "✅ Quote accepted by the customer."
+                            )
+                          : T(
+                              "✓ Presupuesto enviado. Esperando decisión del cliente.",
+                              "✓ Quote sent. Waiting for the customer’s decision."
+                            )}
+                      </div>
+                    )
                   ) : null}
 
                   {pago && (
