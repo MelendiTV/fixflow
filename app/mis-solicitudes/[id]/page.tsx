@@ -2173,16 +2173,13 @@ export default function MisSolicitudDetallePage() {
         );
       }
 
+      // Quitamos inmediatamente de la pantalla el presupuesto rechazado.
+      // La solicitud sigue abierta y las demás ofertas permanecen visibles.
       setOfertas(
         (actuales) =>
-          actuales.map(
+          actuales.filter(
             (item) =>
-              item.id === oferta.id
-                ? {
-                    ...item,
-                    status: "rejected",
-                  }
-                : item
+              item.id !== oferta.id
           )
       );
 
@@ -3521,6 +3518,15 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
         oferta.status ===
         "pending"
     ).length;
+
+  // Las ofertas rechazadas se conservan en la base de datos como historial,
+  // pero el cliente no debe seguir viéndolas en Presupuestos recibidos.
+  const ofertasVisibles =
+    ofertas.filter(
+      (oferta) =>
+        oferta.status !==
+        "rejected"
+    );
 
   const profesionalLiberoTrabajo =
     solicitud.status ===
@@ -5579,7 +5585,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
 
           </div>
 
-          {ofertas.length ===
+          {ofertasVisibles.length ===
           0 ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-lg">
 
@@ -5599,7 +5605,7 @@ Al aceptar, continuarás al pago seguro de Stripe para pagar el monto adicional 
           ) : (
             <div className="space-y-5">
 
-              {ofertas.map(
+              {ofertasVisibles.map(
                 (
                   oferta
                 ) => {
