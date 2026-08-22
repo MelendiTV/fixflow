@@ -58,10 +58,8 @@ function LoginClienteContenido() {
             "Tu contraseña",
           iniciando:
             "Iniciando sesión...",
-          noCuenta:
-            "¿No tienes una cuenta?",
-          registrate:
-            "Regístrate como cliente",
+          olvidastePassword:
+            "¿Olvidaste tu contraseña?",
           cargando: "Cargando...",
 
           errorUsuario:
@@ -72,6 +70,8 @@ function LoginClienteContenido() {
             "Esta cuenta no está registrada como cliente.",
           errorLogin:
             "No se pudo iniciar sesión",
+          credencialesInvalidas:
+            "El correo electrónico o la contraseña son incorrectos.",
           errorInesperado:
             "Ocurrió un error inesperado.",
         }
@@ -88,10 +88,8 @@ function LoginClienteContenido() {
             "Your password",
           iniciando:
             "Signing in...",
-          noCuenta:
-            "Don't have an account?",
-          registrate:
-            "Register as a customer",
+          olvidastePassword:
+            "Forgot your password?",
           cargando: "Loading...",
 
           errorUsuario:
@@ -102,6 +100,8 @@ function LoginClienteContenido() {
             "This account is not registered as a customer.",
           errorLogin:
             "Unable to sign in",
+          credencialesInvalidas:
+            "The email address or password is incorrect.",
           errorInesperado:
             "An unexpected error occurred.",
         };
@@ -159,6 +159,21 @@ function LoginClienteContenido() {
         });
 
       if (loginError) {
+        /*
+          No mostramos el mensaje técnico de Supabase
+          "Invalid login credentials" al usuario.
+        */
+
+        if (
+          loginError.message
+            .toLowerCase()
+            .includes("invalid login credentials")
+        ) {
+          throw new Error(
+            text.credencialesInvalidas
+          );
+        }
+
         throw new Error(
           loginError.message
         );
@@ -235,7 +250,7 @@ function LoginClienteContenido() {
 
       setError(
         err instanceof Error
-          ? `${text.errorLogin}: ${err.message}`
+          ? err.message
           : text.errorInesperado
       );
 
@@ -244,17 +259,12 @@ function LoginClienteContenido() {
   }
 
   /*
-    IR A REGISTRO
+    RECUPERAR CONTRASEÑA
   */
 
-  function irARegistro() {
-    const destino =
-      obtenerDestinoSeguro();
-
+  function irARecuperarPassword() {
     router.push(
-      `/registro-cliente?redirect=${encodeURIComponent(
-        destino
-      )}`
+      "/recuperar-contrasena"
     );
   }
 
@@ -388,20 +398,16 @@ function LoginClienteContenido() {
               </button>
             </form>
 
-            {/* REGISTRO */}
+            {/* RECUPERAR CONTRASEÑA */}
 
             <div className="mt-6 border-t border-slate-200 pt-6 text-center">
-              <p className="text-sm text-slate-600">
-                {text.noCuenta}
-              </p>
-
               <button
                 type="button"
-                onClick={irARegistro}
+                onClick={irARecuperarPassword}
                 disabled={loading}
-                className="mt-2 font-bold text-blue-700 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                className="font-bold text-blue-700 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {text.registrate}
+                {text.olvidastePassword}
               </button>
             </div>
 
