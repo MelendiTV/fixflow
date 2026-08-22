@@ -91,10 +91,8 @@ export default function LoginProfesional() {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
-  const [mensaje, setMensaje] = useState("");
 
   const [cargando, setCargando] = useState(false);
-  const [recuperando, setRecuperando] = useState(false);
 
   const [
     estadoCuenta,
@@ -191,7 +189,6 @@ export default function LoginProfesional() {
     e.preventDefault();
 
     setError("");
-    setMensaje("");
     setCargando(true);
 
     try {
@@ -477,68 +474,10 @@ export default function LoginProfesional() {
     }
   }
 
-  async function recuperarContrasena() {
-    setError("");
-    setMensaje("");
-
-    const emailLimpio =
-      email.trim().toLowerCase();
-
-    if (!emailLimpio) {
-      setError(
-        text.escribeEmail
-      );
-      return;
-    }
-
-    setRecuperando(true);
-
-    try {
-      const redirectTo =
-        `${window.location.origin}/recuperar-contrasena`;
-
-      const {
-        error: resetError,
-      } =
-        await supabase.auth.resetPasswordForEmail(
-          emailLimpio,
-          {
-            redirectTo,
-          }
-        );
-
-      if (resetError) {
-        throw new Error(
-          resetError.message
-        );
-      }
-
-      setMensaje(
-        text.correoRecuperacion
-      );
-    } catch (err) {
-      if (err instanceof Error) {
-        if (
-          err.message
-            .toLowerCase()
-            .includes("rate limit")
-        ) {
-          setError(
-            text.limiteCorreos
-          );
-        } else {
-          setError(
-            `${text.noEnviarCorreo}: ${err.message}`
-          );
-        }
-      } else {
-        setError(
-          text.noEnviarRecuperacion
-        );
-      }
-    } finally {
-      setRecuperando(false);
-    }
+  function irARecuperarContrasena() {
+    router.push(
+      "/recuperar-contrasena?tipo=profesional"
+    );
   }
 
   async function salirCuentaPendiente() {
@@ -727,16 +666,14 @@ export default function LoginProfesional() {
               <button
                 type="button"
                 onClick={
-                  recuperarContrasena
+                  irARecuperarContrasena
                 }
                 disabled={
-                  recuperando
+                  cargando
                 }
                 className="text-sm font-bold text-blue-700 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {recuperando
-                  ? text.enviandoCorreo
-                  : text.olvidoPassword}
+                {text.olvidoPassword}
               </button>
 
             </div>
@@ -749,17 +686,12 @@ export default function LoginProfesional() {
             </div>
           )}
 
-          {mensaje && (
-            <div className="rounded-xl border border-green-300 bg-green-50 p-4 text-sm font-medium text-green-700">
-              {mensaje}
-            </div>
-          )}
+
 
           <button
             type="submit"
             disabled={
-              cargando ||
-              recuperando
+              cargando
             }
             className="w-full rounded-xl bg-blue-700 py-4 text-lg font-extrabold text-white shadow-md transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
           >

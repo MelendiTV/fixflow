@@ -264,7 +264,7 @@ function LoginClienteContenido() {
 
   function irARecuperarPassword() {
     router.push(
-      "/recuperar-contrasena"
+      "/recuperar-contrasena?tipo=cliente"
     );
   }
 

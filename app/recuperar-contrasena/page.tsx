@@ -28,6 +28,11 @@ type TipoCuenta =
   | "cliente"
   | "profesional";
 
+type Modo =
+  | "request"
+  | "checking"
+  | "reset";
+
 function RecuperarContrasenaContenido() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,6 +51,12 @@ function RecuperarContrasenaContenido() {
       ? "/login-profesional"
       : "/login-cliente";
 
+  const [modo, setModo] =
+    useState<Modo>("checking");
+
+  const [email, setEmail] =
+    useState("");
+
   const [password, setPassword] =
     useState("");
 
@@ -57,28 +68,36 @@ function RecuperarContrasenaContenido() {
   const [loading, setLoading] =
     useState(false);
 
-  const [checking, setChecking] =
-    useState(true);
-
   const [error, setError] =
     useState("");
 
   const [mensaje, setMensaje] =
     useState("");
 
-  const [
-    recoveryValid,
-    setRecoveryValid,
-  ] = useState(false);
-
   const text =
     language === "es"
       ? {
           verificando:
             "Verificando enlace...",
-          titulo:
+          recuperarTitulo:
+            "Recuperar contraseña",
+          recuperarDescripcion:
+            "Escribe el correo de tu cuenta y te enviaremos un enlace seguro para crear una nueva contraseña.",
+          email:
+            "Correo electrónico",
+          emailPlaceholder:
+            "tu@email.com",
+          enviar:
+            "Enviar enlace de recuperación",
+          enviando:
+            "Enviando...",
+          correoEnviado:
+            "Te enviamos un enlace para recuperar tu contraseña. Revisa también Spam o correo no deseado.",
+          correoNoEnviado:
+            "No se pudo enviar el correo de recuperación",
+          nuevaTitulo:
             "Nueva contraseña",
-          descripcion:
+          nuevaDescripcion:
             "Crea una nueva contraseña para tu cuenta.",
           nuevaPassword:
             "Nueva contraseña",
@@ -110,13 +129,31 @@ function RecuperarContrasenaContenido() {
             "No se pudo validar el enlace de recuperación.",
           noCambiar:
             "No se pudo cambiar la contraseña",
+          emailRequerido:
+            "Escribe tu correo electrónico.",
         }
       : {
           verificando:
             "Verifying link...",
-          titulo:
+          recuperarTitulo:
+            "Reset password",
+          recuperarDescripcion:
+            "Enter the email for your account and we will send you a secure link to create a new password.",
+          email:
+            "Email address",
+          emailPlaceholder:
+            "you@email.com",
+          enviar:
+            "Send recovery link",
+          enviando:
+            "Sending...",
+          correoEnviado:
+            "We sent you a password recovery link. Check your Spam or Junk folder as well.",
+          correoNoEnviado:
+            "We could not send the recovery email",
+          nuevaTitulo:
             "New password",
-          descripcion:
+          nuevaDescripcion:
             "Create a new password for your account.",
           nuevaPassword:
             "New password",
@@ -148,14 +185,45 @@ function RecuperarContrasenaContenido() {
             "We could not validate the recovery link.",
           noCambiar:
             "We could not change the password",
+          emailRequerido:
+            "Enter your email address.",
         };
 
   useEffect(() => {
     let mounted = true;
 
-    /*
-      IMPORTANTE:
+    const currentUrl =
+      new URL(
+        window.location.href
+      );
 
+    const code =
+      currentUrl.searchParams.get(
+        "code"
+      );
+
+    const hash =
+      window.location.hash;
+
+    const tieneEnlaceRecuperacion =
+      Boolean(code || hash);
+
+    /*
+      Si el usuario llegó desde el login
+      y todavía NO abrió un enlace de email,
+      mostramos primero el formulario
+      para solicitar la recuperación.
+    */
+
+    if (!tieneEnlaceRecuperacion) {
+      setModo("request");
+
+      return () => {
+        mounted = false;
+      };
+    }
+
+    /*
       Escuchamos PASSWORD_RECOVERY antes
       de procesar el enlace.
     */
@@ -172,33 +240,22 @@ function RecuperarContrasenaContenido() {
               "PASSWORD_RECOVERY" &&
             mounted
           ) {
-            setRecoveryValid(true);
-            setChecking(false);
+            setModo("reset");
             setError("");
           }
         }
       );
 
     async function comprobarRecuperacion() {
+      setModo("checking");
       setError("");
 
       try {
         /*
-          1. FLUJO PKCE ACTUAL DE SUPABASE
+          1. FLUJO PKCE
 
-          URL:
-          /recuperar-contrasena?code=...
+          /recuperar-contrasena?tipo=cliente&code=...
         */
-
-        const url =
-          new URL(
-            window.location.href
-          );
-
-        const code =
-          url.searchParams.get(
-            "code"
-          );
 
         if (code) {
           const {
@@ -216,14 +273,6 @@ function RecuperarContrasenaContenido() {
             );
           }
 
-          /*
-            Quitamos el code de la URL
-            después de usarlo.
-
-            Conservamos tipo para saber
-            a qué login regresar.
-          */
-
           window.history.replaceState(
             {},
             document.title,
@@ -232,16 +281,12 @@ function RecuperarContrasenaContenido() {
         }
 
         /*
-          2. SOPORTE PARA FLUJO
-             IMPLICIT ANTIGUO
+          2. SOPORTE FLUJO IMPLICIT
 
           #access_token=...
           &refresh_token=...
           &type=recovery
         */
-
-        const hash =
-          window.location.hash;
 
         if (hash) {
           const params =
@@ -292,7 +337,7 @@ function RecuperarContrasenaContenido() {
         }
 
         /*
-          3. COMPROBAR SESIÓN
+          3. CONFIRMAR SESIÓN DE RECUPERACIÓN
         */
 
         const {
@@ -309,19 +354,10 @@ function RecuperarContrasenaContenido() {
           sessionCheckError ||
           !session
         ) {
-          if (mounted) {
-            setRecoveryValid(false);
-            setError(
-              text.enlaceInvalido
-            );
-          }
-
-          return;
+          throw new Error(
+            text.enlaceInvalido
+          );
         }
-
-        /*
-          4. CONFIRMAR USUARIO
-        */
 
         const {
           data: {
@@ -337,18 +373,13 @@ function RecuperarContrasenaContenido() {
           userError ||
           !user
         ) {
-          if (mounted) {
-            setRecoveryValid(false);
-            setError(
-              text.enlaceInvalido
-            );
-          }
-
-          return;
+          throw new Error(
+            text.enlaceInvalido
+          );
         }
 
         if (mounted) {
-          setRecoveryValid(true);
+          setModo("reset");
           setError("");
         }
       } catch (err) {
@@ -361,18 +392,14 @@ function RecuperarContrasenaContenido() {
           err
         );
 
-        setRecoveryValid(false);
+        setModo("request");
 
         setError(
           err instanceof Error &&
           err.message
-            ? `${text.noValidar}: ${err.message}`
+            ? err.message
             : text.noValidar
         );
-      } finally {
-        if (mounted) {
-          setChecking(false);
-        }
       }
     }
 
@@ -382,23 +409,80 @@ function RecuperarContrasenaContenido() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [tipo]);
+  }, [tipo, language]);
 
-  async function handleSubmit(
+  async function solicitarRecuperacion(
     e: React.FormEvent<HTMLFormElement>
   ) {
     e.preventDefault();
 
+    if (loading) {
+      return;
+    }
+
     setError("");
     setMensaje("");
 
-    if (!recoveryValid) {
+    const emailLimpio =
+      email.trim().toLowerCase();
+
+    if (!emailLimpio) {
       setError(
-        text.enlaceYaNoValido
+        text.emailRequerido
       );
 
       return;
     }
+
+    setLoading(true);
+
+    try {
+      const redirectTo =
+        `${window.location.origin}/recuperar-contrasena?tipo=${tipo}`;
+
+      const {
+        error:
+          resetError,
+      } =
+        await supabase.auth
+          .resetPasswordForEmail(
+            emailLimpio,
+            {
+              redirectTo,
+            }
+          );
+
+      if (resetError) {
+        throw new Error(
+          resetError.message
+        );
+      }
+
+      setMensaje(
+        text.correoEnviado
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `${text.correoNoEnviado}: ${err.message}`
+          : text.correoNoEnviado
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function cambiarPassword(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
+
+    if (loading) {
+      return;
+    }
+
+    setError("");
+    setMensaje("");
 
     if (password.length < 8) {
       setError(
@@ -444,21 +528,16 @@ function RecuperarContrasenaContenido() {
         text.actualizado
       );
 
-      /*
-        Cerramos la sesión temporal
-        de recuperación.
-
-        El usuario vuelve a iniciar
-        sesión normalmente.
-      */
-
       await supabase.auth.signOut();
 
-      setTimeout(() => {
-        router.replace(
-          loginDestino
-        );
-      }, 1800);
+      window.setTimeout(
+        () => {
+          router.replace(
+            loginDestino
+          );
+        },
+        1800
+      );
     } catch (err) {
       setError(
         err instanceof Error
@@ -470,7 +549,7 @@ function RecuperarContrasenaContenido() {
     }
   }
 
-  if (checking) {
+  if (modo === "checking") {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
@@ -482,32 +561,32 @@ function RecuperarContrasenaContenido() {
     );
   }
 
+  const esReset =
+    modo === "reset";
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-
       <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
 
-        {/* HEADER */}
-
         <div className="bg-blue-700 px-8 py-7 text-white">
-
           <div className="text-2xl font-black">
             RELYDO
           </div>
 
           <h1 className="mt-2 text-3xl font-extrabold">
-            {text.titulo}
+            {esReset
+              ? text.nuevaTitulo
+              : text.recuperarTitulo}
           </h1>
 
           <p className="mt-2 text-blue-100">
-            {text.descripcion}
+            {esReset
+              ? text.nuevaDescripcion
+              : text.recuperarDescripcion}
           </p>
-
         </div>
 
         <div className="p-8">
-
-          {/* ERROR */}
 
           {error && (
             <div className="mb-6 rounded-xl border border-red-300 bg-red-50 p-4 text-red-700">
@@ -515,113 +594,156 @@ function RecuperarContrasenaContenido() {
             </div>
           )}
 
-          {/* SUCCESS */}
-
           {mensaje && (
             <div className="mb-6 rounded-xl border border-green-300 bg-green-50 p-4 text-green-700">
-
               {mensaje}
 
-              <p className="mt-2 text-sm">
-                {text.redirigiendo}
-              </p>
-
+              {esReset && (
+                <p className="mt-2 text-sm">
+                  {text.redirigiendo}
+                </p>
+              )}
             </div>
           )}
 
-          {recoveryValid &&
-            !mensaje && (
-              <form
-                onSubmit={
-                  handleSubmit
-                }
-                className="space-y-6"
-              >
-
-                <div>
-
-                  <label className="mb-2 block font-bold text-slate-900">
-                    {text.nuevaPassword}
-                  </label>
-
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) =>
-                      setPassword(
-                        e.target.value
-                      )
-                    }
-                    placeholder={
-                      text.minimo
-                    }
-                    className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                  />
-
-                </div>
-
-                <div>
-
-                  <label className="mb-2 block font-bold text-slate-900">
-                    {text.confirmarPassword}
-                  </label>
-
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    value={
-                      confirmPassword
-                    }
-                    onChange={(e) =>
-                      setConfirmPassword(
-                        e.target.value
-                      )
-                    }
-                    placeholder={
-                      text.repetir
-                    }
-                    className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                  />
-
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+          {!esReset ? (
+            <form
+              onSubmit={
+                solicitarRecuperacion
+              }
+              className="space-y-5"
+            >
+              <div>
+                <label
+                  htmlFor="recovery-email"
+                  className="mb-2 block font-bold text-slate-900"
                 >
-                  {loading
-                    ? text.actualizando
-                    : text.cambiar}
-                </button>
+                  {text.email}
+                </label>
 
-              </form>
-            )}
+                <input
+                  id="recovery-email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(
+                      e.target.value
+                    )
+                  }
+                  placeholder={
+                    text.emailPlaceholder
+                  }
+                  disabled={loading}
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
 
-          {!recoveryValid &&
-            !mensaje && (
               <button
-                type="button"
-                onClick={() =>
-                  router.replace(
-                    loginDestino
-                  )
-                }
-                className="w-full rounded-xl bg-blue-700 px-6 py-4 font-extrabold text-white hover:bg-blue-800"
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {text.volver}
+                {loading
+                  ? text.enviando
+                  : text.enviar}
               </button>
-            )}
+            </form>
+          ) : !mensaje ? (
+            <form
+              onSubmit={
+                cambiarPassword
+              }
+              className="space-y-6"
+            >
+              <div>
+                <label
+                  htmlFor="new-password"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.nuevaPassword}
+                </label>
+
+                <input
+                  id="new-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(
+                      e.target.value
+                    )
+                  }
+                  placeholder={
+                    text.minimo
+                  }
+                  disabled={loading}
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirm-password"
+                  className="mb-2 block font-bold text-slate-900"
+                >
+                  {text.confirmarPassword}
+                </label>
+
+                <input
+                  id="confirm-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={
+                    confirmPassword
+                  }
+                  onChange={(e) =>
+                    setConfirmPassword(
+                      e.target.value
+                    )
+                  }
+                  placeholder={
+                    text.repetir
+                  }
+                  disabled={loading}
+                  className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading
+                  ? text.actualizando
+                  : text.cambiar}
+              </button>
+            </form>
+          ) : null}
+
+          {!esReset && (
+            <button
+              type="button"
+              onClick={() =>
+                router.replace(
+                  loginDestino
+                )
+              }
+              disabled={loading}
+              className="mt-5 w-full rounded-xl border-2 border-blue-700 bg-white px-6 py-3.5 font-extrabold text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+            >
+              {text.volver}
+            </button>
+          )}
 
         </div>
-
       </div>
-
     </main>
   );
 }
