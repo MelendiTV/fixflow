@@ -115,8 +115,6 @@ function RecuperarContrasenaContenido() {
             "Contraseña actualizada correctamente.",
           redirigiendo:
             "Redirigiendo al inicio de sesión...",
-          volver:
-            "Volver al inicio de sesión",
           enlaceInvalido:
             "El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.",
           enlaceYaNoValido:
@@ -171,8 +169,6 @@ function RecuperarContrasenaContenido() {
             "Password updated successfully.",
           redirigiendo:
             "Redirecting to sign in...",
-          volver:
-            "Back to sign in",
           enlaceInvalido:
             "The recovery link is invalid or has expired. Request a new one.",
           enlaceYaNoValido:
@@ -202,11 +198,25 @@ function RecuperarContrasenaContenido() {
         "code"
       );
 
+    const tokenHash =
+      currentUrl.searchParams.get(
+        "token_hash"
+      );
+
+    const recoveryType =
+      currentUrl.searchParams.get(
+        "type"
+      );
+
     const hash =
       window.location.hash;
 
     const tieneEnlaceRecuperacion =
-      Boolean(code || hash);
+      Boolean(
+        code ||
+        tokenHash ||
+        hash
+      );
 
     /*
       Si el usuario llegó desde el login
@@ -252,7 +262,45 @@ function RecuperarContrasenaContenido() {
 
       try {
         /*
-          1. FLUJO PKCE
+          1. FLUJO CON TOKEN HASH
+
+          /recuperar-contrasena?token_hash=...&type=recovery
+
+          Este es el flujo que usamos en la plantilla
+          personalizada de Reset password.
+        */
+
+        if (
+          tokenHash &&
+          recoveryType === "recovery"
+        ) {
+          const {
+            error:
+              verifyError,
+          } =
+            await supabase.auth
+              .verifyOtp({
+                token_hash:
+                  tokenHash,
+                type:
+                  "recovery",
+              });
+
+          if (verifyError) {
+            throw new Error(
+              verifyError.message
+            );
+          }
+
+          window.history.replaceState(
+            {},
+            document.title,
+            `/recuperar-contrasena?tipo=${tipo}`
+          );
+        }
+
+        /*
+          2. FLUJO PKCE
 
           /recuperar-contrasena?tipo=cliente&code=...
         */
@@ -281,7 +329,7 @@ function RecuperarContrasenaContenido() {
         }
 
         /*
-          2. SOPORTE FLUJO IMPLICIT
+          3. SOPORTE FLUJO IMPLICIT
 
           #access_token=...
           &refresh_token=...
@@ -337,7 +385,7 @@ function RecuperarContrasenaContenido() {
         }
 
         /*
-          3. CONFIRMAR SESIÓN DE RECUPERACIÓN
+          4. CONFIRMAR SESIÓN DE RECUPERACIÓN
         */
 
         const {
@@ -438,7 +486,7 @@ function RecuperarContrasenaContenido() {
 
     try {
       const redirectTo =
-        `${window.location.origin}/recuperar-contrasena?tipo=${tipo}`;
+        `https://relydo.co/recuperar-contrasena?tipo=${tipo}`;
 
       const {
         error:
@@ -726,21 +774,6 @@ function RecuperarContrasenaContenido() {
               </button>
             </form>
           ) : null}
-
-          {!esReset && (
-            <button
-              type="button"
-              onClick={() =>
-                router.replace(
-                  loginDestino
-                )
-              }
-              disabled={loading}
-              className="mt-5 w-full rounded-xl border-2 border-blue-700 bg-white px-6 py-3.5 font-extrabold text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-            >
-              {text.volver}
-            </button>
-          )}
 
         </div>
       </div>
