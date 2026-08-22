@@ -1,148 +1,163 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import {
+  Suspense,
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  createClient,
+} from "@supabase/supabase-js";
+
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+
+import {
+  useLanguage,
+} from "@/app/components/LanguageProvider";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
 );
 
-export default function RecuperarContrasena() {
+type TipoCuenta =
+  | "cliente"
+  | "profesional";
+
+function RecuperarContrasenaContenido() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { language } = useLanguage();
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const tipoParam =
+    searchParams.get("tipo");
 
-  const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const tipo: TipoCuenta =
+    tipoParam === "profesional"
+      ? "profesional"
+      : "cliente";
 
-  const [error, setError] = useState("");
-  const [mensaje, setMensaje] = useState("");
+  const loginDestino =
+    tipo === "profesional"
+      ? "/login-profesional"
+      : "/login-cliente";
 
-  const [recoveryValid, setRecoveryValid] =
+  const [password, setPassword] =
+    useState("");
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+
+  const [loading, setLoading] =
     useState(false);
+
+  const [checking, setChecking] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [mensaje, setMensaje] =
+    useState("");
+
+  const [
+    recoveryValid,
+    setRecoveryValid,
+  ] = useState(false);
+
+  const text =
+    language === "es"
+      ? {
+          verificando:
+            "Verificando enlace...",
+          titulo:
+            "Nueva contraseña",
+          descripcion:
+            "Crea una nueva contraseña para tu cuenta.",
+          nuevaPassword:
+            "Nueva contraseña",
+          confirmarPassword:
+            "Confirmar contraseña",
+          minimo:
+            "Mínimo 8 caracteres",
+          repetir:
+            "Repite la contraseña",
+          actualizando:
+            "Actualizando...",
+          cambiar:
+            "Cambiar contraseña",
+          actualizado:
+            "Contraseña actualizada correctamente.",
+          redirigiendo:
+            "Redirigiendo al inicio de sesión...",
+          volver:
+            "Volver al inicio de sesión",
+          enlaceInvalido:
+            "El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.",
+          enlaceYaNoValido:
+            "El enlace de recuperación ya no es válido. Solicita uno nuevo.",
+          minimoError:
+            "La contraseña debe tener al menos 8 caracteres.",
+          noCoinciden:
+            "Las contraseñas no coinciden.",
+          noValidar:
+            "No se pudo validar el enlace de recuperación.",
+          noCambiar:
+            "No se pudo cambiar la contraseña",
+        }
+      : {
+          verificando:
+            "Verifying link...",
+          titulo:
+            "New password",
+          descripcion:
+            "Create a new password for your account.",
+          nuevaPassword:
+            "New password",
+          confirmarPassword:
+            "Confirm password",
+          minimo:
+            "Minimum 8 characters",
+          repetir:
+            "Repeat your password",
+          actualizando:
+            "Updating...",
+          cambiar:
+            "Change password",
+          actualizado:
+            "Password updated successfully.",
+          redirigiendo:
+            "Redirecting to sign in...",
+          volver:
+            "Back to sign in",
+          enlaceInvalido:
+            "The recovery link is invalid or has expired. Request a new one.",
+          enlaceYaNoValido:
+            "The recovery link is no longer valid. Request a new one.",
+          minimoError:
+            "The password must contain at least 8 characters.",
+          noCoinciden:
+            "The passwords do not match.",
+          noValidar:
+            "We could not validate the recovery link.",
+          noCambiar:
+            "We could not change the password",
+        };
 
   useEffect(() => {
     let mounted = true;
 
-    async function comprobarRecuperacion() {
-      setError("");
-
-      try {
-        /*
-          SOPORTE PARA EL FLUJO ANTIGUO/IMPLICIT:
-
-          #access_token=...
-          &refresh_token=...
-        */
-
-        const hash = window.location.hash;
-
-        if (hash) {
-          const params = new URLSearchParams(
-            hash.startsWith("#")
-              ? hash.substring(1)
-              : hash
-          );
-
-          const accessToken =
-            params.get("access_token");
-
-          const refreshToken =
-            params.get("refresh_token");
-
-          const type =
-            params.get("type");
-
-          if (
-            accessToken &&
-            refreshToken
-          ) {
-            const {
-              error: sessionError,
-            } =
-              await supabase.auth.setSession({
-                access_token:
-                  accessToken,
-
-                refresh_token:
-                  refreshToken,
-              });
-
-            if (sessionError) {
-              throw new Error(
-                `No se pudo validar el enlace: ${sessionError.message}`
-              );
-            }
-
-            if (
-              type === "recovery" &&
-              mounted
-            ) {
-              setRecoveryValid(true);
-            }
-
-            window.history.replaceState(
-              {},
-              document.title,
-              "/recuperar-contrasena"
-            );
-          }
-        }
-
-        /*
-          SI SUPABASE YA CREÓ LA SESIÓN,
-          COMPROBAMOS AL USUARIO.
-        */
-
-        const {
-          data: { user },
-          error: userError,
-        } =
-          await supabase.auth.getUser();
-
-        if (userError || !user) {
-          if (mounted) {
-            setError(
-              "El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo."
-            );
-
-            setRecoveryValid(false);
-          }
-
-          return;
-        }
-
-        if (mounted) {
-          setRecoveryValid(true);
-        }
-      } catch (err) {
-        if (!mounted) {
-          return;
-        }
-
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError(
-            "No se pudo validar el enlace de recuperación."
-          );
-        }
-
-        setRecoveryValid(false);
-      } finally {
-        if (mounted) {
-          setChecking(false);
-        }
-      }
-    }
-
     /*
-      Supabase también emite
-      PASSWORD_RECOVERY cuando entra
-      mediante un enlace de recuperación.
+      IMPORTANTE:
+
+      Escuchamos PASSWORD_RECOVERY antes
+      de procesar el enlace.
     */
 
     const {
@@ -154,7 +169,8 @@ export default function RecuperarContrasena() {
         (event) => {
           if (
             event ===
-            "PASSWORD_RECOVERY"
+              "PASSWORD_RECOVERY" &&
+            mounted
           ) {
             setRecoveryValid(true);
             setChecking(false);
@@ -163,13 +179,210 @@ export default function RecuperarContrasena() {
         }
       );
 
+    async function comprobarRecuperacion() {
+      setError("");
+
+      try {
+        /*
+          1. FLUJO PKCE ACTUAL DE SUPABASE
+
+          URL:
+          /recuperar-contrasena?code=...
+        */
+
+        const url =
+          new URL(
+            window.location.href
+          );
+
+        const code =
+          url.searchParams.get(
+            "code"
+          );
+
+        if (code) {
+          const {
+            error:
+              exchangeError,
+          } =
+            await supabase.auth
+              .exchangeCodeForSession(
+                code
+              );
+
+          if (exchangeError) {
+            throw new Error(
+              exchangeError.message
+            );
+          }
+
+          /*
+            Quitamos el code de la URL
+            después de usarlo.
+
+            Conservamos tipo para saber
+            a qué login regresar.
+          */
+
+          window.history.replaceState(
+            {},
+            document.title,
+            `/recuperar-contrasena?tipo=${tipo}`
+          );
+        }
+
+        /*
+          2. SOPORTE PARA FLUJO
+             IMPLICIT ANTIGUO
+
+          #access_token=...
+          &refresh_token=...
+          &type=recovery
+        */
+
+        const hash =
+          window.location.hash;
+
+        if (hash) {
+          const params =
+            new URLSearchParams(
+              hash.startsWith("#")
+                ? hash.substring(1)
+                : hash
+            );
+
+          const accessToken =
+            params.get(
+              "access_token"
+            );
+
+          const refreshToken =
+            params.get(
+              "refresh_token"
+            );
+
+          if (
+            accessToken &&
+            refreshToken
+          ) {
+            const {
+              error:
+                sessionError,
+            } =
+              await supabase.auth
+                .setSession({
+                  access_token:
+                    accessToken,
+                  refresh_token:
+                    refreshToken,
+                });
+
+            if (sessionError) {
+              throw new Error(
+                sessionError.message
+              );
+            }
+
+            window.history.replaceState(
+              {},
+              document.title,
+              `/recuperar-contrasena?tipo=${tipo}`
+            );
+          }
+        }
+
+        /*
+          3. COMPROBAR SESIÓN
+        */
+
+        const {
+          data: {
+            session,
+          },
+          error:
+            sessionCheckError,
+        } =
+          await supabase.auth
+            .getSession();
+
+        if (
+          sessionCheckError ||
+          !session
+        ) {
+          if (mounted) {
+            setRecoveryValid(false);
+            setError(
+              text.enlaceInvalido
+            );
+          }
+
+          return;
+        }
+
+        /*
+          4. CONFIRMAR USUARIO
+        */
+
+        const {
+          data: {
+            user,
+          },
+          error:
+            userError,
+        } =
+          await supabase.auth
+            .getUser();
+
+        if (
+          userError ||
+          !user
+        ) {
+          if (mounted) {
+            setRecoveryValid(false);
+            setError(
+              text.enlaceInvalido
+            );
+          }
+
+          return;
+        }
+
+        if (mounted) {
+          setRecoveryValid(true);
+          setError("");
+        }
+      } catch (err) {
+        if (!mounted) {
+          return;
+        }
+
+        console.error(
+          "Error validando recuperación:",
+          err
+        );
+
+        setRecoveryValid(false);
+
+        setError(
+          err instanceof Error &&
+          err.message
+            ? `${text.noValidar}: ${err.message}`
+            : text.noValidar
+        );
+      } finally {
+        if (mounted) {
+          setChecking(false);
+        }
+      }
+    }
+
     comprobarRecuperacion();
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [tipo]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -181,15 +394,17 @@ export default function RecuperarContrasena() {
 
     if (!recoveryValid) {
       setError(
-        "El enlace de recuperación ya no es válido. Solicita uno nuevo."
+        text.enlaceYaNoValido
       );
+
       return;
     }
 
     if (password.length < 8) {
       setError(
-        "La contraseña debe tener al menos 8 caracteres."
+        text.minimoError
       );
+
       return;
     }
 
@@ -198,8 +413,9 @@ export default function RecuperarContrasena() {
       confirmPassword
     ) {
       setError(
-        "Las contraseñas no coinciden."
+        text.noCoinciden
       );
+
       return;
     }
 
@@ -207,11 +423,13 @@ export default function RecuperarContrasena() {
 
     try {
       const {
-        error: updateError,
+        error:
+          updateError,
       } =
-        await supabase.auth.updateUser({
-          password,
-        });
+        await supabase.auth
+          .updateUser({
+            password,
+          });
 
       if (updateError) {
         throw new Error(
@@ -223,32 +441,30 @@ export default function RecuperarContrasena() {
       setConfirmPassword("");
 
       setMensaje(
-        "Contraseña actualizada correctamente."
+        text.actualizado
       );
 
       /*
-        Cerramos la sesión de recuperación
-        para que el usuario vuelva a entrar
-        normalmente con su nueva contraseña.
+        Cerramos la sesión temporal
+        de recuperación.
+
+        El usuario vuelve a iniciar
+        sesión normalmente.
       */
 
       await supabase.auth.signOut();
 
       setTimeout(() => {
         router.replace(
-          "/login-profesional"
+          loginDestino
         );
       }, 1800);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(
-          `No se pudo cambiar la contraseña: ${err.message}`
-        );
-      } else {
-        setError(
-          "No se pudo cambiar la contraseña."
-        );
-      }
+      setError(
+        err instanceof Error
+          ? `${text.noCambiar}: ${err.message}`
+          : text.noCambiar
+      );
     } finally {
       setLoading(false);
     }
@@ -256,10 +472,10 @@ export default function RecuperarContrasena() {
 
   if (checking) {
     return (
-      <main className="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
         <div className="rounded-2xl border border-slate-200 bg-white px-8 py-7 shadow-lg">
           <p className="font-bold text-slate-700">
-            Verificando enlace...
+            {text.verificando}
           </p>
         </div>
       </main>
@@ -267,7 +483,7 @@ export default function RecuperarContrasena() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 flex items-center justify-center px-4 py-10">
+    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
 
       <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
 
@@ -280,11 +496,11 @@ export default function RecuperarContrasena() {
           </div>
 
           <h1 className="mt-2 text-3xl font-extrabold">
-            Nueva contraseña
+            {text.titulo}
           </h1>
 
           <p className="mt-2 text-blue-100">
-            Crea una nueva contraseña para tu cuenta.
+            {text.descripcion}
           </p>
 
         </div>
@@ -303,11 +519,13 @@ export default function RecuperarContrasena() {
 
           {mensaje && (
             <div className="mb-6 rounded-xl border border-green-300 bg-green-50 p-4 text-green-700">
+
               {mensaje}
 
               <p className="mt-2 text-sm">
-                Redirigiendo al inicio de sesión...
+                {text.redirigiendo}
               </p>
+
             </div>
           )}
 
@@ -323,7 +541,7 @@ export default function RecuperarContrasena() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Nueva contraseña
+                    {text.nuevaPassword}
                   </label>
 
                   <input
@@ -337,7 +555,9 @@ export default function RecuperarContrasena() {
                         e.target.value
                       )
                     }
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder={
+                      text.minimo
+                    }
                     className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                   />
 
@@ -346,7 +566,7 @@ export default function RecuperarContrasena() {
                 <div>
 
                   <label className="mb-2 block font-bold text-slate-900">
-                    Confirmar contraseña
+                    {text.confirmarPassword}
                   </label>
 
                   <input
@@ -362,7 +582,9 @@ export default function RecuperarContrasena() {
                         e.target.value
                       )
                     }
-                    placeholder="Repite la contraseña"
+                    placeholder={
+                      text.repetir
+                    }
                     className="w-full rounded-xl border border-slate-300 p-4 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                   />
 
@@ -374,8 +596,8 @@ export default function RecuperarContrasena() {
                   className="w-full rounded-xl bg-blue-700 px-6 py-4 text-lg font-extrabold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
-                    ? "Actualizando..."
-                    : "Cambiar contraseña"}
+                    ? text.actualizando
+                    : text.cambiar}
                 </button>
 
               </form>
@@ -387,12 +609,12 @@ export default function RecuperarContrasena() {
                 type="button"
                 onClick={() =>
                   router.replace(
-                    "/login-profesional"
+                    loginDestino
                   )
                 }
                 className="w-full rounded-xl bg-blue-700 px-6 py-4 font-extrabold text-white hover:bg-blue-800"
               >
-                Volver al inicio de sesión
+                {text.volver}
               </button>
             )}
 
@@ -401,5 +623,34 @@ export default function RecuperarContrasena() {
       </div>
 
     </main>
+  );
+}
+
+function RecuperarContrasenaFallback() {
+  const { language } =
+    useLanguage();
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-100">
+      <div className="rounded-2xl bg-white px-8 py-7 shadow-lg">
+        <p className="font-bold text-slate-700">
+          {language === "es"
+            ? "Cargando..."
+            : "Loading..."}
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default function RecuperarContrasena() {
+  return (
+    <Suspense
+      fallback={
+        <RecuperarContrasenaFallback />
+      }
+    >
+      <RecuperarContrasenaContenido />
+    </Suspense>
   );
 }
