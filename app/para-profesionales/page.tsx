@@ -5,34 +5,13 @@ import { useLanguage } from "@/app/components/LanguageProvider";
 
 const LOGO_SRC = "/relydo-logo.png";
 
-function BrandLogo({ dark = false }: { dark?: boolean }) {
+function BrandLogo() {
   return (
-    <div className="flex items-center gap-3">
-      <img
-        src={LOGO_SRC}
-        alt="RELYDO"
-        className="h-10 w-auto object-contain sm:h-11"
-        onError={(event) => {
-          event.currentTarget.style.display = "none";
-
-          const fallback =
-            event.currentTarget.nextElementSibling as HTMLElement | null;
-
-          if (fallback) {
-            fallback.style.display = "inline";
-          }
-        }}
-      />
-
-      <span
-        style={{ display: "none" }}
-        className={`text-2xl font-black tracking-[0.06em] ${
-          dark ? "text-white" : "text-slate-950"
-        }`}
-      >
-        RELY<span className="text-blue-500">DO</span>
-      </span>
-    </div>
+    <img
+      src={LOGO_SRC}
+      alt="RELYDO"
+      className="h-12 w-auto object-contain sm:h-14"
+    />
   );
 }
 
@@ -126,20 +105,16 @@ export default function ProfesionalesHome() {
           "Crea tu perfil, completa la verificación y empieza a recibir oportunidades.",
 
         footerDescription:
-          "Conectando profesionales con clientes que necesitan sus habilidades.",
+          "Una plataforma creada para ayudar a profesionales a encontrar oportunidades, administrar trabajos y construir reputación.",
 
         footerPlatform: "Plataforma",
-        footerCustomers: "Clientes",
         footerProfessionals: "Profesionales",
         footerLegal: "Legal",
 
         footerHome: "Inicio",
         footerServices: "Servicios",
         footerHow: "Cómo funciona",
-
-        customerPortal: "Portal de clientes",
-        customerLogin: "Iniciar sesión como cliente",
-        customerSignup: "Crear cuenta de cliente",
+        footerTrust: "Confianza",
 
         professionalPortal: "Portal profesional",
         professionalLogin: "Iniciar sesión profesional",
@@ -233,20 +208,16 @@ export default function ProfesionalesHome() {
           "Create your profile, complete verification and start receiving opportunities.",
 
         footerDescription:
-          "Connecting professionals with customers who need their skills.",
+          "A platform built to help professionals find opportunities, manage jobs and build reputation.",
 
         footerPlatform: "Platform",
-        footerCustomers: "Customers",
         footerProfessionals: "Professionals",
         footerLegal: "Legal",
 
         footerHome: "Home",
         footerServices: "Services",
         footerHow: "How it works",
-
-        customerPortal: "Customer portal",
-        customerLogin: "Customer sign in",
-        customerSignup: "Create customer account",
+        footerTrust: "Trust",
 
         professionalPortal: "Professional portal",
         professionalLogin: "Professional sign in",
@@ -258,11 +229,6 @@ export default function ProfesionalesHome() {
         rights: "All rights reserved.",
       };
 
-  /*
-   * IMPORTANTE:
-   * La primera imagen de cada idioma es ahora la imagen principal
-   * dirigida al profesional.
-   */
   const ads = es
     ? [
         "/ads/274974a4-c1f1-49e8-9ff6-cbd13ad4b9f7.png",
@@ -332,18 +298,14 @@ export default function ProfesionalesHome() {
 
       <header className="sticky top-0 z-50 border-b border-slate-800 bg-[#020817]/95 text-white shadow-lg backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          {/* LOGO */}
-
           <button
             type="button"
             onClick={() => router.push("/")}
             aria-label="RELYDO Home"
             className="shrink-0"
           >
-            <BrandLogo dark />
+            <BrandLogo />
           </button>
-
-          {/* CENTER NAV */}
 
           <nav className="hidden items-center gap-7 lg:flex">
             <button
@@ -383,8 +345,6 @@ export default function ProfesionalesHome() {
             </button>
           </nav>
 
-          {/* ACCOUNT BUTTONS */}
-
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -423,8 +383,6 @@ export default function ProfesionalesHome() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(37,99,235,0.42),transparent_30%),radial-gradient(circle_at_85%_20%,rgba(56,189,248,0.12),transparent_24%),linear-gradient(135deg,#020817_0%,#061a42_55%,#020817_100%)]" />
 
         <div className="relative mx-auto grid max-w-[1440px] gap-10 px-5 py-16 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:px-8 lg:py-28">
-          {/* TEXT */}
-
           <div>
             <p className="text-xs font-black tracking-[0.22em] text-blue-300">
               {T.badge}
@@ -464,8 +422,6 @@ export default function ProfesionalesHome() {
               </button>
             </div>
           </div>
-
-          {/* PROFESSIONAL IMAGE */}
 
           <div className="relative">
             <div className="absolute -inset-8 rounded-[3rem] bg-blue-500/10 blur-3xl" />
@@ -649,24 +605,20 @@ export default function ProfesionalesHome() {
       {/* FOOTER */}
 
       <footer className="border-t border-slate-800 bg-[#020817] px-5 py-12 text-white lg:px-8">
-        <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-2 lg:grid-cols-5">
-          {/* BRAND */}
-
+        <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <button
               type="button"
               onClick={() => router.push("/")}
               aria-label="RELYDO Home"
             >
-              <BrandLogo dark />
+              <BrandLogo />
             </button>
 
             <p className="mt-5 max-w-xs leading-7 text-slate-400">
               {T.footerDescription}
             </p>
           </div>
-
-          {/* PLATFORM */}
 
           <div>
             <h3 className="font-black text-white">
@@ -699,48 +651,18 @@ export default function ProfesionalesHome() {
               >
                 {T.footerHow}
               </button>
-            </div>
-          </div>
-
-          {/* CUSTOMERS */}
-
-          <div>
-            <h3 className="font-black text-white">
-              {T.footerCustomers}
-            </h3>
-
-            <div className="mt-4 flex flex-col items-start gap-3 text-slate-400">
-              <button
-                type="button"
-                onClick={() => router.push("/clientes")}
-                className="transition hover:text-blue-400"
-              >
-                {T.customerPortal}
-              </button>
 
               <button
                 type="button"
                 onClick={() =>
-                  router.push("/login-cliente")
+                  scrollToSection("confianza-profesional")
                 }
                 className="transition hover:text-blue-400"
               >
-                {T.customerLogin}
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  router.push("/registro-cliente")
-                }
-                className="transition hover:text-blue-400"
-              >
-                {T.customerSignup}
+                {T.footerTrust}
               </button>
             </div>
           </div>
-
-          {/* PROFESSIONALS */}
 
           <div>
             <h3 className="font-black text-white">
@@ -779,8 +701,6 @@ export default function ProfesionalesHome() {
               </button>
             </div>
           </div>
-
-          {/* LEGAL */}
 
           <div>
             <h3 className="font-black text-white">
